@@ -34,7 +34,7 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: agoracloud/server:latest
-          platforms: linux/amd64,linux/arm64,linux/arm
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
