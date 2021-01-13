@@ -13,11 +13,25 @@ $ npm i
 ## Running the app
 
 ```bash
-$ npm run start
+# development
+> npm run start
+
+# watch mode
+> npm run start:dev
+
+# production mode
+> npm run start:prod
 ```
 
 ## Test
 
 ```bash
-$ npm run test
+# unit tests
+> npm run test
+
+# e2e tests
+> npm run test:e2e
+
+# test coverage
+> npm run test:cov
 ```
