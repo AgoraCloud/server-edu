@@ -451,7 +451,9 @@ export class KubernetesClientService {
    * @param payload the deployment.created event payload
    */
   @OnEvent(Event.DeploymentCreated)
-  private async handleDeploymentCreatedEvent(payload: DeploymentCreatedEvent) {
+  private async handleDeploymentCreatedEvent(
+    payload: DeploymentCreatedEvent,
+  ): Promise<void> {
     const deploymentId: string = payload.deployment._id;
     const storageCount = payload.deployment.properties.resources.storageCount;
     await this.deploymentsService.updateStatus(
@@ -481,7 +483,9 @@ export class KubernetesClientService {
    * @param payload the deployment.updated event payload
    */
   @OnEvent(Event.DeploymentUpdated)
-  private async handleDeploymentUpdatedEvent(payload: DeploymentUpdatedEvent) {
+  private async handleDeploymentUpdatedEvent(
+    payload: DeploymentUpdatedEvent,
+  ): Promise<void> {
     const deploymentId: string = payload.deploymentId;
     await this.deploymentsService.updateStatus(
       deploymentId,
@@ -506,7 +510,9 @@ export class KubernetesClientService {
    * @param payload the deployment.deleted event payload
    */
   @OnEvent(Event.DeploymentDeleted)
-  private async handleDeploymentDeletedEvent(payload: DeploymentDeletedEvent) {
+  private async handleDeploymentDeletedEvent(
+    payload: DeploymentDeletedEvent,
+  ): Promise<void> {
     const deploymentId: string = payload.deployment._id;
     try {
       await this.deleteService(deploymentId);
