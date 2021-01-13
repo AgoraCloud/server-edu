@@ -49,7 +49,7 @@ export class DeploymentsController {
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,
   ): Promise<DeploymentDocument[]> {
-    return this.deploymentsService.findAll(userId, workspaceId);
+    return this.deploymentsService.findAll(workspaceId, userId);
   }
 
   @Get(':id')
