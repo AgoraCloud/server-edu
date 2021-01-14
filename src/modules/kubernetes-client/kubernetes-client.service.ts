@@ -65,6 +65,10 @@ export class KubernetesClientService {
         metadata: {
           name: `${this.resourcePrefix}-${deploymentId}`,
           namespace: this.kubernetesConfig.namespace,
+          labels: {
+            app: this.resourcePrefix,
+            deployment: deploymentId,
+          },
         },
         data: {
           sudo_password: this.toBase64(sudoPassword),
@@ -161,6 +165,10 @@ export class KubernetesClientService {
         metadata: {
           name: `${this.resourcePrefix}-${deploymentId}`,
           namespace: this.kubernetesConfig.namespace,
+          labels: {
+            app: this.resourcePrefix,
+            deployment: deploymentId,
+          },
         },
         spec: {
           type: 'ClusterIP',
