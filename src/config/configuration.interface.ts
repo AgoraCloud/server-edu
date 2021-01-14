@@ -19,4 +19,9 @@ enum EnvironmentConfig {
   Production = 'production',
 }
 
-export { KubernetesConfig, JwtConfig, EnvironmentConfig };
+interface AdminConfig {
+  email: string;
+  password: string;
+}
+
+export { KubernetesConfig, JwtConfig, EnvironmentConfig, AdminConfig };
