@@ -3,6 +3,10 @@ export default () => ({
   port: parseInt(process.env.PORT, 10),
   domain: process.env.DOMAIN,
   databaseUri: process.env.DATABASE_URI,
+  admin: {
+    email: process.env.ADMIN_EMAIL,
+    password: process.env.ADMIN_PASSWORD,
+  },
   jwt: {
     access: {
       secret: process.env.JWT_ACCESS_SECRET,

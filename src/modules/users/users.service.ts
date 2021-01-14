@@ -3,12 +3,15 @@ import { Event } from './../../events/events.enum';
 import { addDays } from 'src/utils/date';
 import { TokenType, TokenDocument } from '../tokens/schemas/token.schema';
 import { TokensService } from './../tokens/tokens.service';
-import { EnvironmentConfig } from './../../config/configuration.interface';
+import {
+  AdminConfig,
+  EnvironmentConfig,
+} from './../../config/configuration.interface';
 import { ConfigService } from '@nestjs/config';
 import { AccountNotVerifiedException } from '../../exceptions/account-not-verified.exception';
 import { AccountDisabledException } from '../../exceptions/account-disabled.exception';
 import { User, UserDocument } from './schemas/user.schema';
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { UserNotFoundException } from 'src/exceptions/user-not-found.exception';
@@ -18,7 +21,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import * as bcrypt from 'bcryptjs';
 
 @Injectable()
-export class UsersService {
+export class UsersService implements OnModuleInit {
   private readonly environment: EnvironmentConfig;
 
   constructor(
@@ -28,6 +31,32 @@ export class UsersService {
     private readonly eventEmitter: EventEmitter2,
   ) {
     this.environment = this.configService.get<EnvironmentConfig>('environment');
+  }
+
+  async onModuleInit(): Promise<void> {
+    await this.createAdminUser();
+  }
+
+  /**
+   * Checks if the admin user has been created. If not,
+   * the admin user is created.
+   */
+  private async createAdminUser(): Promise<void> {
+    const adminConfig: AdminConfig = this.configService.get<AdminConfig>(
+      'admin',
+    );
+    try {
+      await this.findByEmail(adminConfig.email);
+    } catch (err) {
+      // Admin user has not been created yet, create it
+      await this.userModel.create({
+        email: adminConfig.email,
+        fullName: 'Admin',
+        password: await bcrypt.hash(adminConfig.password, 10),
+        isAdmin: true,
+        isVerified: true,
+      });
+    }
   }
 
   /**

@@ -28,6 +28,8 @@ import * as Joi from '@hapi/joi';
         PORT: Joi.number().default(3000),
         DOMAIN: Joi.string().required(),
         DATABASE_URI: Joi.string().required(),
+        ADMIN_EMAIL: Joi.string().email().required(),
+        ADMIN_PASSWORD: Joi.string().min(8).required(),
         JWT_ACCESS_SECRET: Joi.string().required(),
         JWT_ACCESS_EXPIRATION_TIME: Joi.number().required(),
         JWT_REFRESH_SECRET: Joi.string().required(),
