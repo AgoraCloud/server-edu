@@ -5,8 +5,8 @@ AgoraCloud is your coding workspace, in the cloud.
 ## Installation
 
 ```bash
-$ git clone https://github.com/AgoraCloud/backend.git
-$ cd backend
+$ git clone https://github.com/AgoraCloud/server.git
+$ cd server
 $ npm i
 ```
 
