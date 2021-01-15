@@ -1,0 +1,131 @@
+{{- $chartName := include "helm-chart.name" . -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $chartName }}-server
+  labels:
+    {{- include "helm-chart.labels" . | nindent 4 }}
+    app: {{ $chartName }}-server
+spec:
+{{- if not .Values.server.autoscaling.enabled }}
+  replicas: {{ .Values.server.replicaCount }}
+{{- end }}
+  selector:
+    matchLabels:
+      {{- include "helm-chart.selectorLabels" . | nindent 6 }}
+      app: {{ $chartName }}-server
+  template:
+    metadata:
+    {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      labels:
+        {{- include "helm-chart.selectorLabels" . | nindent 8 }}
+        app: {{ $chartName }}-server
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ $chartName }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ $chartName }}-server
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.agoracloud.server.repository }}:{{ .Values.image.agoracloud.server.tag }}"
+          imagePullPolicy: {{ .Values.image.agoracloud.server.pullPolicy }}
+          ports:
+            - containerPort: 3000
+          env:
+            - name: DOMAIN
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ $chartName }}
+                  key: domain
+            - name: DATABASE_URI
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $chartName }}
+                  key: database_uri
+            - name: ADMIN_EMAIL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ $chartName }}
+                  key: admin_email
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $chartName }}
+                  key: admin_password
+            - name: JWT_ACCESS_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $chartName }}
+                  key: jwt_access_secret
+            - name: JWT_ACCESS_EXPIRATION_TIME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ $chartName }}
+                  key: jwt_access_expiration_time
+            - name: JWT_REFRESH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $chartName }}
+                  key: jwt_refresh_secret
+            - name: JWT_REFRESH_EXPIRATION_TIME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ $chartName }}
+                  key: jwt_refresh_expiration_time
+            - name: SMTP_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ $chartName }}
+                  key: smtp_host
+            - name: SMTP_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ $chartName }}
+                  key: smtp_port
+            - name: SMTP_SECURE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ $chartName }}
+                  key: smtp_secure
+            - name: SMTP_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ $chartName }}
+                  key: smtp_username
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $chartName }}
+                  key: smtp_password
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ $chartName }}
+                  key: kubernetes_namespace
+            - name: KUBERNETES_STORAGE_CLASS
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ $chartName }}
+                  key: kubernetes_storage_class
+          resources:
+            {{- toYaml .Values.server.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

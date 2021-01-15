@@ -1,0 +1,17 @@
+{{- $chartName := include "helm-chart.name" . -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Chart.Name }}-server
+  labels:
+    {{- include "helm-chart.labels" . | nindent 4 }}
+    app: {{ $chartName }}-server
+spec:
+  type: {{ .Values.server.service.type }}
+  ports:
+    - port: {{ .Values.server.service.port }}
+      targetPort: 3000
+      protocol: TCP
+  selector:
+    {{- include "helm-chart.selectorLabels" . | nindent 4 }}
+    app: {{ $chartName }}-server
