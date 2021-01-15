@@ -476,9 +476,13 @@ export class KubernetesClientService {
         await this.createPersistentVolumeClaim(deploymentId, storageCount);
       }
       await this.createDeployment(deploymentId, payload.deployment.properties);
-    } catch (err) {
+    } catch (error) {
       // TODO: add a message to the deployment to indicate failure reason
       // TODO: retry creation based on the creation failure reason
+      this.logger.error({
+        message: `Error creating deployment ${deploymentId}`,
+        error,
+      });
       await this.deploymentsService.updateStatus(
         deploymentId,
         DeploymentStatus.Failed,
@@ -504,8 +508,12 @@ export class KubernetesClientService {
         deploymentId,
         payload.updateDeploymentDto.properties.resources,
       );
-    } catch {
+    } catch (error) {
       // TODO: roll back the deployment update
+      this.logger.error({
+        message: `Error updating deployment ${deploymentId}`,
+        error,
+      });
       await this.deploymentsService.updateStatus(
         deploymentId,
         DeploymentStatus.Failed,
@@ -529,8 +537,12 @@ export class KubernetesClientService {
         await this.deletePersistentVolumeClaim(deploymentId);
       }
       await this.deleteSecret(deploymentId);
-    } catch (err) {
+    } catch (error) {
       // TODO: handle deletion failure
+      this.logger.error({
+        message: `Error deleting deployment ${deploymentId}`,
+        error,
+      });
     }
   }
 
@@ -605,11 +617,6 @@ export class KubernetesClientService {
         DeploymentStatus.Running,
       );
     }
-    // TODO: remove after debugging is done
-    this.logger.debug({
-      type: 'POD UPDATED',
-      statuses: obj?.status?.containerStatuses,
-    });
   }
 
   /**
