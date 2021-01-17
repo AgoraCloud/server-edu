@@ -16,25 +16,13 @@ spec:
       app: {{ $chartName }}-server
   template:
     metadata:
-    {{- with .Values.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-    {{- end }}
       labels:
         {{- include "helm-chart.selectorLabels" . | nindent 8 }}
         app: {{ $chartName }}-server
     spec:
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       serviceAccountName: {{ $chartName }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ $chartName }}-server
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.agoracloud.server.repository }}:{{ .Values.image.agoracloud.server.tag }}"
           imagePullPolicy: {{ .Values.image.agoracloud.server.pullPolicy }}
           ports:

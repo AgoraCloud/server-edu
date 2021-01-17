@@ -1,15 +1,16 @@
 {{- if .Values.server.autoscaling.enabled }}
+{{- $chartName := include "helm-chart.name" . -}}
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "helm-chart.fullname" . }}
+  name: {{ $chartName }}-server
   labels:
     {{- include "helm-chart.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "helm-chart.name" . }}-server
+    name: {{ $chartName }}-server
   minReplicas: {{ .Values.server.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.server.autoscaling.maxReplicas }}
   metrics:
