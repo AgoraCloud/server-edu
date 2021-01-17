@@ -1,7 +1,7 @@
 {
-  "name": "agoracloud",
+  "name": "agoracloud_server",
   "version": "0.0.1",
-  "description": "AgoraClouds backend",
+  "description": "AgoraClouds Server",
   "author": "AgoraCloud",
   "private": true,
   "license": "MIT",
