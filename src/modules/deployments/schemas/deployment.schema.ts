@@ -1,8 +1,8 @@
-import { User } from '../../users/schemas/user.schema';
+import { WorkspaceDocument } from './../../workspaces/schemas/workspace.schema';
+import { UserDocument } from 'src/modules/users/schemas/user.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import * as mongoose from 'mongoose';
-import { Workspace } from '../../workspaces/schemas/workspace.schema';
 
 export enum DeploymentStatus {
   Pending = 'PENDING',
@@ -98,7 +98,7 @@ export class Deployment {
     ref: 'Workspace',
     index: true,
   })
-  workspace: Workspace;
+  workspace: WorkspaceDocument;
 
   @Prop({
     required: true,
@@ -106,7 +106,7 @@ export class Deployment {
     ref: 'User',
     index: true,
   })
-  user: User;
+  user: UserDocument;
 
   constructor(partial: Partial<Deployment>) {
     Object.assign(this, partial);

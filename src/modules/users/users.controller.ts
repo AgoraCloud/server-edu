@@ -11,20 +11,20 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  find(@User('email') email: string): Promise<UserDocument> {
-    return this.usersService.findByEmail(email);
+  find(@User() user: UserDocument): UserDocument {
+    return user;
   }
 
   @Put()
   update(
-    @User('email') email: string,
+    @User('_id') userId: string,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<UserDocument> {
-    return this.usersService.update(email, updateUserDto);
+    return this.usersService.update(userId, updateUserDto);
   }
 
   @Delete()
-  async remove(@User('email') email: string): Promise<void> {
-    return this.usersService.remove(email);
+  async remove(@User('_id') userId: string): Promise<void> {
+    return this.usersService.remove(userId);
   }
 }

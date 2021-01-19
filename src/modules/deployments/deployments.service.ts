@@ -1,3 +1,4 @@
+import { WorkspaceUserRemovedEvent } from './../../events/workspace-user-removed.event';
 import { WorkspaceDeletedEvent } from './../../events/workspace-deleted.event';
 import { DeploymentNotRunningException } from './../../exceptions/deployment-not-running.exception';
 import { deploymentImages } from './deployment-images';
@@ -212,9 +213,13 @@ export class DeploymentsService {
   /**
    * Delete all deployments for the given workspace
    * @param workspaceId the workspace id
+   * @param userId the users id
    */
-  private async removeAll(workspaceId: string): Promise<void> {
-    const deployments: DeploymentDocument[] = await this.findAll(workspaceId);
+  private async removeAll(workspaceId: string, userId?: string): Promise<void> {
+    const deployments: DeploymentDocument[] = await this.findAll(
+      workspaceId,
+      userId,
+    );
     const deploymentIds: string[] = deployments.map((d) => d._id);
     await this.deploymentModel.deleteMany().where('_id').in(deploymentIds);
     deployments.forEach((deployment: DeploymentDocument) => {
@@ -234,5 +239,16 @@ export class DeploymentsService {
     payload: WorkspaceDeletedEvent,
   ): Promise<void> {
     await this.removeAll(payload.id);
+  }
+
+  /**
+   * Handles the workspace.user.removed event
+   * @param payload the workspace.user.removed event payload
+   */
+  @OnEvent(Event.WorkspaceUserRemoved)
+  private async handleWorkspaceUserRemoved(
+    payload: WorkspaceUserRemovedEvent,
+  ): Promise<void> {
+    await this.removeAll(payload.workspaceId, payload.userId);
   }
 }
