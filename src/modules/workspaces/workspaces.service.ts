@@ -1,5 +1,7 @@
+import { WorkspaceUserRemovedEvent } from './../../events/workspace-user-removed.event';
+import { UserDeletedEvent } from './../../events/user-deleted.event';
 import { WorkspaceDeletedEvent } from '../../events/workspace-deleted.event';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { WorkspaceNotFoundException } from './../../exceptions/workspace-not-found.exception';
 import { InjectModel } from '@nestjs/mongoose';
 import { Workspace, WorkspaceDocument } from './schemas/workspace.schema';
@@ -99,5 +101,35 @@ export class WorkspacesService {
       Event.WorkspaceDeleted,
       new WorkspaceDeletedEvent(workspaceId),
     );
+  }
+
+  /**
+   * Handles the user.deleted event
+   * @param payload the user.deleted even payload
+   */
+  @OnEvent(Event.UserDeleted)
+  private async handleUserDeletedEvent(
+    payload: UserDeletedEvent,
+  ): Promise<void> {
+    const userId: string = payload.id;
+    const workspaces: WorkspaceDocument[] = await this.findAll(userId);
+    for (const workspace of workspaces) {
+      const workspaceId: string = workspace._id;
+      // The user is the only user in the workspace, delete the workspace
+      if (workspace.users.length === 1) {
+        await this.remove(userId, workspaceId);
+      } else {
+        // Remove the user from the workspace users
+        workspace.users = workspace.users.filter((u) => u._id !== userId);
+        await this.workspaceModel.updateOne(
+          { _id: workspaceId },
+          { users: workspace.users },
+        );
+        this.eventEmitter.emit(
+          Event.WorkspaceUserRemoved,
+          new WorkspaceUserRemovedEvent(workspaceId, userId),
+        );
+      }
+    }
   }
 }

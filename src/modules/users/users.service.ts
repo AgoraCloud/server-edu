@@ -1,3 +1,4 @@
+import { UserDeletedEvent } from './../../events/user-deleted.event';
 import { UserCreatedEvent } from '../../events/user-created.event';
 import { Event } from './../../events/events.enum';
 import { addDays } from 'src/utils/date';
@@ -85,15 +86,15 @@ export class UsersService implements OnModuleInit {
 
   /**
    * Update a user
-   * @param email the users email
+   * @param userId the users id
    * @param updateUserDto the updated user
    */
   async update(
-    email: string,
+    userId: string,
     updateUserDto: UpdateUserDto,
   ): Promise<UserDocument> {
     const user: UserDocument = await this.userModel.findOneAndUpdate(
-      { email },
+      { _id: userId },
       updateUserDto,
       { new: true },
     );
@@ -102,10 +103,11 @@ export class UsersService implements OnModuleInit {
 
   /**
    * Delete a user
-   * @param email the users email
+   * @param userId the users id
    */
-  async remove(email: string): Promise<void> {
-    await this.userModel.deleteOne({ email });
+  async remove(userId: string): Promise<void> {
+    await this.userModel.deleteOne({ _id: userId });
+    this.eventEmitter.emit(Event.UserDeleted, new UserDeletedEvent(userId));
   }
 
   /**

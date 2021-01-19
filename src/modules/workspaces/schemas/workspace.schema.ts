@@ -1,4 +1,4 @@
-import { User } from 'src/modules/users/schemas/user.schema';
+import { UserDocument } from 'src/modules/users/schemas/user.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import * as mongoose from 'mongoose';
@@ -15,7 +15,7 @@ export class Workspace {
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     index: true,
   })
-  users: User[];
+  users: UserDocument[];
 
   constructor(partial: Partial<Workspace>) {
     Object.assign(this, partial);
