@@ -53,21 +53,11 @@ spec:
                 secretKeyRef:
                   name: {{ $chartName }}
                   key: jwt_access_secret
-            - name: JWT_ACCESS_EXPIRATION_TIME
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ $chartName }}
-                  key: jwt_access_expiration_time
             - name: JWT_REFRESH_SECRET
               valueFrom:
                 secretKeyRef:
                   name: {{ $chartName }}
                   key: jwt_refresh_secret
-            - name: JWT_REFRESH_EXPIRATION_TIME
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ $chartName }}
-                  key: jwt_refresh_expiration_time
             - name: SMTP_HOST
               valueFrom:
                 configMapKeyRef:

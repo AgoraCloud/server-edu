@@ -1,3 +1,4 @@
+import { accessTokenConstants, refreshTokenConstants } from './constants';
 import { PasswordChangedEvent } from '../../events/password-changed.event';
 import { ForgotPasswordEvent } from '../../events/forgot-password.event';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -77,7 +78,7 @@ export class AuthenticationService {
     const payload = { email };
     const token: string = this.jwtService.sign(payload, {
       secret: this.jwtConfig.access.secret,
-      expiresIn: `${this.jwtConfig.access.expirationTime}s`,
+      expiresIn: `${accessTokenConstants.expirationTime}s`,
     });
     return token;
   }
@@ -90,7 +91,7 @@ export class AuthenticationService {
     const payload = { email };
     const token: string = this.jwtService.sign(payload, {
       secret: this.jwtConfig.refresh.secret,
-      expiresIn: `${this.jwtConfig.refresh.expirationTime}s`,
+      expiresIn: `${refreshTokenConstants.expirationTime}s`,
     });
 
     await this.userService.updateRefreshToken(email, token);

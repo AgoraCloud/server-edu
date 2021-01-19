@@ -1,3 +1,4 @@
+import { accessTokenConstants } from './constants';
 import { TokensModule } from './../tokens/tokens.module';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
@@ -22,7 +23,7 @@ import { PassportModule } from '@nestjs/passport';
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('jwt.access.secret'),
         signOptions: {
-          expiresIn: configService.get<number>('jwt.access.expirationTime'),
+          expiresIn: accessTokenConstants.expirationTime,
         },
       }),
     }),

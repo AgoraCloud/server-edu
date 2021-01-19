@@ -6,11 +6,9 @@ interface KubernetesConfig {
 interface JwtConfig {
   access: {
     secret: string;
-    expirationTime: string;
   };
   refresh: {
     secret: string;
-    expirationTime: string;
   };
 }
 
