@@ -8,9 +8,9 @@ import { Workspace, WorkspaceDocument } from './schemas/workspace.schema';
 import { Injectable } from '@nestjs/common';
 import { CreateWorkspaceDto } from './dto/create-workspace.dto';
 import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
-import { UserDocument } from 'src/modules/users/schemas/user.schema';
+import { UserDocument } from '../users/schemas/user.schema';
 import { Model } from 'mongoose';
-import { Event } from 'src/events/events.enum';
+import { Event } from '../../events/events.enum';
 
 @Injectable()
 export class WorkspacesService {

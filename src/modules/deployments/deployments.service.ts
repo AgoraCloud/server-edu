@@ -20,7 +20,7 @@ import { Model, Query } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { CreateDeploymentDto } from './dto/create-deployment.dto';
 import { UpdateDeploymentDto } from './dto/update-deployment.dto';
-import { Event } from 'src/events/events.enum';
+import { Event } from '../../events/events.enum';
 
 @Injectable()
 export class DeploymentsService {

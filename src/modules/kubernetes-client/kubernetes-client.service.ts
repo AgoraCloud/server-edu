@@ -15,7 +15,7 @@ import { DeploymentCreatedEvent } from './../../events/deployment-created.event'
 import { Injectable, Logger } from '@nestjs/common';
 import * as k8s from '@kubernetes/client-node';
 import { OnEvent } from '@nestjs/event-emitter';
-import { Event } from 'src/events/events.enum';
+import { Event } from '../../events/events.enum';
 import * as http from 'http';
 import * as request from 'request';
 

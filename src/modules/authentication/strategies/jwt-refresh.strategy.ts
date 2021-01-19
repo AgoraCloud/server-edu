@@ -1,5 +1,5 @@
-import { User } from 'src/modules/users/schemas/user.schema';
-import { UsersService } from 'src/modules/users/users.service';
+import { User } from '../../users/schemas/user.schema';
+import { UsersService } from '../../users/users.service';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';

@@ -1,4 +1,4 @@
-import { UserDocument } from 'src/modules/users/schemas/user.schema';
+import { UserDocument } from '../../users/schemas/user.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 

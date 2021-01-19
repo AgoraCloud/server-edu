@@ -1,7 +1,7 @@
 import { UserDeletedEvent } from './../../events/user-deleted.event';
 import { UserCreatedEvent } from '../../events/user-created.event';
 import { Event } from './../../events/events.enum';
-import { addDays } from 'src/utils/date';
+import { addDays } from '../../utils/date';
 import { TokenType, TokenDocument } from '../tokens/schemas/token.schema';
 import { TokensService } from './../tokens/tokens.service';
 import {
@@ -15,7 +15,7 @@ import { User, UserDocument } from './schemas/user.schema';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { UserNotFoundException } from 'src/exceptions/user-not-found.exception';
+import { UserNotFoundException } from '../../exceptions/user-not-found.exception';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';

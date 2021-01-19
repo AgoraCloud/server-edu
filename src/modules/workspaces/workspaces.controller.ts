@@ -1,5 +1,5 @@
 import { WorkspaceDocument } from './schemas/workspace.schema';
-import { UserDocument } from 'src/modules/users/schemas/user.schema';
+import { UserDocument } from '../users/schemas/user.schema';
 import { JwtAuthenticationGuard } from '../authentication/guards/jwt-authentication.guard';
 import { FindOneParams } from './../../utils/find-one-params';
 import {
@@ -15,7 +15,7 @@ import {
 import { WorkspacesService } from './workspaces.service';
 import { CreateWorkspaceDto } from './dto/create-workspace.dto';
 import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
-import { User } from 'src/decorators/user.decorator';
+import { User } from '../../decorators/user.decorator';
 
 @Controller('api/workspaces')
 @UseGuards(JwtAuthenticationGuard)

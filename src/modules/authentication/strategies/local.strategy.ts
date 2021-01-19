@@ -1,4 +1,4 @@
-import { User } from 'src/modules/users/schemas/user.schema';
+import { User } from '../../users/schemas/user.schema';
 import { AuthenticationService } from '../authentication.service';
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';

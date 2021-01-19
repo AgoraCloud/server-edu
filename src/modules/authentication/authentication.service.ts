@@ -14,12 +14,12 @@ import { ConfigService } from '@nestjs/config';
 import { InvalidCredentialsException } from '../../exceptions/invalid-credentials.exception';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { Injectable } from '@nestjs/common';
-import { UsersService } from 'src/modules/users/users.service';
+import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
-import { UserDocument } from 'src/modules/users/schemas/user.schema';
-import { addDays } from 'src/utils/date';
-import { Event } from 'src/events/events.enum';
+import { UserDocument } from '../users/schemas/user.schema';
+import { addDays } from '../../utils/date';
+import { Event } from '../../events/events.enum';
 
 @Injectable()
 export class AuthenticationService {
