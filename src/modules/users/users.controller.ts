@@ -1,9 +1,9 @@
-import { JwtAuthenticationGuard } from 'src/modules/authentication/guards/jwt-authentication.guard';
+import { JwtAuthenticationGuard } from '../authentication/guards/jwt-authentication.guard';
 import { Controller, Get, Body, Put, Delete, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from 'src/decorators/user.decorator';
-import { UserDocument } from 'src/modules/users/schemas/user.schema';
+import { User } from '../../decorators/user.decorator';
+import { UserDocument } from '../users/schemas/user.schema';
 
 @Controller('api/user')
 @UseGuards(JwtAuthenticationGuard)

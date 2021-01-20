@@ -4,6 +4,8 @@ export const accessTokenConstants = {
     httpOnly: true,
     path: '/',
   },
+  // 1 day
+  expirationTime: 86400,
 };
 
 export const refreshTokenConstants = {
@@ -12,4 +14,6 @@ export const refreshTokenConstants = {
     httpOnly: true,
     path: '/',
   },
+  // 365 days
+  expirationTime: 31556952,
 };

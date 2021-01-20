@@ -1,3 +1,4 @@
+import { accessTokenConstants, refreshTokenConstants } from './constants';
 import { PasswordChangedEvent } from '../../events/password-changed.event';
 import { ForgotPasswordEvent } from '../../events/forgot-password.event';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -13,12 +14,12 @@ import { ConfigService } from '@nestjs/config';
 import { InvalidCredentialsException } from '../../exceptions/invalid-credentials.exception';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { Injectable } from '@nestjs/common';
-import { UsersService } from 'src/modules/users/users.service';
+import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
-import { UserDocument } from 'src/modules/users/schemas/user.schema';
-import { addDays } from 'src/utils/date';
-import { Event } from 'src/events/events.enum';
+import { UserDocument } from '../users/schemas/user.schema';
+import { addDays } from '../../utils/date';
+import { Event } from '../../events/events.enum';
 
 @Injectable()
 export class AuthenticationService {
@@ -77,7 +78,7 @@ export class AuthenticationService {
     const payload = { email };
     const token: string = this.jwtService.sign(payload, {
       secret: this.jwtConfig.access.secret,
-      expiresIn: `${this.jwtConfig.access.expirationTime}s`,
+      expiresIn: `${accessTokenConstants.expirationTime}s`,
     });
     return token;
   }
@@ -90,7 +91,7 @@ export class AuthenticationService {
     const payload = { email };
     const token: string = this.jwtService.sign(payload, {
       secret: this.jwtConfig.refresh.secret,
-      expiresIn: `${this.jwtConfig.refresh.expirationTime}s`,
+      expiresIn: `${refreshTokenConstants.expirationTime}s`,
     });
 
     await this.userService.updateRefreshToken(email, token);

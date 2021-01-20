@@ -15,7 +15,7 @@ import { DeploymentCreatedEvent } from './../../events/deployment-created.event'
 import { Injectable, Logger } from '@nestjs/common';
 import * as k8s from '@kubernetes/client-node';
 import { OnEvent } from '@nestjs/event-emitter';
-import { Event } from 'src/events/events.enum';
+import { Event } from '../../events/events.enum';
 import * as http from 'http';
 import * as request from 'request';
 
@@ -26,7 +26,6 @@ export class KubernetesClientService {
   private readonly k8sAppsV1Api: k8s.AppsV1Api;
   private readonly kubernetesConfig: KubernetesConfig;
   private readonly resourcePrefix: string = 'agoracloud';
-  private readonly baseDomain: string;
   // TODO: remove after debugging is done
   private readonly logger = new Logger(KubernetesClientService.name);
 
@@ -37,7 +36,6 @@ export class KubernetesClientService {
     this.kubernetesConfig = this.configService.get<KubernetesConfig>(
       'kubernetes',
     );
-    this.baseDomain = this.configService.get<string>('domain');
     this.kc = new k8s.KubeConfig();
     this.kc.loadFromDefault();
     this.k8sCoreV1Api = this.kc.makeApiClient(k8s.CoreV1Api);

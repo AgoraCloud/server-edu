@@ -10,11 +10,9 @@ export default () => ({
   jwt: {
     access: {
       secret: process.env.JWT_ACCESS_SECRET,
-      expirationTime: parseInt(process.env.JWT_ACCESS_EXPIRATION_TIME),
     },
     refresh: {
       secret: process.env.JWT_REFRESH_SECRET,
-      expirationTime: parseInt(process.env.JWT_REFRESH_EXPIRATION_TIME),
     },
   },
   smtp: {

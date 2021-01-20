@@ -14,11 +14,11 @@ import {
   UseInterceptors,
   UseGuards,
 } from '@nestjs/common';
-import { Workspace } from 'src/decorators/workspace.decorator';
+import { Workspace } from '../../decorators/workspace.decorator';
 import { DeploymentsService } from './deployments.service';
 import { CreateDeploymentDto } from './dto/create-deployment.dto';
 import { UpdateDeploymentDto } from './dto/update-deployment.dto';
-import { User } from 'src/decorators/user.decorator';
+import { User } from '../../decorators/user.decorator';
 import {
   DeploymentDocument,
   DeploymentImage,

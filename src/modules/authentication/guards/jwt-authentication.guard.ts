@@ -1,6 +1,6 @@
-import { UserDocument } from 'src/modules/users/schemas/user.schema';
+import { UserDocument } from '../../users/schemas/user.schema';
 import { accessTokenConstants, refreshTokenConstants } from '../constants';
-import { UsersService } from 'src/modules/users/users.service';
+import { UsersService } from '../../users/users.service';
 import { Request, Response } from 'express';
 import { AuthenticationService } from '../authentication.service';
 import {

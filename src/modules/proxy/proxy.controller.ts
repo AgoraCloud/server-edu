@@ -1,5 +1,5 @@
 import { DeploymentInterceptor } from './../../interceptors/deployment.interceptor';
-import { JwtAuthenticationGuard } from 'src/modules/authentication/guards/jwt-authentication.guard';
+import { JwtAuthenticationGuard } from '../authentication/guards/jwt-authentication.guard';
 import {
   All,
   Controller,

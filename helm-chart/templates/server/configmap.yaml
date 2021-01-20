@@ -5,8 +5,6 @@ metadata:
 data:
   domain: {{ .Values.config.domain | quote }}
   admin_email: {{ .Values.config.admin.email | quote }}
-  jwt_access_expiration_time: {{ .Values.config.token.access.expirationTime | quote }}
-  jwt_refresh_expiration_time: {{ .Values.config.token.refresh.expirationTime | quote }}
   smtp_host: {{ .Values.config.smtp.host | quote }}
   smtp_port: {{ .Values.config.smtp.port | quote }}
   smtp_secure: {{ .Values.config.smtp.secure | quote }}

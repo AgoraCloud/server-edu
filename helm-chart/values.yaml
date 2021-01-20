@@ -10,19 +10,19 @@ image:
       tag: latest
 
 config:
-  # The domain AgoraCloud will be accessed from, ex: agoracloud.mydomain.com
+  # The domain AgoraCloud will be accessed from, ex: https://agoracloud.mydomain.com
   domain:
   # MongoDB Connection URI, see https://docs.mongodb.com/manual/reference/connection-string/
   database:
     uri:
-  # Authentication token configuration
+  # Authentication tokens configuration
   token:
+    # Key used to encode access tokens
     access:
       key:
-      expirationTime: 10
+    # Key used to encode refresh tokens
     refresh:
       key:
-      expirationTime: 31556952
   # Credentials of the admin user created on startup
   admin:
     email:

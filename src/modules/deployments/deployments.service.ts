@@ -20,7 +20,7 @@ import { Model, Query } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { CreateDeploymentDto } from './dto/create-deployment.dto';
 import { UpdateDeploymentDto } from './dto/update-deployment.dto';
-import { Event } from 'src/events/events.enum';
+import { Event } from '../../events/events.enum';
 
 @Injectable()
 export class DeploymentsService {
@@ -85,7 +85,7 @@ export class DeploymentsService {
     if (userId) {
       deploymentsQuery = deploymentsQuery.where('user').equals(userId);
     }
-    const deployments: DeploymentDocument[] = await deploymentsQuery;
+    const deployments: DeploymentDocument[] = await deploymentsQuery.exec();
     return deployments;
   }
 
@@ -112,7 +112,7 @@ export class DeploymentsService {
     if (workspaceId) {
       deploymentQuery = deploymentQuery.where('workspace').equals(workspaceId);
     }
-    const deployment: DeploymentDocument = await deploymentQuery;
+    const deployment: DeploymentDocument = await deploymentQuery.exec();
     if (!deployment) throw new DeploymentNotFoundException(deploymentId);
     return deployment;
   }
@@ -154,7 +154,8 @@ export class DeploymentsService {
       .where('user')
       .equals(userId)
       .where('workspace')
-      .equals(workspaceId);
+      .equals(workspaceId)
+      .exec();
 
     /**
      * Send the deployment.updated event only if cpuCount or
@@ -181,7 +182,9 @@ export class DeploymentsService {
     deploymentId: string,
     status: DeploymentStatus,
   ): Promise<void> {
-    await this.deploymentModel.updateOne({ _id: deploymentId }, { status });
+    await this.deploymentModel
+      .updateOne({ _id: deploymentId }, { status })
+      .exec();
   }
 
   /**
@@ -202,7 +205,8 @@ export class DeploymentsService {
       .where('user')
       .equals(userId)
       .where('workspace')
-      .equals(workspaceId);
+      .equals(workspaceId)
+      .exec();
     if (!deployment) throw new DeploymentNotFoundException(deploymentId);
     this.eventEmitter.emit(
       Event.DeploymentDeleted,
@@ -221,7 +225,11 @@ export class DeploymentsService {
       userId,
     );
     const deploymentIds: string[] = deployments.map((d) => d._id);
-    await this.deploymentModel.deleteMany().where('_id').in(deploymentIds);
+    await this.deploymentModel
+      .deleteMany()
+      .where('_id')
+      .in(deploymentIds)
+      .exec();
     deployments.forEach((deployment: DeploymentDocument) => {
       this.eventEmitter.emit(
         Event.DeploymentDeleted,
