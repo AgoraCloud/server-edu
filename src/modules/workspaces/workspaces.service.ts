@@ -41,7 +41,7 @@ export class WorkspacesService {
    * @param userId the users id
    */
   async findAll(userId: string): Promise<WorkspaceDocument[]> {
-    return this.workspaceModel.find().where('users').in([userId]);
+    return this.workspaceModel.find().where('users').in([userId]).exec();
   }
 
   /**
@@ -58,7 +58,8 @@ export class WorkspacesService {
       .where('_id')
       .equals(workspaceId)
       .where('users')
-      .in([userId]);
+      .in([userId])
+      .exec();
     if (!workspace) throw new WorkspaceNotFoundException(workspaceId);
     return workspace;
   }
@@ -79,7 +80,8 @@ export class WorkspacesService {
       .where('_id')
       .equals(workspaceId)
       .where('users')
-      .in([userId]);
+      .in([userId])
+      .exec();
     if (!workspace) throw new WorkspaceNotFoundException(workspaceId);
     return workspace;
   }
@@ -95,7 +97,8 @@ export class WorkspacesService {
       .where('_id')
       .equals(workspaceId)
       .where('users')
-      .in([userId]);
+      .in([userId])
+      .exec();
     if (!workspace) throw new WorkspaceNotFoundException(workspaceId);
     this.eventEmitter.emit(
       Event.WorkspaceDeleted,
@@ -121,10 +124,9 @@ export class WorkspacesService {
       } else {
         // Remove the user from the workspace users
         workspace.users = workspace.users.filter((u) => u._id !== userId);
-        await this.workspaceModel.updateOne(
-          { _id: workspaceId },
-          { users: workspace.users },
-        );
+        await this.workspaceModel
+          .updateOne({ _id: workspaceId }, { users: workspace.users })
+          .exec();
         this.eventEmitter.emit(
           Event.WorkspaceUserRemoved,
           new WorkspaceUserRemovedEvent(workspaceId, userId),

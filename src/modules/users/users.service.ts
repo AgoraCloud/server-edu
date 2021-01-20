@@ -93,11 +93,9 @@ export class UsersService implements OnModuleInit {
     userId: string,
     updateUserDto: UpdateUserDto,
   ): Promise<UserDocument> {
-    const user: UserDocument = await this.userModel.findOneAndUpdate(
-      { _id: userId },
-      updateUserDto,
-      { new: true },
-    );
+    const user: UserDocument = await this.userModel
+      .findOneAndUpdate({ _id: userId }, updateUserDto, { new: true })
+      .exec();
     return user;
   }
 
@@ -106,7 +104,7 @@ export class UsersService implements OnModuleInit {
    * @param userId the users id
    */
   async remove(userId: string): Promise<void> {
-    await this.userModel.deleteOne({ _id: userId });
+    await this.userModel.deleteOne({ _id: userId }).exec();
     this.eventEmitter.emit(Event.UserDeleted, new UserDeletedEvent(userId));
   }
 
@@ -115,7 +113,7 @@ export class UsersService implements OnModuleInit {
    * @param email the users email
    */
   async findByEmail(email: string): Promise<UserDocument> {
-    const user: UserDocument = await this.userModel.findOne({ email });
+    const user: UserDocument = await this.userModel.findOne({ email }).exec();
     if (!user) throw new UserNotFoundException(email);
     if (!user.isEnabled) throw new AccountDisabledException(email);
     if (!user.isVerified) throw new AccountNotVerifiedException(email);
@@ -152,10 +150,9 @@ export class UsersService implements OnModuleInit {
       latestRefreshToken,
       10,
     );
-    await this.userModel.updateOne(
-      { email },
-      { latestRefreshToken: hashedRefreshToken },
-    );
+    await this.userModel
+      .updateOne({ email }, { latestRefreshToken: hashedRefreshToken })
+      .exec();
   }
 
   /**
@@ -163,7 +160,9 @@ export class UsersService implements OnModuleInit {
    * @param email the users email
    */
   async clearRefreshToken(email: string): Promise<void> {
-    await this.userModel.updateOne({ email }, { latestRefreshToken: null });
+    await this.userModel
+      .updateOne({ email }, { latestRefreshToken: null })
+      .exec();
   }
 
   /**
@@ -173,10 +172,9 @@ export class UsersService implements OnModuleInit {
    */
   async updatePassword(userId: string, password: string): Promise<void> {
     const hashedPassword: string = await bcrypt.hash(password, 10);
-    await this.userModel.updateOne(
-      { _id: userId },
-      { password: hashedPassword },
-    );
+    await this.userModel
+      .updateOne({ _id: userId }, { password: hashedPassword })
+      .exec();
   }
 
   /**
@@ -184,7 +182,9 @@ export class UsersService implements OnModuleInit {
    * @param userId the users id
    */
   async verify(userId: string): Promise<void> {
-    await this.userModel.updateOne({ _id: userId }, { isVerified: true });
+    await this.userModel
+      .updateOne({ _id: userId }, { isVerified: true })
+      .exec();
   }
 
   /**

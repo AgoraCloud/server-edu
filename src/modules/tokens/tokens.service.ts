@@ -33,7 +33,8 @@ export class TokensService {
         _id: tokenId,
         type,
       })
-      .populate('user');
+      .populate('user')
+      .exec();
     if (!token) throw new TokenNotFoundException(tokenId);
     return token;
   }
