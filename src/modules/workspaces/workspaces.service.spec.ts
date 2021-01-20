@@ -156,4 +156,6 @@ describe('WorkspacesService', () => {
       expect(eventEmitterSpy).toHaveBeenCalledTimes(1);
     });
   });
+
+  // TODO: test handleUserDeletedEvent
 });
