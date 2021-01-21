@@ -262,16 +262,39 @@ describe('DeploymentsService', () => {
     });
   });
 
-  // TODO: finish this
   describe('updateStatus', () => {
-    it('should update the deployments status', () => {});
+    it('should update the deployments status', async () => {
+      const updatedStatus: DeploymentStatus = DeploymentStatus.Deleting;
+      await service.updateStatus(deploymentId, updatedStatus);
+      const retrievedDeployment = await service.findOne(
+        user._id,
+        deploymentId,
+        workspace._id,
+      );
+      expect(retrievedDeployment.status).toBe(updatedStatus);
+    });
   });
 
-  // TODO: finish this
   describe('remove', () => {
-    it('should throw an error if the deployment with the given id was not found', () => {});
+    it('should throw an error if the deployment with the given id was not found', async () => {
+      const deploymentId: string = Types.ObjectId().toHexString();
+      const expectedErrorMessage: string = new DeploymentNotFoundException(
+        deploymentId,
+      ).message;
+      try {
+        await service.remove(user._id, workspace._id, deploymentId);
+        fail('It should throw an error');
+      } catch (err) {
+        expect(err.message).toBe(expectedErrorMessage);
+      }
+    });
 
-    it('should delete the deployment', () => {});
+    it('should delete the deployment', async () => {
+      const eventEmitterSpy = jest.spyOn(eventEmitter, 'emit');
+      eventEmitterSpy.mockClear();
+      await service.remove(user._id, workspace._id, deploymentId);
+      expect(eventEmitterSpy).toHaveBeenCalledTimes(1);
+    });
   });
 
   // TODO: test removeAll
