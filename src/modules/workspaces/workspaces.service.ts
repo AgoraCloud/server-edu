@@ -111,7 +111,9 @@ export class WorkspacesService {
    * @param payload the user.deleted even payload
    */
   @OnEvent(Event.UserDeleted)
-  async handleUserDeletedEvent(payload: UserDeletedEvent): Promise<void> {
+  private async handleUserDeletedEvent(
+    payload: UserDeletedEvent,
+  ): Promise<void> {
     const userId: string = payload.id;
     const workspaces: WorkspaceDocument[] = await this.findAll(userId);
     for (const workspace of workspaces) {

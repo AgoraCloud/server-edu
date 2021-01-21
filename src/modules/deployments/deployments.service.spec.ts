@@ -3,7 +3,7 @@ import { UpdateDeploymentDto } from './dto/update-deployment.dto';
 import { DeploymentNotFoundException } from './../../exceptions/deployment-not-found.exception';
 import { CreateDeploymentDto } from './dto/create-deployment.dto';
 import { WorkspaceDocument } from './../workspaces/schemas/workspace.schema';
-import { UserDocument } from 'src/modules/users/schemas/user.schema';
+import { UserDocument } from '../users/schemas/user.schema';
 import { deploymentImages } from './deployment-images';
 import {
   DeploymentSchema,
@@ -85,7 +85,7 @@ describe('DeploymentsService', () => {
             memoryCount: 2,
             storageCount: 8,
           },
-          sudoPassword: 'Sudo Passsword',
+          sudoPassword: 'Sudo Password',
         },
       };
       const createdDeployment: DeploymentDocument = await service.create(
@@ -296,8 +296,4 @@ describe('DeploymentsService', () => {
       expect(eventEmitterSpy).toHaveBeenCalledTimes(1);
     });
   });
-
-  // TODO: test removeAll
-  // TODO: test handleWorkspaceDeletedEvent
-  // TODO: test handleWorkspaceUserRemoved
 });
