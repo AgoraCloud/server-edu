@@ -87,6 +87,7 @@ describe('WorkspacesService', () => {
         user._id,
       );
       expect(retrievedWorkspaces).toHaveLength(1);
+      expect(retrievedWorkspaces[0].users[0]._id).toEqual(user._id);
     });
   });
 
@@ -141,6 +142,7 @@ describe('WorkspacesService', () => {
         updateWorkspaceDto,
       );
       expect(updatedWorkspace._id).toEqual(workspaceId);
+      expect(updatedWorkspace.users[0]._id).toEqual(user._id);
       expect(updatedWorkspace.name).toBe(updateWorkspaceDto.name);
     });
   });
@@ -184,7 +186,7 @@ describe('WorkspacesService', () => {
       const payload: UserDeletedEvent = new UserDeletedEvent(user._id);
       const serviceRemoveSpy = jest.spyOn(service, 'remove');
       await service.handleUserDeletedEvent(payload);
-      expect(serviceRemoveSpy).toBeCalledTimes(1);
+      expect(serviceRemoveSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should remove the user from the workspace', async () => {
@@ -207,7 +209,7 @@ describe('WorkspacesService', () => {
       const serviceRemoveSpy = jest.spyOn(service, 'remove');
       serviceRemoveSpy.mockClear();
       await service.handleUserDeletedEvent(payload);
-      expect(serviceRemoveSpy).toBeCalledTimes(0);
+      expect(serviceRemoveSpy).not.toHaveBeenCalled();
     });
   });
 });
