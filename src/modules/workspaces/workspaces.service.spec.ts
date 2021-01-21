@@ -2,7 +2,7 @@ import { UserDeletedEvent } from './../../events/user-deleted.event';
 import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
 import { WorkspaceNotFoundException } from './../../exceptions/workspace-not-found.exception';
 import { CreateWorkspaceDto } from './dto/create-workspace.dto';
-import { UserDocument } from 'src/modules/users/schemas/user.schema';
+import { UserDocument } from '../users/schemas/user.schema';
 import {
   MongooseMockModule,
   closeMongooseConnection,
