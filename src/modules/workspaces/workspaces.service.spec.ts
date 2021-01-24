@@ -153,7 +153,10 @@ describe('WorkspacesService', () => {
     });
 
     it('should delete the users workspace', async () => {
-      const eventEmitterSpy = jest.spyOn(eventEmitter, 'emit');
+      const eventEmitterSpy: jest.SpyInstance<boolean, any[]> = jest.spyOn(
+        eventEmitter,
+        'emit',
+      );
       await service.remove(user._id, workspaceId);
       expect(eventEmitterSpy).toHaveBeenCalledTimes(1);
     });

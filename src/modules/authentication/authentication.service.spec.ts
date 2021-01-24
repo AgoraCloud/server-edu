@@ -10,6 +10,7 @@ import {
   TokenSchema,
   TokenDocument,
   TokenType,
+  Token,
 } from './../tokens/schemas/token.schema';
 import { PassportModule } from '@nestjs/passport';
 import { UserSchema } from './../users/schemas/user.schema';
@@ -115,7 +116,10 @@ describe('AuthenticationService', () => {
     });
 
     it('should register a user', async () => {
-      const usersServiceSpy = jest.spyOn(usersService, 'create');
+      const usersServiceSpy: jest.SpyInstance<
+        Promise<UserDocument>,
+        [createUserDto: CreateUserDto]
+      > = jest.spyOn(usersService, 'create');
       await service.register(createUserDto);
       expect(usersServiceSpy).toHaveBeenCalledTimes(1);
     });
@@ -130,8 +134,14 @@ describe('AuthenticationService', () => {
       const verifyAccountDto: VerifyAccountDto = {
         token: token._id,
       };
-      const tokensServiceSpy = jest.spyOn(tokensService, 'findOneAndRemove');
-      const usersServiceSpy = jest.spyOn(usersService, 'verify');
+      const tokensServiceSpy: jest.SpyInstance<
+        Promise<TokenDocument>,
+        [tokenId: string, type: TokenType]
+      > = jest.spyOn(tokensService, 'findOneAndRemove');
+      const usersServiceSpy: jest.SpyInstance<
+        Promise<void>,
+        [userId: string]
+      > = jest.spyOn(usersService, 'verify');
       await service.verifyAccount(verifyAccountDto);
       expect(tokensServiceSpy).toHaveBeenCalledTimes(1);
       expect(usersServiceSpy).toHaveBeenCalledTimes(1);
@@ -191,7 +201,10 @@ describe('AuthenticationService', () => {
 
   describe('generateRefreshToken', () => {
     it('should generate a refresh token', async () => {
-      const usersServiceSpy = jest.spyOn(usersService, 'updateRefreshToken');
+      const usersServiceSpy: jest.SpyInstance<
+        Promise<void>,
+        [email: string, latestRefreshToken: string]
+      > = jest.spyOn(usersService, 'updateRefreshToken');
       const token: string = await service.generateRefreshToken(user.email);
       expect(token).toBeTruthy();
       expect(usersServiceSpy).toHaveBeenCalledTimes(1);
@@ -201,7 +214,10 @@ describe('AuthenticationService', () => {
 
   describe('clearRefreshToken', () => {
     it('should clear the users refresh token', async () => {
-      const usersServiceSpy = jest.spyOn(usersService, 'clearRefreshToken');
+      const usersServiceSpy: jest.SpyInstance<
+        Promise<void>,
+        [email: string]
+      > = jest.spyOn(usersService, 'clearRefreshToken');
       await service.clearRefreshToken(user.email);
       expect(usersServiceSpy).toHaveBeenCalledTimes(1);
     });
@@ -252,8 +268,14 @@ describe('AuthenticationService', () => {
       const forgotPasswordDto: ForgotPasswordDto = {
         email: user.email,
       };
-      const tokensServiceSpy = jest.spyOn(tokensService, 'create');
-      const eventEmitterSpy = jest.spyOn(eventEmitter, 'emit');
+      const tokensServiceSpy: jest.SpyInstance<
+        Promise<TokenDocument>,
+        [token: Token]
+      > = jest.spyOn(tokensService, 'create');
+      const eventEmitterSpy: jest.SpyInstance<boolean, any[]> = jest.spyOn(
+        eventEmitter,
+        'emit',
+      );
       await service.forgotPassword(forgotPasswordDto);
       expect(tokensServiceSpy).toHaveBeenCalledTimes(1);
       expect(eventEmitterSpy).toHaveBeenCalledTimes(1);
@@ -270,8 +292,14 @@ describe('AuthenticationService', () => {
         token: token._id,
         password: 'Password12345',
       };
-      const usersServiceSpy = jest.spyOn(usersService, 'updatePassword');
-      const eventEmitterSpy = jest.spyOn(eventEmitter, 'emit');
+      const usersServiceSpy: jest.SpyInstance<
+        Promise<void>,
+        [userId: string, password: string]
+      > = jest.spyOn(usersService, 'updatePassword');
+      const eventEmitterSpy: jest.SpyInstance<boolean, any[]> = jest.spyOn(
+        eventEmitter,
+        'emit',
+      );
       eventEmitterSpy.mockClear();
       await service.changePassword(changePasswordDto);
       expect(usersServiceSpy).toHaveBeenCalledTimes(1);

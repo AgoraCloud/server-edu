@@ -226,7 +226,10 @@ describe('DeploymentsService', () => {
     it('should update the deployment', async () => {
       // Update the deployment status to running
       await service.updateStatus(deploymentId, DeploymentStatus.Running);
-      const eventEmitterSpy = jest.spyOn(eventEmitter, 'emit');
+      const eventEmitterSpy: jest.SpyInstance<boolean, any[]> = jest.spyOn(
+        eventEmitter,
+        'emit',
+      );
       const updatedDeployment: DeploymentDocument = await service.update(
         user._id,
         workspace._id,
@@ -247,7 +250,10 @@ describe('DeploymentsService', () => {
     });
 
     it('should not emit the deployment.updated event if only the deployment name was updated', async () => {
-      const eventEmitterSpy = jest.spyOn(eventEmitter, 'emit');
+      const eventEmitterSpy: jest.SpyInstance<boolean, any[]> = jest.spyOn(
+        eventEmitter,
+        'emit',
+      );
       eventEmitterSpy.mockClear();
       const updateDeploymentDto: UpdateDeploymentDto = {
         name: 'New Test Deployment',
@@ -290,7 +296,10 @@ describe('DeploymentsService', () => {
     });
 
     it('should delete the deployment', async () => {
-      const eventEmitterSpy = jest.spyOn(eventEmitter, 'emit');
+      const eventEmitterSpy: jest.SpyInstance<boolean, any[]> = jest.spyOn(
+        eventEmitter,
+        'emit',
+      );
       eventEmitterSpy.mockClear();
       await service.remove(user._id, workspace._id, deploymentId);
       expect(eventEmitterSpy).toHaveBeenCalledTimes(1);

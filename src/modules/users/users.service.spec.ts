@@ -64,7 +64,10 @@ describe('UsersService', () => {
         email: 'test@test.com',
         password: 'Password123',
       };
-      const eventEmitterSpy = jest.spyOn(eventEmitter, 'emit');
+      const eventEmitterSpy: jest.SpyInstance<boolean, any[]> = jest.spyOn(
+        eventEmitter,
+        'emit',
+      );
       const createdUser: UserDocument = await service.create(createUserDto);
       expect(createdUser.fullName).toBe(createUserDto.fullName);
       expect(createdUser.email).toBe(createUserDto.email);
@@ -212,7 +215,10 @@ describe('UsersService', () => {
 
   describe('remove', () => {
     it('should remove the user', async () => {
-      const eventEmitterSpy = jest.spyOn(eventEmitter, 'emit');
+      const eventEmitterSpy: jest.SpyInstance<boolean, any[]> = jest.spyOn(
+        eventEmitter,
+        'emit',
+      );
       eventEmitterSpy.mockClear();
       await service.remove(user._id);
       expect(eventEmitterSpy).toHaveBeenCalledTimes(1);
