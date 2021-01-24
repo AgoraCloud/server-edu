@@ -92,13 +92,13 @@ export class DeploymentsService {
   /**
    * Find a deployment
    * @param userId the users id
-   * @param workspaceId the workspace id
    * @param deploymentId the deployment id
+   * @param workspaceId the workspace id
    */
   async findOne(
     userId: string,
-    workspaceId: string,
     deploymentId: string,
+    workspaceId?: string,
   ): Promise<DeploymentDocument> {
     let deploymentQuery: Query<
       DeploymentDocument,
@@ -132,8 +132,8 @@ export class DeploymentsService {
   ): Promise<DeploymentDocument> {
     const deployment: DeploymentDocument = await this.findOne(
       userId,
-      workspaceId,
       deploymentId,
+      workspaceId,
     );
     if (deployment.status !== DeploymentStatus.Running) {
       throw new DeploymentNotRunningException(deploymentId);

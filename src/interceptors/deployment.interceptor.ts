@@ -37,8 +37,8 @@ export class DeploymentInterceptor implements NestInterceptor {
     const workspace: WorkspaceDocument = request.workspace;
     const deployment: DeploymentDocument = await this.deploymentsService.findOne(
       user._id,
-      workspace?._id,
       deploymentId,
+      workspace?._id,
     );
     if (deployment.status !== DeploymentStatus.Running) {
       throw new DeploymentNotRunningException(deploymentId);

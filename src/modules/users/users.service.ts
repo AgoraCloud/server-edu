@@ -130,6 +130,7 @@ export class UsersService implements OnModuleInit {
     refreshToken: string,
   ): Promise<UserDocument> {
     const user: UserDocument = await this.findByEmail(email);
+    if (!user.latestRefreshToken) return;
     const refreshTokensMatch: boolean = await bcrypt.compare(
       refreshToken,
       user.latestRefreshToken,

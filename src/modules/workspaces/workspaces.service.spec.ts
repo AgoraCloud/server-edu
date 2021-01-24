@@ -1,7 +1,7 @@
 import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
 import { WorkspaceNotFoundException } from './../../exceptions/workspace-not-found.exception';
 import { CreateWorkspaceDto } from './dto/create-workspace.dto';
-import { UserDocument } from 'src/modules/users/schemas/user.schema';
+import { UserDocument } from '../users/schemas/user.schema';
 import {
   MongooseMockModule,
   closeMongooseConnection,
@@ -78,6 +78,7 @@ describe('WorkspacesService', () => {
         user._id,
       );
       expect(retrievedWorkspaces).toHaveLength(1);
+      expect(retrievedWorkspaces[0].users[0]._id).toEqual(user._id);
     });
   });
 
@@ -132,6 +133,7 @@ describe('WorkspacesService', () => {
         updateWorkspaceDto,
       );
       expect(updatedWorkspace._id).toEqual(workspaceId);
+      expect(updatedWorkspace.users[0]._id).toEqual(user._id);
       expect(updatedWorkspace.name).toBe(updateWorkspaceDto.name);
     });
   });
@@ -151,11 +153,12 @@ describe('WorkspacesService', () => {
     });
 
     it('should delete the users workspace', async () => {
-      const eventEmitterSpy = jest.spyOn(eventEmitter, 'emit');
+      const eventEmitterSpy: jest.SpyInstance<boolean, any[]> = jest.spyOn(
+        eventEmitter,
+        'emit',
+      );
       await service.remove(user._id, workspaceId);
       expect(eventEmitterSpy).toHaveBeenCalledTimes(1);
     });
   });
-
-  // TODO: test handleUserDeletedEvent
 });

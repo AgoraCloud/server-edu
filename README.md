@@ -1,37 +1,55 @@
-## Description
+# AgoraCloud
 
-AgoraCloud is your coding workspace, in the cloud.
+AgoraCloud is an open source and self hosted cloud coding platform that runs in Kubernetes.
 
 ## Installation
 
+AgoraCloud is installed on a Kubernetes cluster using a Helm chart. For more details, refer to the instructions in the [helm-chart directory](https://github.com/AgoraCloud/server/tree/main/helm-chart).
+
+## Development
+
+### Set Up
+
+1. Clone this repository
+
 ```bash
-$ git clone https://github.com/AgoraCloud/server.git
-$ cd server
-$ npm i
+git clone https://github.com/AgoraCloud/server.git
 ```
 
-## Running the app
+2. Change directory
 
 ```bash
-# development
+cd server
+```
+
+3. Install required packages
+
+```bash
+npm i
+```
+
+### Running the app
+
+```bash
+# Development
 $ npm run start
 
-# watch mode
+# Watch mode
 $ npm run start:dev
 
-# production mode
+# Production mode
 $ npm run start:prod
 ```
 
-## Test
+### Testing
 
 ```bash
-# unit tests
+# Unit tests
 $ npm run test
 
-# e2e tests
+# E2E tests
 $ npm run test:e2e
 
-# test coverage
+# Test coverage
 $ npm run test:cov
 ```
