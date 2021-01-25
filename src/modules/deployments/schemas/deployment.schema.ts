@@ -42,20 +42,8 @@ export class DeploymentImage {
 }
 
 export class DeploymentProperties {
-  @Prop()
-  namespace?: string;
-
-  @Prop()
-  serviceName?: string;
-
-  @Prop()
-  deploymentName?: string;
-
-  @Prop()
-  persistentVolumeClaimName?: string;
-
   @Prop({ required: true })
-  image?: DeploymentImage;
+  image: DeploymentImage;
 
   @Prop({ required: true })
   resources: DeploymentResources;
@@ -71,9 +59,6 @@ export type DeploymentDocument = Deployment & Document;
 export class Deployment {
   @Prop({ required: true, minlength: 4 })
   name: string;
-
-  @Prop()
-  url?: string;
 
   @Prop({
     required: true,
