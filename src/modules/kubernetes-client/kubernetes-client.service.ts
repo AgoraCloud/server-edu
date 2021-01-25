@@ -12,7 +12,7 @@ import { ConfigService } from '@nestjs/config';
 import { DeploymentDeletedEvent } from './../../events/deployment-deleted.event';
 import { DeploymentUpdatedEvent } from './../../events/deployment-updated.event';
 import { DeploymentCreatedEvent } from './../../events/deployment-created.event';
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import * as k8s from '@kubernetes/client-node';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Event } from '../../events/events.enum';
@@ -21,7 +21,6 @@ import * as request from 'request';
 
 @Injectable()
 export class KubernetesClientService {
-  private readonly kc: k8s.KubeConfig;
   private readonly k8sCoreV1Api: k8s.CoreV1Api;
   private readonly k8sAppsV1Api: k8s.AppsV1Api;
   private readonly kubernetesConfig: KubernetesConfig;
@@ -30,13 +29,13 @@ export class KubernetesClientService {
   private readonly logger = new Logger(KubernetesClientService.name);
 
   constructor(
+    @Inject(k8s.KubeConfig) private readonly kc: k8s.KubeConfig,
     private readonly configService: ConfigService,
     private readonly deploymentsService: DeploymentsService,
   ) {
     this.kubernetesConfig = this.configService.get<KubernetesConfig>(
       'kubernetes',
     );
-    this.kc = new k8s.KubeConfig();
     this.kc.loadFromDefault();
     this.k8sCoreV1Api = this.kc.makeApiClient(k8s.CoreV1Api);
     this.k8sAppsV1Api = this.kc.makeApiClient(k8s.AppsV1Api);

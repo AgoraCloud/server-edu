@@ -257,7 +257,7 @@ describe('DeploymentsService', () => {
       eventEmitterSpy.mockClear();
       const updateDeploymentDto: UpdateDeploymentDto = {
         name: 'New Test Deployment',
-      } as UpdateDeploymentDto;
+      };
       await service.update(
         user._id,
         workspace._id,

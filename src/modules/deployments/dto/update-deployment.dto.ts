@@ -38,5 +38,5 @@ export class UpdateDeploymentDto {
   @IsOptional()
   @ValidateNested()
   @Type(() => UpdateDeploymentPropertiesDto)
-  properties: UpdateDeploymentPropertiesDto;
+  properties?: UpdateDeploymentPropertiesDto;
 }
