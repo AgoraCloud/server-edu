@@ -55,7 +55,7 @@ export class DeploymentProperties {
 
 export type DeploymentDocument = Deployment & Document;
 
-@Schema({ collection: 'deployments' })
+@Schema({ collection: 'deployments', timestamps: true })
 export class Deployment {
   @Prop({ required: true, minlength: 4 })
   name: string;

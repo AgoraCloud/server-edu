@@ -14,6 +14,7 @@ import { DeploymentsModule } from './modules/deployments/deployments.module';
 import { KubernetesClientModule } from './modules/kubernetes-client/kubernetes-client.module';
 import { ProxyModule } from './modules/proxy/proxy.module';
 import * as Joi from '@hapi/joi';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -73,6 +74,7 @@ import * as Joi from '@hapi/joi';
         },
       }),
     }),
+    ScheduleModule.forRoot(),
     UsersModule,
     AuthenticationModule,
     WorkspacesModule,
