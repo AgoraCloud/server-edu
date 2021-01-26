@@ -11,6 +11,10 @@ jobs:
     steps:
       - name: Check Out Repo
         uses: actions/checkout@v2
+      - name: Extract Branch Tag
+        shell: bash
+        run: echo "##[set-output name=branch_tag;]${GITHUB_REF#refs/*/}"
+        id: extract_branch_tag
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
@@ -28,5 +32,5 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: agoracloud/server:latest,agoracloud/server:${ GITHUB_REF#refs/*/ }
+          tags: agoracloud/server:latest,agoracloud/server:${{ steps.extract_branch_tag.outputs.branch_tag }}
           platforms: linux/amd64,linux/arm64,linux/arm/v7

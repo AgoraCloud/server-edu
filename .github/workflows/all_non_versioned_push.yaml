@@ -11,6 +11,14 @@ jobs:
     steps:
       - name: Check Out Repo
         uses: actions/checkout@v2
+      - name: Extract Branch Name
+        shell: bash
+        run: echo "##[set-output name=branch_name;]${GITHUB_REF#refs/heads/}"
+        id: extract_branch_name
+      - name: Extract Commit Short SHA
+        shell: bash
+        run: echo "##[set-output name=commit_short_sha;]${GITHUB_SHA::8}"
+        id: extract_commit_short_sha
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
@@ -28,5 +36,5 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: agoracloud/server:${ GITHUB_REF#refs/heads/ }-${ GITHUB_SHA::8 }
+          tags: agoracloud/server:${{ steps.extract_branch_name.outputs.branch_name }}-${{ steps.extract_commit_short_sha.outputs.commit_short_sha }}
           platforms: linux/amd64,linux/arm64,linux/arm/v7
