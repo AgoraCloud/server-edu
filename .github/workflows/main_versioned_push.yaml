@@ -1,3 +1,4 @@
+name: main_versioned_push
 on:
   push:
     branches:
@@ -27,7 +28,5 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: |
-            agoracloud/server:latest
-            agoracloud/server:${GITHUB_REF#refs/*/}
+          tags: agoracloud/server:latest,agoracloud/server:${ GITHUB_REF#refs/*/ }
           platforms: linux/amd64,linux/arm64,linux/arm/v7
