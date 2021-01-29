@@ -36,5 +36,5 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: agoracloud/server:${{ steps.extract_branch_name.outputs.branch_name }}-${{ steps.extract_commit_short_sha.outputs.commit_short_sha }}
+          tags: agoracloud/server:${{ steps.extract_branch_name.outputs.branch_name }}-latest,agoracloud/server:${{ steps.extract_branch_name.outputs.branch_name }}-${{ steps.extract_commit_short_sha.outputs.commit_short_sha }}
           platforms: linux/amd64,linux/arm64,linux/arm/v7
