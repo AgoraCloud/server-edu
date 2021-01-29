@@ -108,7 +108,7 @@ export class WorkspacesService {
 
   /**
    * Handles the user.deleted event
-   * @param payload the user.deleted even payload
+   * @param payload the user.deleted event payload
    */
   @OnEvent(Event.UserDeleted)
   private async handleUserDeletedEvent(

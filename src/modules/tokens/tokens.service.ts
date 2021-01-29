@@ -1,8 +1,11 @@
+import { UserDeletedEvent } from './../../events/user-deleted.event';
+import { OnEvent } from '@nestjs/event-emitter';
 import { TokenNotFoundException } from './../../exceptions/token-not-found.exception';
 import { TokenType, Token, TokenDocument } from './schemas/token.schema';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { Event } from 'src/events/events.enum';
 
 @Injectable()
 export class TokensService {
@@ -40,10 +43,29 @@ export class TokensService {
   }
 
   /**
+   * Remove all tokens for the given user
+   * @param userId the users id
+   */
+  private async removeAll(userId: string): Promise<void> {
+    await this.tokenModel.deleteMany().where('user').equals(userId).exec();
+  }
+
+  /**
    * Checks if a token is expired
    * @param token the token to check
    */
   isTokenExpired(token: TokenDocument): boolean {
     return token.expiresAt < new Date();
+  }
+
+  /**
+   * Handles the user.deleted event
+   * @param payload the user.deleted event payload
+   */
+  @OnEvent(Event.UserDeleted)
+  private async handleUserDeletedEvent(
+    payload: UserDeletedEvent,
+  ): Promise<void> {
+    await this.removeAll(payload.id);
   }
 }

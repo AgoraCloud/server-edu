@@ -209,12 +209,15 @@ export class UsersService implements OnModuleInit {
   @Cron(CronExpression.EVERY_HOUR)
   private async deleteStaleUsersJob(): Promise<void> {
     const yesterday: Date = removeDays(new Date());
-    await this.userModel
-      .deleteMany()
+    const staleUsers: UserDocument[] = await this.userModel
+      .find()
       .where('isVerified')
       .equals(false)
       .where('createdAt')
       .lte(yesterday.getTime())
       .exec();
+    for (const staleUser of staleUsers) {
+      await this.remove(staleUser._id);
+    }
   }
 }
