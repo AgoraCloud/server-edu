@@ -8,10 +8,9 @@ import {
   Req,
   Res,
   UseGuards,
-  Next,
   UseInterceptors,
 } from '@nestjs/common';
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 
 @Controller('proxy/:deploymentId')
 @UseGuards(JwtAuthenticationGuard)
@@ -24,8 +23,7 @@ export class ProxyController {
     @Param('deploymentId') deploymentId: string,
     @Req() req: Request,
     @Res() res: Response,
-    @Next() next: NextFunction,
   ): void {
-    this.proxyService.proxy(deploymentId, req, res, next);
+    this.proxyService.proxy(deploymentId, req, res);
   }
 }

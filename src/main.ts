@@ -23,7 +23,7 @@ async function bootstrap() {
   // TODO: figure out how to disable these for the /proxy endpoint
   // app.use(helmet());
   // app.enableCors();
-  // app.set('trust proxy', 1);
+  app.set('trust proxy', 1);
   await app.listen(port);
 
   // Hot Reload
