@@ -43,6 +43,23 @@ export class KubernetesClientService {
   }
 
   /**
+   * Get all Kubernetes secrets
+   */
+  private getAllSecrets(): Promise<{
+    response: http.IncomingMessage;
+    body: k8s.V1SecretList;
+  }> {
+    return this.k8sCoreV1Api.listNamespacedSecret(
+      this.kubernetesConfig.namespace,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      'deployment',
+    );
+  }
+
+  /**
    * Create a Kubernetes secret
    * @param deploymentId the deployment id
    * @param sudoPassword the deployment container sudo password
@@ -84,6 +101,23 @@ export class KubernetesClientService {
     return this.k8sCoreV1Api.deleteNamespacedSecret(
       this.generateResourceName(deploymentId),
       this.kubernetesConfig.namespace,
+    );
+  }
+
+  /**
+   * Get all Kubernetes persistent volume claims
+   */
+  private getAllPersistentVolumeClaims(): Promise<{
+    response: http.IncomingMessage;
+    body: k8s.V1PersistentVolumeClaimList;
+  }> {
+    return this.k8sCoreV1Api.listNamespacedPersistentVolumeClaim(
+      this.kubernetesConfig.namespace,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      'deployment',
     );
   }
 
@@ -139,6 +173,23 @@ export class KubernetesClientService {
   }
 
   /**
+   * Get all Kubernetes services
+   */
+  private getAllServices(): Promise<{
+    response: http.IncomingMessage;
+    body: k8s.V1ServiceList;
+  }> {
+    return this.k8sCoreV1Api.listNamespacedService(
+      this.kubernetesConfig.namespace,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      'deployment',
+    );
+  }
+
+  /**
    * Create a Kubernetes service
    * @param deploymentId the deployment id
    */
@@ -186,6 +237,23 @@ export class KubernetesClientService {
     return this.k8sCoreV1Api.deleteNamespacedService(
       this.generateResourceName(deploymentId),
       this.kubernetesConfig.namespace,
+    );
+  }
+
+  /**
+   * Get all Kubernetes deployments
+   */
+  private getAllDeployments(): Promise<{
+    response: http.IncomingMessage;
+    body: k8s.V1DeploymentList;
+  }> {
+    return this.k8sAppsV1Api.listNamespacedDeployment(
+      this.kubernetesConfig.namespace,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      'deployment',
     );
   }
 
@@ -354,12 +422,13 @@ export class KubernetesClientService {
   }
 
   /**
-   * Get a Kubernetes pod
-   * @param deploymentId the pods deployment id
+   * Get all Kubernetes pods
    */
-  private async getPod(deploymentId: string): Promise<k8s.V1Pod> {
-    // Get all pods with the deployment label
-    const { body } = await this.k8sCoreV1Api.listNamespacedPod(
+  private async getAllPods(): Promise<{
+    response: http.IncomingMessage;
+    body: k8s.V1PodList;
+  }> {
+    return this.k8sCoreV1Api.listNamespacedPod(
       this.kubernetesConfig.namespace,
       undefined,
       undefined,
@@ -367,6 +436,15 @@ export class KubernetesClientService {
       undefined,
       'deployment',
     );
+  }
+
+  /**
+   * Get a Kubernetes pod
+   * @param deploymentId the pods deployment id
+   */
+  private async getPod(deploymentId: string): Promise<k8s.V1Pod> {
+    // Get all pods
+    const { body } = await this.getAllPods();
     // Filter the pods by the deployment label
     const podIndex: number = body.items.findIndex(
       (p) =>
