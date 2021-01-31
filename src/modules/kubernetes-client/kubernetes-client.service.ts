@@ -375,9 +375,14 @@ export class KubernetesClientService {
    * @param deploymentId the pods deployment id
    */
   private async getPod(deploymentId: string): Promise<k8s.V1Pod> {
-    // Get all the pods
+    // Get all the pods with the deployment label
     const { body } = await this.k8sCoreV1Api.listNamespacedPod(
       this.kubernetesConfig.namespace,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      'deployment',
     );
     // Filter the pods by the deployment label
     const podIndex: number = body.items.findIndex(
@@ -436,8 +441,8 @@ export class KubernetesClientService {
     if (!Array.isArray(response?.containers)) {
       throw new DeploymentPodMetricsNotAvailableException(deploymentId);
     }
-    const containers = response.containers as any[];
-    const containerIndex = containers.findIndex(
+    const containers: any[] = response.containers as any[];
+    const containerIndex: number = containers.findIndex(
       (c) => c.name === `${this.resourcePrefix}-${deploymentId}`,
     );
     if (containerIndex === -1) {
@@ -575,7 +580,7 @@ export class KubernetesClientService {
    * TODO: see if needed
    */
   private onPodAdded(obj: k8s.V1Pod): void {
-    this.logger.debug(`POD Added: ${obj.metadata?.name}`);
+    this.logger.debug({ message: 'POD Added', podName: obj.metadata?.name });
   }
 
   /**
@@ -620,16 +625,14 @@ export class KubernetesClientService {
    * TODO: see if needed
    */
   private onPodDeleted(obj: k8s.V1Pod): void {
-    this.logger.debug(
-      `POD Deleted: ${obj.metadata?.name}, ${obj.metadata?.labels}`,
-    );
+    this.logger.debug({ message: 'POD Deleted', podName: obj.metadata?.name });
   }
 
   /**
    * TODO: see if needed
    */
   private onPodError(err: k8s.V1Pod): void {
-    this.logger.error(`POD Error: ${err}`);
+    this.logger.error({ message: 'POD Error', err });
   }
 
   /**
