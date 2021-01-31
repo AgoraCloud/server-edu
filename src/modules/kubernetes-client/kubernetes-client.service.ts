@@ -60,12 +60,9 @@ export class KubernetesClientService {
         apiVersion: 'v1',
         kind: 'Secret',
         metadata: {
-          name: `${this.resourcePrefix}-${deploymentId}`,
+          name: this.generateResourceName(deploymentId),
           namespace: this.kubernetesConfig.namespace,
-          labels: {
-            app: this.resourcePrefix,
-            deployment: deploymentId,
-          },
+          labels: this.generateLabels(deploymentId),
         },
         data: {
           sudo_password: this.toBase64(sudoPassword),
@@ -85,7 +82,7 @@ export class KubernetesClientService {
     body: k8s.V1Status;
   }> {
     return this.k8sCoreV1Api.deleteNamespacedSecret(
-      `${this.resourcePrefix}-${deploymentId}`,
+      this.generateResourceName(deploymentId),
       this.kubernetesConfig.namespace,
     );
   }
@@ -108,12 +105,9 @@ export class KubernetesClientService {
         apiVersion: 'v1',
         kind: 'PersistentVolumeClaim',
         metadata: {
-          name: `${this.resourcePrefix}-${deploymentId}`,
+          name: this.generateResourceName(deploymentId),
           namespace: this.kubernetesConfig.namespace,
-          labels: {
-            app: this.resourcePrefix,
-            deployment: deploymentId,
-          },
+          labels: this.generateLabels(deploymentId),
         },
         spec: {
           accessModes: ['ReadWriteOnce'],
@@ -139,7 +133,7 @@ export class KubernetesClientService {
     body: k8s.V1PersistentVolumeClaim;
   }> {
     return this.k8sCoreV1Api.deleteNamespacedPersistentVolumeClaim(
-      `${this.resourcePrefix}-${deploymentId}`,
+      this.generateResourceName(deploymentId),
       this.kubernetesConfig.namespace,
     );
   }
@@ -154,18 +148,16 @@ export class KubernetesClientService {
     response: http.IncomingMessage;
     body: k8s.V1Service;
   }> {
+    const labels: { [key: string]: string } = this.generateLabels(deploymentId);
     return this.k8sCoreV1Api.createNamespacedService(
       this.kubernetesConfig.namespace,
       {
         apiVersion: 'v1',
         kind: 'Service',
         metadata: {
-          name: `${this.resourcePrefix}-${deploymentId}`,
+          name: this.generateResourceName(deploymentId),
           namespace: this.kubernetesConfig.namespace,
-          labels: {
-            app: this.resourcePrefix,
-            deployment: deploymentId,
-          },
+          labels,
         },
         spec: {
           type: 'ClusterIP',
@@ -175,10 +167,7 @@ export class KubernetesClientService {
               targetPort: new Number(8443),
             },
           ],
-          selector: {
-            app: this.resourcePrefix,
-            deployment: deploymentId,
-          },
+          selector: labels,
         },
       },
     );
@@ -195,7 +184,7 @@ export class KubernetesClientService {
     body: k8s.V1Status;
   }> {
     return this.k8sCoreV1Api.deleteNamespacedService(
-      `${this.resourcePrefix}-${deploymentId}`,
+      this.generateResourceName(deploymentId),
       this.kubernetesConfig.namespace,
     );
   }
@@ -212,17 +201,19 @@ export class KubernetesClientService {
     response: http.IncomingMessage;
     body: k8s.V1Deployment;
   }> {
+    const labels: { [key: string]: string } = this.generateLabels(deploymentId);
+    const resourceName: string = this.generateResourceName(deploymentId);
     const volumes: k8s.V1Volume[] = [];
     const volumeMounts: k8s.V1VolumeMount[] = [];
     if (deploymentProperties.resources.storageCount) {
       volumes.push({
-        name: `${this.resourcePrefix}-${deploymentId}`,
+        name: resourceName,
         persistentVolumeClaim: {
-          claimName: `${this.resourcePrefix}-${deploymentId}`,
+          claimName: resourceName,
         },
       });
       volumeMounts.push({
-        name: `${this.resourcePrefix}-${deploymentId}`,
+        name: resourceName,
         mountPath: '/config',
       });
     }
@@ -233,12 +224,9 @@ export class KubernetesClientService {
         apiVersion: 'apps/v1',
         kind: 'Deployment',
         metadata: {
-          name: `${this.resourcePrefix}-${deploymentId}`,
+          name: resourceName,
           namespace: this.kubernetesConfig.namespace,
-          labels: {
-            app: this.resourcePrefix,
-            deployment: deploymentId,
-          },
+          labels,
         },
         spec: {
           replicas: 1,
@@ -246,23 +234,17 @@ export class KubernetesClientService {
             type: 'Recreate',
           },
           selector: {
-            matchLabels: {
-              app: this.resourcePrefix,
-              deployment: deploymentId,
-            },
+            matchLabels: labels,
           },
           template: {
             metadata: {
-              labels: {
-                app: this.resourcePrefix,
-                deployment: deploymentId,
-              },
+              labels,
             },
             spec: {
               volumes,
               containers: [
                 {
-                  name: `${this.resourcePrefix}-${deploymentId}`,
+                  name: resourceName,
                   image: `${deploymentProperties.image.name}:${deploymentProperties.image.tag}`,
                   imagePullPolicy: 'Always',
                   resources: {
@@ -276,7 +258,7 @@ export class KubernetesClientService {
                       name: 'SUDO_PASSWORD',
                       valueFrom: {
                         secretKeyRef: {
-                          name: `${this.resourcePrefix}-${deploymentId}`,
+                          name: resourceName,
                           key: 'sudo_password',
                         },
                       },
@@ -316,6 +298,7 @@ export class KubernetesClientService {
     response: http.IncomingMessage;
     body: k8s.V1Deployment;
   }> {
+    const resourceName: string = this.generateResourceName(deploymentId);
     const resources: k8s.V1ResourceRequirements = new k8s.V1ResourceRequirements();
     resources.limits = {};
     if (updatedResources.cpuCount) {
@@ -326,7 +309,7 @@ export class KubernetesClientService {
     }
 
     return this.k8sAppsV1Api.patchNamespacedDeployment(
-      `${this.resourcePrefix}-${deploymentId}`,
+      resourceName,
       this.kubernetesConfig.namespace,
       {
         spec: {
@@ -334,7 +317,7 @@ export class KubernetesClientService {
             spec: {
               containers: [
                 {
-                  name: `${this.resourcePrefix}-${deploymentId}`,
+                  name: resourceName,
                   resources,
                 },
               ],
@@ -365,7 +348,7 @@ export class KubernetesClientService {
     body: k8s.V1Status;
   }> {
     return this.k8sAppsV1Api.deleteNamespacedDeployment(
-      `${this.resourcePrefix}-${deploymentId}`,
+      this.generateResourceName(deploymentId),
       this.kubernetesConfig.namespace,
     );
   }
@@ -375,7 +358,7 @@ export class KubernetesClientService {
    * @param deploymentId the pods deployment id
    */
   private async getPod(deploymentId: string): Promise<k8s.V1Pod> {
-    // Get all the pods with the deployment label
+    // Get all pods with the deployment label
     const { body } = await this.k8sCoreV1Api.listNamespacedPod(
       this.kubernetesConfig.namespace,
       undefined,
@@ -443,7 +426,7 @@ export class KubernetesClientService {
     }
     const containers: any[] = response.containers as any[];
     const containerIndex: number = containers.findIndex(
-      (c) => c.name === `${this.resourcePrefix}-${deploymentId}`,
+      (c) => c.name === this.generateResourceName(deploymentId),
     );
     if (containerIndex === -1) {
       throw new DeploymentPodMetricsNotAvailableException(deploymentId);
@@ -649,5 +632,25 @@ export class KubernetesClientService {
         (c) => c.type === condition && c.status === 'True',
       ) !== -1
     );
+  }
+
+  /**
+   * Generates labels for all Kubernetes resources
+   * @param deploymentId the deployment id
+   */
+  private generateLabels(
+    deploymentId: string,
+  ): {
+    [key: string]: string;
+  } {
+    return { app: this.resourcePrefix, deployment: deploymentId };
+  }
+
+  /**
+   * Generates the name for any Kubernetes resource
+   * @param deploymentId the deployment id
+   */
+  private generateResourceName(deploymentId: string): string {
+    return `${this.resourcePrefix}-${deploymentId}`;
   }
 }
