@@ -1,3 +1,9 @@
+import {
+  PodConditionType,
+  PodConditionReason,
+  PodConditionStatus,
+} from './schemas/pod-condition.schema';
+import { PodPhase } from './schemas/pod-phase.schema';
 import { DeploymentsService } from './../deployments/deployments.service';
 import { UpdateDeploymentResourcesDto } from './../deployments/dto/update-deployment.dto';
 import { DeploymentPodMetricsNotAvailableException } from '../../exceptions/deployment-pod-metrics-not-available.exception';
@@ -634,86 +640,9 @@ export class KubernetesClientService {
       `/api/v1/namespaces/${this.kubernetesConfig.namespace}/pods`,
       listFn,
     );
-    informer.on('add', (obj: k8s.V1Pod) => this.onPodAdded(obj));
-    informer.on('update', (obj: k8s.V1Pod) => this.onPodUpdated(obj));
-    informer.on('delete', (obj: k8s.V1Pod) => this.onPodDeleted(obj));
-    informer.on('error', (err: k8s.V1Pod) => this.onPodError(err));
+    informer.on('update', (pod: k8s.V1Pod) => this.updateDeploymentStatus(pod));
+    informer.on('error', (pod: k8s.V1Pod) => this.updateDeploymentStatus(pod));
     await informer.start();
-  }
-
-  /**
-   * TODO: see if needed
-   */
-  private onPodAdded(obj: k8s.V1Pod): void {
-    this.logger.debug({ message: 'POD Added', podName: obj.metadata?.name });
-  }
-
-  /**
-   * Checks a pods conditions to make sure it is ready to accept
-   * connections. The deployments status is updated to RUNNING
-   * if all conditions are fulfilled.
-   * @param obj the Kubernetes pod
-   */
-  private onPodUpdated(obj: k8s.V1Pod): void {
-    const deploymentId: string = obj?.metadata?.labels?.deployment;
-    // Check pod conditions
-    const conditions: k8s.V1PodCondition[] = obj.status?.conditions;
-    const podScheduled: boolean = this.isConditionFulfilled(
-      conditions,
-      'PodScheduled',
-    );
-    const containersReady: boolean = this.isConditionFulfilled(
-      conditions,
-      'ContainersReady',
-    );
-    const initialized: boolean = this.isConditionFulfilled(
-      conditions,
-      'Initialized',
-    );
-    const ready: boolean = this.isConditionFulfilled(conditions, 'Ready');
-
-    if (
-      deploymentId &&
-      podScheduled &&
-      containersReady &&
-      initialized &&
-      ready
-    ) {
-      this.deploymentsService.updateStatus(
-        deploymentId,
-        DeploymentStatus.Running,
-      );
-    }
-  }
-
-  /**
-   * TODO: see if needed
-   */
-  private onPodDeleted(obj: k8s.V1Pod): void {
-    this.logger.debug({ message: 'POD Deleted', podName: obj.metadata?.name });
-  }
-
-  /**
-   * TODO: see if needed
-   */
-  private onPodError(err: k8s.V1Pod): void {
-    this.logger.error({ message: 'POD Error', err });
-  }
-
-  /**
-   * Checks whether a pod condition has been fulfilled
-   * @param conditions the pods conditions
-   * @param condition the condition to check
-   */
-  private isConditionFulfilled(
-    conditions: k8s.V1PodCondition[],
-    condition: 'PodScheduled' | 'ContainersReady' | 'Initialized' | 'Ready',
-  ): boolean {
-    return (
-      conditions?.findIndex(
-        (c) => c.type === condition && c.status === 'True',
-      ) !== -1
-    );
   }
 
   /**
@@ -742,7 +671,7 @@ export class KubernetesClientService {
    * deleted
    */
   @Cron(CronExpression.EVERY_HOUR)
-  private async deleteRemainingKubernetesResourcesJob() {
+  private async deleteRemainingKubernetesResourcesJob(): Promise<void> {
     const storedDeployments: DeploymentDocument[] = await this.deploymentsService.findAll();
     const storedDeploymentIds: string[] = storedDeployments.map((d) =>
       d._id.toString(),
@@ -786,14 +715,64 @@ export class KubernetesClientService {
     }
   }
 
-  @Cron(CronExpression.EVERY_5_MINUTES)
-  private async updateDeploymentsStatusJob() {
+  /**
+   * Cron job that runs every minute and updates a deployments
+   * status based on the Kubernetes pod status
+   */
+  @Cron(CronExpression.EVERY_MINUTE)
+  private async updateDeploymentStatusesJob(): Promise<void> {
     const {
       body: { items: pods },
     } = await this.getAllPods();
     for (const pod of pods) {
-      // TODO: finish this
-      this;
+      await this.updateDeploymentStatus(pod);
+    }
+  }
+
+  /**
+   * Updates a deployments status based on the Kubernetes
+   * pod status
+   * @param pod the deployments Kubernetes pod
+   */
+  private async updateDeploymentStatus(pod: k8s.V1Pod): Promise<void> {
+    const deploymentId: string = pod.metadata?.labels?.deployment;
+    if (!deploymentId) return;
+    const podPhase: string = pod.status?.phase;
+
+    if (!podPhase || podPhase === PodPhase.Unknown) {
+      await this.deploymentsService.updateStatus(
+        deploymentId,
+        DeploymentStatus.Unknown,
+      );
+    } else if (podPhase === PodPhase.Running) {
+      await this.deploymentsService.updateStatus(
+        deploymentId,
+        DeploymentStatus.Running,
+      );
+    } else if (podPhase === PodPhase.Pending) {
+      /**
+       * Check if the pod can not be scheduled by Kubernetes due
+       * to insufficient cluster resources
+       */
+      const conditions: k8s.V1PodCondition[] = pod.status?.conditions;
+      const podScheduledConditionIndex: number = conditions?.findIndex(
+        (c) =>
+          c.type === PodConditionType.PodScheduled &&
+          c.status === PodConditionStatus.False &&
+          c.reason === PodConditionReason.Unschedulable,
+      );
+      if (podScheduledConditionIndex !== -1) {
+        await this.deploymentsService.updateStatus(
+          deploymentId,
+          DeploymentStatus.Failed,
+          conditions[podScheduledConditionIndex].message,
+        );
+      }
+    } else if (podPhase === PodPhase.Failed) {
+      await this.deploymentsService.updateStatus(
+        deploymentId,
+        DeploymentStatus.Failed,
+      );
     }
   }
 }

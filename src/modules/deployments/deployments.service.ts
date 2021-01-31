@@ -179,16 +179,18 @@ export class DeploymentsService {
   }
 
   /**
-   * Update a deployments status
+   * Update a deployments status and failure reason
    * @param deploymentId the deployment id
    * @param status the deployment status
+   * @param failureReason failure reason if a deployments status is FAILED
    */
   async updateStatus(
     deploymentId: string,
     status: DeploymentStatus,
+    failureReason?: string,
   ): Promise<void> {
     await this.deploymentModel
-      .updateOne({ _id: deploymentId }, { status })
+      .updateOne({ _id: deploymentId }, { status, failureReason })
       .exec();
   }
 

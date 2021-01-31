@@ -74,6 +74,9 @@ export class Deployment {
   })
   status: string;
 
+  @Prop()
+  failureReason?: string;
+
   @Prop({ required: true })
   properties: DeploymentProperties;
 
