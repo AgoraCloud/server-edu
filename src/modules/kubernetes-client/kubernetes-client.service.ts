@@ -4,6 +4,7 @@ import { DeploymentPodMetricsNotAvailableException } from '../../exceptions/depl
 import { DeploymentMetricsDto } from './dto/deployment-metrics.dto';
 import { DeploymentPodNotAvailableException } from '../../exceptions/deployment-pod-not-available.exception';
 import {
+  DeploymentDocument,
   DeploymentProperties,
   DeploymentStatus,
 } from './../deployments/schemas/deployment.schema';
@@ -18,6 +19,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { Event } from '../../events/events.enum';
 import * as http from 'http';
 import * as request from 'request';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class KubernetesClientService {
@@ -444,16 +446,18 @@ export class KubernetesClientService {
    */
   private async getPod(deploymentId: string): Promise<k8s.V1Pod> {
     // Get all pods
-    const { body } = await this.getAllPods();
+    const {
+      body: { items: pods },
+    } = await this.getAllPods();
     // Filter the pods by the deployment label
-    const podIndex: number = body.items.findIndex(
+    const podIndex: number = pods.findIndex(
       (p) =>
         p.metadata?.labels?.deployment === deploymentId && p.metadata?.name,
     );
     if (podIndex === -1) {
       throw new DeploymentPodNotAvailableException(deploymentId);
     }
-    return body.items[podIndex];
+    return pods[podIndex];
   }
 
   /**
@@ -730,5 +734,66 @@ export class KubernetesClientService {
    */
   private generateResourceName(deploymentId: string): string {
     return `${this.resourcePrefix}-${deploymentId}`;
+  }
+
+  /**
+   * Cron job that runs every hour and deletes any Kubernetes
+   * resource that was not deleted when a deployment was
+   * deleted
+   */
+  @Cron(CronExpression.EVERY_HOUR)
+  private async deleteRemainingKubernetesResourcesJob() {
+    const storedDeployments: DeploymentDocument[] = await this.deploymentsService.findAll();
+    const storedDeploymentIds: string[] = storedDeployments.map((d) =>
+      d._id.toString(),
+    );
+    const {
+      body: { items: services },
+    } = await this.getAllServices();
+    const {
+      body: { items: deployments },
+    } = await this.getAllDeployments();
+    const {
+      body: { items: persistentVolumeClaims },
+    } = await this.getAllPersistentVolumeClaims();
+    const {
+      body: { items: secrets },
+    } = await this.getAllSecrets();
+    for (const service of services) {
+      const deploymentId: string = service?.metadata?.labels?.deployment;
+      if (!storedDeploymentIds.includes(deploymentId)) {
+        await this.deleteService(deploymentId);
+      }
+    }
+    for (const deployment of deployments) {
+      const deploymentId: string = deployment?.metadata?.labels?.deployment;
+      if (!storedDeploymentIds.includes(deploymentId)) {
+        await this.deleteDeployment(deploymentId);
+      }
+    }
+    for (const persistentVolumeClaim of persistentVolumeClaims) {
+      const deploymentId: string =
+        persistentVolumeClaim?.metadata?.labels?.deployment;
+      if (!storedDeploymentIds.includes(deploymentId)) {
+        await this.deletePersistentVolumeClaim(deploymentId);
+      }
+    }
+    for (const secret of secrets) {
+      const deploymentId: string = secret?.metadata?.labels?.deployment;
+      if (!storedDeploymentIds.includes(deploymentId)) {
+        await this.deleteSecret(deploymentId);
+      }
+    }
+  }
+
+  @Cron(CronExpression.EVERY_5_MINUTES)
+  private async updateDeploymentsStatusJob() {
+    const {
+      body: { items: pods },
+    } = await this.getAllPods();
+    for (const pod of pods) {
+      // TODO: finish this
+      this;
+    }
   }
 }

@@ -75,13 +75,18 @@ export class DeploymentsService {
    * @param userId the users id
    */
   async findAll(
-    workspaceId: string,
+    workspaceId?: string,
     userId?: string,
   ): Promise<DeploymentDocument[]> {
     let deploymentsQuery: Query<
       DeploymentDocument[],
       DeploymentDocument
-    > = this.deploymentModel.find().where('workspace').equals(workspaceId);
+    > = this.deploymentModel.find();
+    if (workspaceId) {
+      deploymentsQuery = deploymentsQuery
+        .where('workspace')
+        .equals(workspaceId);
+    }
     if (userId) {
       deploymentsQuery = deploymentsQuery.where('user').equals(userId);
     }
