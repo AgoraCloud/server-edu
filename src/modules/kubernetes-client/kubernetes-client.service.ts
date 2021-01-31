@@ -1,9 +1,16 @@
+import {
+  PodConditionType,
+  PodConditionReason,
+  PodConditionStatus,
+} from './schemas/pod-condition.schema';
+import { PodPhase } from './schemas/pod-phase.schema';
 import { DeploymentsService } from './../deployments/deployments.service';
 import { UpdateDeploymentResourcesDto } from './../deployments/dto/update-deployment.dto';
 import { DeploymentPodMetricsNotAvailableException } from '../../exceptions/deployment-pod-metrics-not-available.exception';
 import { DeploymentMetricsDto } from './dto/deployment-metrics.dto';
 import { DeploymentPodNotAvailableException } from '../../exceptions/deployment-pod-not-available.exception';
 import {
+  DeploymentDocument,
   DeploymentProperties,
   DeploymentStatus,
 } from './../deployments/schemas/deployment.schema';
@@ -18,6 +25,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { Event } from '../../events/events.enum';
 import * as http from 'http';
 import * as request from 'request';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class KubernetesClientService {
@@ -43,6 +51,23 @@ export class KubernetesClientService {
   }
 
   /**
+   * Get all Kubernetes secrets
+   */
+  private getAllSecrets(): Promise<{
+    response: http.IncomingMessage;
+    body: k8s.V1SecretList;
+  }> {
+    return this.k8sCoreV1Api.listNamespacedSecret(
+      this.kubernetesConfig.namespace,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      'deployment',
+    );
+  }
+
+  /**
    * Create a Kubernetes secret
    * @param deploymentId the deployment id
    * @param sudoPassword the deployment container sudo password
@@ -60,12 +85,9 @@ export class KubernetesClientService {
         apiVersion: 'v1',
         kind: 'Secret',
         metadata: {
-          name: `${this.resourcePrefix}-${deploymentId}`,
+          name: this.generateResourceName(deploymentId),
           namespace: this.kubernetesConfig.namespace,
-          labels: {
-            app: this.resourcePrefix,
-            deployment: deploymentId,
-          },
+          labels: this.generateLabels(deploymentId),
         },
         data: {
           sudo_password: this.toBase64(sudoPassword),
@@ -85,8 +107,25 @@ export class KubernetesClientService {
     body: k8s.V1Status;
   }> {
     return this.k8sCoreV1Api.deleteNamespacedSecret(
-      `${this.resourcePrefix}-${deploymentId}`,
+      this.generateResourceName(deploymentId),
       this.kubernetesConfig.namespace,
+    );
+  }
+
+  /**
+   * Get all Kubernetes persistent volume claims
+   */
+  private getAllPersistentVolumeClaims(): Promise<{
+    response: http.IncomingMessage;
+    body: k8s.V1PersistentVolumeClaimList;
+  }> {
+    return this.k8sCoreV1Api.listNamespacedPersistentVolumeClaim(
+      this.kubernetesConfig.namespace,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      'deployment',
     );
   }
 
@@ -108,12 +147,9 @@ export class KubernetesClientService {
         apiVersion: 'v1',
         kind: 'PersistentVolumeClaim',
         metadata: {
-          name: `${this.resourcePrefix}-${deploymentId}`,
+          name: this.generateResourceName(deploymentId),
           namespace: this.kubernetesConfig.namespace,
-          labels: {
-            app: this.resourcePrefix,
-            deployment: deploymentId,
-          },
+          labels: this.generateLabels(deploymentId),
         },
         spec: {
           accessModes: ['ReadWriteOnce'],
@@ -139,8 +175,25 @@ export class KubernetesClientService {
     body: k8s.V1PersistentVolumeClaim;
   }> {
     return this.k8sCoreV1Api.deleteNamespacedPersistentVolumeClaim(
-      `${this.resourcePrefix}-${deploymentId}`,
+      this.generateResourceName(deploymentId),
       this.kubernetesConfig.namespace,
+    );
+  }
+
+  /**
+   * Get all Kubernetes services
+   */
+  private getAllServices(): Promise<{
+    response: http.IncomingMessage;
+    body: k8s.V1ServiceList;
+  }> {
+    return this.k8sCoreV1Api.listNamespacedService(
+      this.kubernetesConfig.namespace,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      'deployment',
     );
   }
 
@@ -154,18 +207,16 @@ export class KubernetesClientService {
     response: http.IncomingMessage;
     body: k8s.V1Service;
   }> {
+    const labels: { [key: string]: string } = this.generateLabels(deploymentId);
     return this.k8sCoreV1Api.createNamespacedService(
       this.kubernetesConfig.namespace,
       {
         apiVersion: 'v1',
         kind: 'Service',
         metadata: {
-          name: `${this.resourcePrefix}-${deploymentId}`,
+          name: this.generateResourceName(deploymentId),
           namespace: this.kubernetesConfig.namespace,
-          labels: {
-            app: this.resourcePrefix,
-            deployment: deploymentId,
-          },
+          labels,
         },
         spec: {
           type: 'ClusterIP',
@@ -175,10 +226,7 @@ export class KubernetesClientService {
               targetPort: new Number(8443),
             },
           ],
-          selector: {
-            app: this.resourcePrefix,
-            deployment: deploymentId,
-          },
+          selector: labels,
         },
       },
     );
@@ -195,8 +243,25 @@ export class KubernetesClientService {
     body: k8s.V1Status;
   }> {
     return this.k8sCoreV1Api.deleteNamespacedService(
-      `${this.resourcePrefix}-${deploymentId}`,
+      this.generateResourceName(deploymentId),
       this.kubernetesConfig.namespace,
+    );
+  }
+
+  /**
+   * Get all Kubernetes deployments
+   */
+  private getAllDeployments(): Promise<{
+    response: http.IncomingMessage;
+    body: k8s.V1DeploymentList;
+  }> {
+    return this.k8sAppsV1Api.listNamespacedDeployment(
+      this.kubernetesConfig.namespace,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      'deployment',
     );
   }
 
@@ -212,17 +277,19 @@ export class KubernetesClientService {
     response: http.IncomingMessage;
     body: k8s.V1Deployment;
   }> {
+    const labels: { [key: string]: string } = this.generateLabels(deploymentId);
+    const resourceName: string = this.generateResourceName(deploymentId);
     const volumes: k8s.V1Volume[] = [];
     const volumeMounts: k8s.V1VolumeMount[] = [];
     if (deploymentProperties.resources.storageCount) {
       volumes.push({
-        name: `${this.resourcePrefix}-${deploymentId}`,
+        name: resourceName,
         persistentVolumeClaim: {
-          claimName: `${this.resourcePrefix}-${deploymentId}`,
+          claimName: resourceName,
         },
       });
       volumeMounts.push({
-        name: `${this.resourcePrefix}-${deploymentId}`,
+        name: resourceName,
         mountPath: '/config',
       });
     }
@@ -233,12 +300,9 @@ export class KubernetesClientService {
         apiVersion: 'apps/v1',
         kind: 'Deployment',
         metadata: {
-          name: `${this.resourcePrefix}-${deploymentId}`,
+          name: resourceName,
           namespace: this.kubernetesConfig.namespace,
-          labels: {
-            app: this.resourcePrefix,
-            deployment: deploymentId,
-          },
+          labels,
         },
         spec: {
           replicas: 1,
@@ -246,23 +310,17 @@ export class KubernetesClientService {
             type: 'Recreate',
           },
           selector: {
-            matchLabels: {
-              app: this.resourcePrefix,
-              deployment: deploymentId,
-            },
+            matchLabels: labels,
           },
           template: {
             metadata: {
-              labels: {
-                app: this.resourcePrefix,
-                deployment: deploymentId,
-              },
+              labels,
             },
             spec: {
               volumes,
               containers: [
                 {
-                  name: `${this.resourcePrefix}-${deploymentId}`,
+                  name: resourceName,
                   image: `${deploymentProperties.image.name}:${deploymentProperties.image.tag}`,
                   imagePullPolicy: 'Always',
                   resources: {
@@ -276,7 +334,7 @@ export class KubernetesClientService {
                       name: 'SUDO_PASSWORD',
                       valueFrom: {
                         secretKeyRef: {
-                          name: `${this.resourcePrefix}-${deploymentId}`,
+                          name: resourceName,
                           key: 'sudo_password',
                         },
                       },
@@ -316,6 +374,7 @@ export class KubernetesClientService {
     response: http.IncomingMessage;
     body: k8s.V1Deployment;
   }> {
+    const resourceName: string = this.generateResourceName(deploymentId);
     const resources: k8s.V1ResourceRequirements = new k8s.V1ResourceRequirements();
     resources.limits = {};
     if (updatedResources.cpuCount) {
@@ -326,7 +385,7 @@ export class KubernetesClientService {
     }
 
     return this.k8sAppsV1Api.patchNamespacedDeployment(
-      `${this.resourcePrefix}-${deploymentId}`,
+      resourceName,
       this.kubernetesConfig.namespace,
       {
         spec: {
@@ -334,7 +393,7 @@ export class KubernetesClientService {
             spec: {
               containers: [
                 {
-                  name: `${this.resourcePrefix}-${deploymentId}`,
+                  name: resourceName,
                   resources,
                 },
               ],
@@ -365,8 +424,25 @@ export class KubernetesClientService {
     body: k8s.V1Status;
   }> {
     return this.k8sAppsV1Api.deleteNamespacedDeployment(
-      `${this.resourcePrefix}-${deploymentId}`,
+      this.generateResourceName(deploymentId),
       this.kubernetesConfig.namespace,
+    );
+  }
+
+  /**
+   * Get all Kubernetes pods
+   */
+  private async getAllPods(): Promise<{
+    response: http.IncomingMessage;
+    body: k8s.V1PodList;
+  }> {
+    return this.k8sCoreV1Api.listNamespacedPod(
+      this.kubernetesConfig.namespace,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      'deployment',
     );
   }
 
@@ -375,19 +451,19 @@ export class KubernetesClientService {
    * @param deploymentId the pods deployment id
    */
   private async getPod(deploymentId: string): Promise<k8s.V1Pod> {
-    // Get all the pods
-    const { body } = await this.k8sCoreV1Api.listNamespacedPod(
-      this.kubernetesConfig.namespace,
-    );
+    // Get all pods
+    const {
+      body: { items: pods },
+    } = await this.getAllPods();
     // Filter the pods by the deployment label
-    const podIndex: number = body.items.findIndex(
+    const podIndex: number = pods.findIndex(
       (p) =>
         p.metadata?.labels?.deployment === deploymentId && p.metadata?.name,
     );
     if (podIndex === -1) {
       throw new DeploymentPodNotAvailableException(deploymentId);
     }
-    return body.items[podIndex];
+    return pods[podIndex];
   }
 
   /**
@@ -436,9 +512,9 @@ export class KubernetesClientService {
     if (!Array.isArray(response?.containers)) {
       throw new DeploymentPodMetricsNotAvailableException(deploymentId);
     }
-    const containers = response.containers as any[];
-    const containerIndex = containers.findIndex(
-      (c) => c.name === `${this.resourcePrefix}-${deploymentId}`,
+    const containers: any[] = response.containers as any[];
+    const containerIndex: number = containers.findIndex(
+      (c) => c.name === this.generateResourceName(deploymentId),
     );
     if (containerIndex === -1) {
       throw new DeploymentPodMetricsNotAvailableException(deploymentId);
@@ -564,87 +640,139 @@ export class KubernetesClientService {
       `/api/v1/namespaces/${this.kubernetesConfig.namespace}/pods`,
       listFn,
     );
-    informer.on('add', (obj: k8s.V1Pod) => this.onPodAdded(obj));
-    informer.on('update', (obj: k8s.V1Pod) => this.onPodUpdated(obj));
-    informer.on('delete', (obj: k8s.V1Pod) => this.onPodDeleted(obj));
-    informer.on('error', (err: k8s.V1Pod) => this.onPodError(err));
+    informer.on('update', (pod: k8s.V1Pod) => this.updateDeploymentStatus(pod));
+    informer.on('error', (pod: k8s.V1Pod) => this.updateDeploymentStatus(pod));
     await informer.start();
   }
 
   /**
-   * TODO: see if needed
+   * Generates labels for all Kubernetes resources
+   * @param deploymentId the deployment id
    */
-  private onPodAdded(obj: k8s.V1Pod): void {
-    this.logger.debug(`POD Added: ${obj.metadata?.name}`);
+  private generateLabels(
+    deploymentId: string,
+  ): {
+    [key: string]: string;
+  } {
+    return { app: this.resourcePrefix, deployment: deploymentId };
   }
 
   /**
-   * Checks a pods conditions to make sure it is ready to accept
-   * connections. The deployments status is updated to RUNNING
-   * if all conditions are fulfilled.
-   * @param obj the Kubernetes pod
+   * Generates the name for any Kubernetes resource
+   * @param deploymentId the deployment id
    */
-  private onPodUpdated(obj: k8s.V1Pod): void {
-    const deploymentId: string = obj?.metadata?.labels?.deployment;
-    // Check pod conditions
-    const conditions: k8s.V1PodCondition[] = obj.status?.conditions;
-    const podScheduled: boolean = this.isConditionFulfilled(
-      conditions,
-      'PodScheduled',
-    );
-    const containersReady: boolean = this.isConditionFulfilled(
-      conditions,
-      'ContainersReady',
-    );
-    const initialized: boolean = this.isConditionFulfilled(
-      conditions,
-      'Initialized',
-    );
-    const ready: boolean = this.isConditionFulfilled(conditions, 'Ready');
+  private generateResourceName(deploymentId: string): string {
+    return `${this.resourcePrefix}-${deploymentId}`;
+  }
 
-    if (
-      deploymentId &&
-      podScheduled &&
-      containersReady &&
-      initialized &&
-      ready
-    ) {
-      this.deploymentsService.updateStatus(
-        deploymentId,
-        DeploymentStatus.Running,
-      );
+  /**
+   * Cron job that runs every hour and deletes any Kubernetes
+   * resource that was not deleted when a deployment was
+   * deleted
+   */
+  @Cron(CronExpression.EVERY_HOUR)
+  private async deleteRemainingKubernetesResourcesJob(): Promise<void> {
+    const storedDeployments: DeploymentDocument[] = await this.deploymentsService.findAll();
+    const storedDeploymentIds: string[] = storedDeployments.map((d) =>
+      d._id.toString(),
+    );
+    const {
+      body: { items: services },
+    } = await this.getAllServices();
+    const {
+      body: { items: deployments },
+    } = await this.getAllDeployments();
+    const {
+      body: { items: persistentVolumeClaims },
+    } = await this.getAllPersistentVolumeClaims();
+    const {
+      body: { items: secrets },
+    } = await this.getAllSecrets();
+    for (const service of services) {
+      const deploymentId: string = service?.metadata?.labels?.deployment;
+      if (!storedDeploymentIds.includes(deploymentId)) {
+        await this.deleteService(deploymentId);
+      }
+    }
+    for (const deployment of deployments) {
+      const deploymentId: string = deployment?.metadata?.labels?.deployment;
+      if (!storedDeploymentIds.includes(deploymentId)) {
+        await this.deleteDeployment(deploymentId);
+      }
+    }
+    for (const persistentVolumeClaim of persistentVolumeClaims) {
+      const deploymentId: string =
+        persistentVolumeClaim?.metadata?.labels?.deployment;
+      if (!storedDeploymentIds.includes(deploymentId)) {
+        await this.deletePersistentVolumeClaim(deploymentId);
+      }
+    }
+    for (const secret of secrets) {
+      const deploymentId: string = secret?.metadata?.labels?.deployment;
+      if (!storedDeploymentIds.includes(deploymentId)) {
+        await this.deleteSecret(deploymentId);
+      }
     }
   }
 
   /**
-   * TODO: see if needed
+   * Cron job that runs every minute and updates a deployments
+   * status based on the Kubernetes pod status
    */
-  private onPodDeleted(obj: k8s.V1Pod): void {
-    this.logger.debug(
-      `POD Deleted: ${obj.metadata?.name}, ${obj.metadata?.labels}`,
-    );
+  @Cron(CronExpression.EVERY_MINUTE)
+  private async updateDeploymentStatusesJob(): Promise<void> {
+    const {
+      body: { items: pods },
+    } = await this.getAllPods();
+    for (const pod of pods) {
+      await this.updateDeploymentStatus(pod);
+    }
   }
 
   /**
-   * TODO: see if needed
+   * Updates a deployments status based on the Kubernetes
+   * pod status
+   * @param pod the deployments Kubernetes pod
    */
-  private onPodError(err: k8s.V1Pod): void {
-    this.logger.error(`POD Error: ${err}`);
-  }
+  private async updateDeploymentStatus(pod: k8s.V1Pod): Promise<void> {
+    const deploymentId: string = pod.metadata?.labels?.deployment;
+    if (!deploymentId) return;
+    const podPhase: string = pod.status?.phase;
 
-  /**
-   * Checks whether a pod condition has been fulfilled
-   * @param conditions the pods conditions
-   * @param condition the condition to check
-   */
-  private isConditionFulfilled(
-    conditions: k8s.V1PodCondition[],
-    condition: 'PodScheduled' | 'ContainersReady' | 'Initialized' | 'Ready',
-  ): boolean {
-    return (
-      conditions?.findIndex(
-        (c) => c.type === condition && c.status === 'True',
-      ) !== -1
-    );
+    if (!podPhase || podPhase === PodPhase.Unknown) {
+      await this.deploymentsService.updateStatus(
+        deploymentId,
+        DeploymentStatus.Unknown,
+      );
+    } else if (podPhase === PodPhase.Running) {
+      await this.deploymentsService.updateStatus(
+        deploymentId,
+        DeploymentStatus.Running,
+      );
+    } else if (podPhase === PodPhase.Pending) {
+      /**
+       * Check if the pod can not be scheduled by Kubernetes due
+       * to insufficient cluster resources
+       */
+      const conditions: k8s.V1PodCondition[] = pod.status?.conditions;
+      const podScheduledConditionIndex: number = conditions?.findIndex(
+        (c) =>
+          c.type === PodConditionType.PodScheduled &&
+          c.status === PodConditionStatus.False &&
+          c.reason === PodConditionReason.Unschedulable,
+      );
+      if (podScheduledConditionIndex !== -1) {
+        await this.deploymentsService.updateStatus(
+          deploymentId,
+          DeploymentStatus.Failed,
+          conditions[podScheduledConditionIndex].message,
+        );
+      }
+    } else if (podPhase === PodPhase.Failed) {
+      await this.deploymentsService.updateStatus(
+        deploymentId,
+        DeploymentStatus.Failed,
+      );
+    }
   }
 }

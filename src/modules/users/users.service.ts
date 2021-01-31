@@ -1,7 +1,7 @@
 import { UserDeletedEvent } from './../../events/user-deleted.event';
 import { UserCreatedEvent } from '../../events/user-created.event';
 import { Event } from './../../events/events.enum';
-import { addDays } from '../../utils/date';
+import { addDays, removeDays } from '../../utils/date';
 import { TokenType, TokenDocument } from '../tokens/schemas/token.schema';
 import { TokensService } from './../tokens/tokens.service';
 import {
@@ -20,6 +20,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import * as bcrypt from 'bcryptjs';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class UsersService implements OnModuleInit {
@@ -198,5 +199,25 @@ export class UsersService implements OnModuleInit {
       user,
       expiresAt: addDays(new Date()),
     });
+  }
+
+  /**
+   * Cron job that runs every hour and deletes stale
+   * users (users that have not verified their accounts
+   * in 24 hours)
+   */
+  @Cron(CronExpression.EVERY_HOUR)
+  private async deleteStaleUsersJob(): Promise<void> {
+    const yesterday: Date = removeDays(new Date());
+    const staleUsers: UserDocument[] = await this.userModel
+      .find()
+      .where('isVerified')
+      .equals(false)
+      .where('createdAt')
+      .lte(yesterday.getTime())
+      .exec();
+    for (const staleUser of staleUsers) {
+      await this.remove(staleUser._id);
+    }
   }
 }

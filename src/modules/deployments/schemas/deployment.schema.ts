@@ -55,7 +55,7 @@ export class DeploymentProperties {
 
 export type DeploymentDocument = Deployment & Document;
 
-@Schema({ collection: 'deployments' })
+@Schema({ collection: 'deployments', timestamps: true })
 export class Deployment {
   @Prop({ required: true, minlength: 4 })
   name: string;
@@ -73,6 +73,9 @@ export class Deployment {
     default: DeploymentStatus.Pending,
   })
   status: string;
+
+  @Prop()
+  failureReason?: string;
 
   @Prop({ required: true })
   properties: DeploymentProperties;

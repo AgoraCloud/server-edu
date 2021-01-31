@@ -5,7 +5,7 @@ import * as mongoose from 'mongoose';
 
 export type WorkspaceDocument = Workspace & Document;
 
-@Schema({ collection: 'workspaces' })
+@Schema({ collection: 'workspaces', timestamps: true })
 export class Workspace {
   @Prop({ required: true, minlength: 4 })
   name: string;
