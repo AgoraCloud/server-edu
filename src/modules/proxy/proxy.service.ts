@@ -1,6 +1,11 @@
 import { HttpAdapterHost } from '@nestjs/core';
 import { Request, Response } from 'express';
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  OnModuleInit,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import * as HttpProxy from 'http-proxy';
 import { Server } from 'http';
 import { Socket } from 'net';
@@ -26,11 +31,10 @@ export class ProxyService implements OnModuleInit {
     this.httpProxy.on(
       'error',
       (err: Error, req: Request, res: Response, target: any) => {
-        res.status(500).json({
-          statusCode: 500,
-          message: `Error proxying to ${target?.href}`,
-          error: 'Internal Server Error',
-        });
+        const exception: InternalServerErrorException = new InternalServerErrorException(
+          `Error proxying ${target.host}`,
+        );
+        res.status(exception.getStatus()).json(exception.getResponse());
       },
     );
   }
