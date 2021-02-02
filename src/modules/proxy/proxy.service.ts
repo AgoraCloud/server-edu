@@ -14,9 +14,33 @@ export class ProxyService implements OnModuleInit {
     private readonly httpAdapterHost: HttpAdapterHost,
   ) {}
 
-  onModuleInit() {
+  onModuleInit(): void {
+    this.onProxyError();
+    this.proxyWebsockets();
+  }
+
+  /**
+   * Handle proxy errors
+   */
+  private onProxyError(): void {
+    this.httpProxy.on(
+      'error',
+      (err: Error, req: Request, res: Response, target: any) => {
+        res.status(500).json({
+          statusCode: 500,
+          message: `Error proxying to ${target?.href}`,
+          error: 'Internal Server Error',
+        });
+      },
+    );
+  }
+
+  /**
+   * Proxy all deployment websockets
+   */
+  private proxyWebsockets(): void {
     const httpServer: Server = this.httpAdapterHost.httpAdapter.getHttpServer();
-    httpServer.on('upgrade', (req: Request, socket: Socket, head) => {
+    httpServer.on('upgrade', (req: Request, socket: Socket, head: any) => {
       const deploymentId: string = req.url.split('/')[2];
       req.url = this.removeProxyUrlPrefix(req.url, deploymentId);
       this.httpProxy.ws(req, socket, head, this.makeProxyOptions(deploymentId));
