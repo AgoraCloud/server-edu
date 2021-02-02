@@ -1,4 +1,9 @@
-import { ExceptionFilter, Catch, ArgumentsHost } from '@nestjs/common';
+import {
+  ExceptionFilter,
+  Catch,
+  ArgumentsHost,
+  BadRequestException,
+} from '@nestjs/common';
 import { HttpArgumentsHost } from '@nestjs/common/interfaces';
 import { Request, Response } from 'express';
 import { MongoError } from 'mongodb';
@@ -15,11 +20,8 @@ export class MongoExceptionFilter implements ExceptionFilter {
      * @param message the error message
      */
     const responseMessage = (message: string): void => {
-      response.status(400).json({
-        statusCode: 400,
-        message,
-        error: 'Bad Request',
-      });
+      const exception: BadRequestException = new BadRequestException(message);
+      response.status(exception.getStatus()).json(exception.getResponse());
     };
 
     switch (exception.code) {
