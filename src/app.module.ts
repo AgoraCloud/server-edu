@@ -48,6 +48,7 @@ import { HealthModule } from './modules/health/health.module';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         uri: configService.get<string>('databaseUri'),
+        useCreateIndex: true,
       }),
     }),
     MailerModule.forRootAsync({
