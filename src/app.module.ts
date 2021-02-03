@@ -15,6 +15,7 @@ import { KubernetesClientModule } from './modules/kubernetes-client/kubernetes-c
 import { ProxyModule } from './modules/proxy/proxy.module';
 import * as Joi from '@hapi/joi';
 import { ScheduleModule } from '@nestjs/schedule';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
@@ -84,6 +85,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     DeploymentsModule,
     KubernetesClientModule,
     ProxyModule,
+    HealthModule,
   ],
 })
 export class AppModule {}
