@@ -75,18 +75,13 @@ export class DeploymentsService {
    * @param userId the users id
    */
   async findAll(
-    workspaceId?: string,
+    workspaceId: string,
     userId?: string,
   ): Promise<DeploymentDocument[]> {
     let deploymentsQuery: Query<
       DeploymentDocument[],
       DeploymentDocument
-    > = this.deploymentModel.find();
-    if (workspaceId) {
-      deploymentsQuery = deploymentsQuery
-        .where('workspace')
-        .equals(workspaceId);
-    }
+    > = this.deploymentModel.find().where('workspace').equals(workspaceId);
     if (userId) {
       deploymentsQuery = deploymentsQuery.where('user').equals(userId);
     }
@@ -96,24 +91,22 @@ export class DeploymentsService {
 
   /**
    * Find a deployment
-   * @param userId the users id
    * @param deploymentId the deployment id
+   * @param userId the users id
    * @param workspaceId the workspace id
    */
   async findOne(
-    userId: string,
     deploymentId: string,
+    userId?: string,
     workspaceId?: string,
   ): Promise<DeploymentDocument> {
     let deploymentQuery: Query<
       DeploymentDocument,
       DeploymentDocument
-    > = this.deploymentModel
-      .findOne()
-      .where('_id')
-      .equals(deploymentId)
-      .where('user')
-      .equals(userId);
+    > = this.deploymentModel.findOne().where('_id').equals(deploymentId);
+    if (userId) {
+      deploymentQuery = deploymentQuery.where('user').equals(userId);
+    }
     if (workspaceId) {
       deploymentQuery = deploymentQuery.where('workspace').equals(workspaceId);
     }
@@ -136,8 +129,8 @@ export class DeploymentsService {
     updateDeploymentDto: UpdateDeploymentDto,
   ): Promise<DeploymentDocument> {
     const deployment: DeploymentDocument = await this.findOne(
-      userId,
       deploymentId,
+      userId,
       workspaceId,
     );
     if (deployment.status !== DeploymentStatus.Running) {
@@ -172,7 +165,11 @@ export class DeploymentsService {
     ) {
       this.eventEmitter.emit(
         Event.DeploymentUpdated,
-        new DeploymentUpdatedEvent(deploymentId, updateDeploymentDto),
+        new DeploymentUpdatedEvent(
+          workspaceId,
+          deploymentId,
+          updateDeploymentDto,
+        ),
       );
     }
     return deployment;
@@ -225,8 +222,13 @@ export class DeploymentsService {
    * Delete all deployments for the given workspace
    * @param workspaceId the workspace id
    * @param userId the users id
+   * @param emitEvents controls whether the deployment.deleted event should be fired
    */
-  private async removeAll(workspaceId: string, userId?: string): Promise<void> {
+  private async removeAll(
+    workspaceId: string,
+    userId?: string,
+    emitEvents = false,
+  ): Promise<void> {
     const deployments: DeploymentDocument[] = await this.findAll(
       workspaceId,
       userId,
@@ -237,12 +239,14 @@ export class DeploymentsService {
       .where('_id')
       .in(deploymentIds)
       .exec();
-    deployments.forEach((deployment: DeploymentDocument) => {
-      this.eventEmitter.emit(
-        Event.DeploymentDeleted,
-        new DeploymentDeletedEvent(deployment),
-      );
-    });
+    if (emitEvents) {
+      deployments.forEach((deployment: DeploymentDocument) => {
+        this.eventEmitter.emit(
+          Event.DeploymentDeleted,
+          new DeploymentDeletedEvent(deployment),
+        );
+      });
+    }
   }
 
   /**
@@ -264,6 +268,6 @@ export class DeploymentsService {
   private async handleWorkspaceUserRemoved(
     payload: WorkspaceUserRemovedEvent,
   ): Promise<void> {
-    await this.removeAll(payload.workspaceId, payload.userId);
+    await this.removeAll(payload.workspaceId, payload.userId, true);
   }
 }

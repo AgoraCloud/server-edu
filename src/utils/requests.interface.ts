@@ -19,9 +19,15 @@ interface RequestWithWorkspaceAndUser extends RequestWithUser {
   workspace: WorkspaceDocument;
 }
 
+interface RequestWithWorkspaceDeploymentAndUser
+  extends RequestWithWorkspaceAndUser {
+  deployment: DeploymentDocument;
+}
+
 export {
   RequestWithUser,
   RequestWithWorkspace,
   RequestWithDeployment,
   RequestWithWorkspaceAndUser,
+  RequestWithWorkspaceDeploymentAndUser,
 };

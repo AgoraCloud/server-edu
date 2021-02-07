@@ -1,3 +1,4 @@
+import { WorkspaceCreatedEvent } from './../../events/workspace-created.event';
 import { WorkspaceUserRemovedEvent } from './../../events/workspace-user-removed.event';
 import { UserDeletedEvent } from './../../events/user-deleted.event';
 import { WorkspaceDeletedEvent } from '../../events/workspace-deleted.event';
@@ -9,7 +10,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateWorkspaceDto } from './dto/create-workspace.dto';
 import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
 import { UserDocument } from '../users/schemas/user.schema';
-import { Model } from 'mongoose';
+import { Model, Query } from 'mongoose';
 import { Event } from '../../events/events.enum';
 
 @Injectable()
@@ -25,23 +26,35 @@ export class WorkspacesService {
    * @param user the user
    * @param createWorkspaceDto the workspace to create
    */
-  create(
+  async create(
     user: UserDocument,
     createWorkspaceDto: CreateWorkspaceDto,
   ): Promise<WorkspaceDocument> {
-    const createdWorkspace: WorkspaceDocument = new this.workspaceModel(
-      createWorkspaceDto,
+    const workspace: Workspace = new Workspace(createWorkspaceDto);
+    workspace.users = [user._id];
+    const createdWorkspace: WorkspaceDocument = await this.workspaceModel.create(
+      workspace,
     );
-    createdWorkspace.users = [user._id];
-    return createdWorkspace.save();
+    this.eventEmitter.emit(
+      Event.WorkspaceCreated,
+      new WorkspaceCreatedEvent(createdWorkspace),
+    );
+    return createdWorkspace;
   }
 
   /**
    * Find all workspaces
    * @param userId the users id
    */
-  async findAll(userId: string): Promise<WorkspaceDocument[]> {
-    return this.workspaceModel.find().where('users').in([userId]).exec();
+  async findAll(userId?: string): Promise<WorkspaceDocument[]> {
+    let workspacesQuery: Query<
+      WorkspaceDocument[],
+      WorkspaceDocument
+    > = this.workspaceModel.find();
+    if (userId) {
+      workspacesQuery = workspacesQuery.where('users').in([userId]);
+    }
+    return workspacesQuery.exec();
   }
 
   /**

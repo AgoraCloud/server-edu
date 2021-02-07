@@ -1,16 +1,14 @@
 {{- $chartName := include "helm-chart.name" . -}}
-{{- $releaseNamespace := .Release.Namespace -}}
 apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
+kind: ClusterRoleBinding
 metadata:
   name: {{ $chartName }}
-  namespace: {{ $releaseNamespace }}
   labels: {{- include "helm-chart.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: Role
+  kind: ClusterRole
   name: {{ $chartName }}
 subjects:
   - kind: ServiceAccount
     name: {{ $chartName }}
-    namespace: {{ $releaseNamespace }}
+    namespace: {{ .Release.Namespace }}

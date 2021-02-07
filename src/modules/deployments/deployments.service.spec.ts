@@ -150,7 +150,7 @@ describe('DeploymentsService', () => {
         deploymentId,
       ).message;
       try {
-        await service.findOne(user._id, deploymentId, workspace._id);
+        await service.findOne(deploymentId, user._id, workspace._id);
         fail('It should throw an error');
       } catch (err) {
         expect(err.message).toBe(expectedErrorMessage);
@@ -159,8 +159,8 @@ describe('DeploymentsService', () => {
 
     it('should find the deployment in the given workspace for the given user', async () => {
       const retrievedDeployment: DeploymentDocument = await service.findOne(
-        user._id,
         deploymentId,
+        user._id,
         workspace._id,
       );
       expect(retrievedDeployment._id).toEqual(deploymentId);
@@ -170,8 +170,8 @@ describe('DeploymentsService', () => {
 
     it('should find the deployment for the given user', async () => {
       const retrievedDeployment: DeploymentDocument = await service.findOne(
-        user._id,
         deploymentId,
+        user._id,
       );
       expect(retrievedDeployment._id).toEqual(deploymentId);
       expect(retrievedDeployment.user._id).toEqual(user._id);
@@ -273,8 +273,8 @@ describe('DeploymentsService', () => {
       const updatedStatus: DeploymentStatus = DeploymentStatus.Deleting;
       await service.updateStatus(deploymentId, updatedStatus);
       const retrievedDeployment = await service.findOne(
-        user._id,
         deploymentId,
+        user._id,
         workspace._id,
       );
       expect(retrievedDeployment.status).toBe(updatedStatus);

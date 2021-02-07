@@ -58,7 +58,7 @@ export class DeploymentsController {
     @Workspace('_id') workspaceId: string,
     @Param() { id }: FindOneParams,
   ): Promise<DeploymentDocument> {
-    return this.deploymentsService.findOne(userId, id, workspaceId);
+    return this.deploymentsService.findOne(id, userId, workspaceId);
   }
 
   @Put(':id')

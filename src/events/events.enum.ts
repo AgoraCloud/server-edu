@@ -5,6 +5,7 @@ export enum Event {
   ForgotPassword = 'user.forgotPassword',
   PasswordChanged = 'user.passwordChanged',
   // Workspace Events
+  WorkspaceCreated = 'workspace.created',
   WorkspaceUserRemoved = 'workspace.user.removed',
   WorkspaceDeleted = 'workspace.deleted',
   // Deployment Events

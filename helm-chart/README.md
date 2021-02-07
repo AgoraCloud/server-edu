@@ -22,12 +22,8 @@ cd server/helm-chart
 nano values.yaml
 ```
 
-4. Create the AgoraCloud namespace
-```bash
-kubectl create namespace agoracloud
-```
-
-5. Install the AgoraCloud Helm chart
+4. Install the AgoraCloud Helm chart
+> The Helm chart will create the namespace
 ```bash
 helm install agoracloud . --namespace agoracloud
 ```
