@@ -1,16 +1,17 @@
+import { DeploymentDocument } from './../deployments/schemas/deployment.schema';
 import { ProxyService } from './proxy.service';
 import { DeploymentInterceptor } from './../../interceptors/deployment.interceptor';
 import { JwtAuthenticationGuard } from '../authentication/guards/jwt-authentication.guard';
 import {
   All,
   Controller,
-  Param,
   Req,
   Res,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { Deployment } from 'src/decorators/deployment.decorator';
 
 @Controller('proxy/:deploymentId')
 @UseGuards(JwtAuthenticationGuard)
@@ -20,10 +21,10 @@ export class ProxyController {
 
   @All()
   proxy(
-    @Param('deploymentId') deploymentId: string,
+    @Deployment() deployment: DeploymentDocument,
     @Req() req: Request,
     @Res() res: Response,
   ): void {
-    this.proxyService.proxy(deploymentId, req, res);
+    this.proxyService.proxy(deployment, req, res);
   }
 }

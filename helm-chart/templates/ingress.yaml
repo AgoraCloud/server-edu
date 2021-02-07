@@ -9,7 +9,7 @@ apiVersion: extensions/v1beta1
 {{- end }}
 kind: Ingress
 metadata:
-  name: {{ include "helm-chart.name" . }}
+  name: {{ $chartName }}
   labels:
     {{- include "helm-chart.labels" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}

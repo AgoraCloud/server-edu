@@ -105,6 +105,11 @@ spec:
                 configMapKeyRef:
                   name: {{ $chartName }}
                   key: kubernetes_storage_class
+            - name: KUBERNETES_SERVICE_ACCOUNT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ $chartName }}
+                  key: kubernetes_service_account
           resources:
             {{- toYaml .Values.server.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

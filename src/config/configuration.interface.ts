@@ -1,6 +1,7 @@
 interface KubernetesConfig {
   namespace: string;
   storageClass: string;
+  serviceAccount: string;
 }
 
 interface JwtConfig {

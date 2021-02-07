@@ -25,5 +25,6 @@ export default () => ({
   kubernetes: {
     namespace: process.env.KUBERNETES_NAMESPACE,
     storageClass: process.env.KUBERNETES_STORAGE_CLASS,
+    serviceAccount: process.env.KUBERNETES_SERVICE_ACCOUNT,
   },
 });

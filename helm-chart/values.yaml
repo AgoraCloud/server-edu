@@ -38,9 +38,6 @@ config:
   kubernetes:
     storageClass: 'default'
 
-nameOverride: ''
-fullnameOverride: ''
-
 ui:
   replicaCount: 1
   service:

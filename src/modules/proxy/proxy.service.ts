@@ -1,3 +1,7 @@
+import { DeploymentsService } from './../deployments/deployments.service';
+import { InvalidMongoIdException } from './../../exceptions/invalid-mongo-id.exception';
+import { isMongoId } from 'class-validator';
+import { DeploymentDocument } from './../deployments/schemas/deployment.schema';
 import { HttpAdapterHost } from '@nestjs/core';
 import { Request, Response } from 'express';
 import {
@@ -12,11 +16,12 @@ import { Socket } from 'net';
 
 @Injectable()
 export class ProxyService implements OnModuleInit {
-  private readonly servicePrefix: string = 'agoracloud';
+  private readonly resourcePrefix: string = 'agoracloud';
 
   constructor(
     @Inject(HttpProxy) private readonly httpProxy: HttpProxy,
     private readonly httpAdapterHost: HttpAdapterHost,
+    private readonly deploymentsService: DeploymentsService,
   ) {}
 
   onModuleInit(): void {
@@ -44,31 +49,54 @@ export class ProxyService implements OnModuleInit {
    */
   private proxyWebsockets(): void {
     const httpServer: Server = this.httpAdapterHost.httpAdapter.getHttpServer();
-    httpServer.on('upgrade', (req: Request, socket: Socket, head: any) => {
-      const deploymentId: string = req.url.split('/')[2];
-      req.url = this.removeProxyUrlPrefix(req.url, deploymentId);
-      this.httpProxy.ws(req, socket, head, this.makeProxyOptions(deploymentId));
-    });
+    httpServer.on(
+      'upgrade',
+      async (req: Request, socket: Socket, head: any) => {
+        const deploymentId: string = req.url.split('/')[2];
+        if (!isMongoId(deploymentId)) {
+          throw new InvalidMongoIdException('deploymentId');
+        }
+        const deployment: DeploymentDocument = await this.deploymentsService.findOne(
+          deploymentId,
+        );
+        req.url = this.removeProxyUrlPrefix(req.url, deploymentId);
+        this.httpProxy.ws(
+          req,
+          socket,
+          head,
+          this.makeProxyOptions(deployment.workspace._id, deploymentId),
+        );
+      },
+    );
   }
 
   /**
    * Proxy all deployment requests
-   * @param deploymentId the deployment id
+   * @param deployment the deployment
    * @param req the request
    * @param res the response
    */
-  proxy(deploymentId: string, req: Request, res: Response): void {
+  proxy(deployment: DeploymentDocument, req: Request, res: Response): void {
+    const deploymentId: string = deployment._id;
     req.url = this.removeProxyUrlPrefix(req.url, deploymentId);
-    this.httpProxy.web(req, res, this.makeProxyOptions(deploymentId));
+    this.httpProxy.web(
+      req,
+      res,
+      this.makeProxyOptions(deployment.workspace._id, deploymentId),
+    );
   }
 
   /**
    * Dynamically creates configuration options for the proxy
+   * @param workspaceId the deployments workspace id
    * @param deploymentId the deployment id
    */
-  private makeProxyOptions(deploymentId: string): HttpProxy.ServerOptions {
+  private makeProxyOptions(
+    workspaceId: string,
+    deploymentId: string,
+  ): HttpProxy.ServerOptions {
     return {
-      target: `http://${this.servicePrefix}-${deploymentId}`,
+      target: `http://${this.resourcePrefix}-${deploymentId}.${this.resourcePrefix}-${workspaceId}.svc.cluster.local`,
       changeOrigin: true,
     };
   }
