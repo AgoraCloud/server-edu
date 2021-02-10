@@ -59,7 +59,7 @@ export class MailService {
       template: 'forgot-password',
       context: {
         user: payload.user,
-        link: `${this.baseDomain}/forgot-password?token=${payload.token}`,
+        link: `${this.baseDomain}/change-password?token=${payload.token}`,
       },
     });
   }
