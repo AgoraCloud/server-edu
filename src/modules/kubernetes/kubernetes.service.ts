@@ -40,7 +40,7 @@ export class KubernetesService {
   private readonly k8sRbacAuthorizationV1Api: k8s.RbacAuthorizationV1Api;
   private readonly kubernetesConfig: KubernetesConfig;
   private readonly resourcePrefix: string = 'agoracloud';
-  private readonly logger = new Logger(KubernetesService.name);
+  private readonly logger: Logger = new Logger(KubernetesService.name);
 
   constructor(
     @Inject(k8s.KubeConfig) private readonly kc: k8s.KubeConfig,

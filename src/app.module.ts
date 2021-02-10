@@ -1,5 +1,6 @@
+import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { LogLevel } from 'src/config/configuration.interface';
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from './modules/users/users.module';
@@ -97,4 +98,8 @@ import { commaDelimitedLogLevel } from './utils/regex.patterns';
     LoggerModule,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(LoggerMiddleware).forRoutes('api');
+  }
+}
