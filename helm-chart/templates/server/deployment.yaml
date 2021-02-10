@@ -40,6 +40,11 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 10
           env:
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ $chartName }}
+                  key: log_level
             - name: DOMAIN
               valueFrom:
                 configMapKeyRef:

@@ -4,6 +4,7 @@ kind: ConfigMap
 metadata:
   name: {{ $chartName }}
 data:
+  log_level: {{ .Values.config.logLevel }}
   domain: {{ .Values.config.domain | quote }}
   admin_email: {{ .Values.config.admin.email | quote }}
   smtp_host: {{ .Values.config.smtp.host | quote }}

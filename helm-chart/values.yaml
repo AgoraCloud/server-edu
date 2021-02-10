@@ -10,6 +10,8 @@ image:
       tag: latest
 
 config:
+  # Server log level, comma delimited string, defaults to 'warn,error'
+  logLevel: 'warn,error'
   # The domain AgoraCloud will be accessed from, ex: https://agoracloud.mydomain.com
   domain:
   # MongoDB Connection URI, see https://docs.mongodb.com/manual/reference/connection-string/
