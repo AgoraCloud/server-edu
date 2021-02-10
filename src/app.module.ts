@@ -1,3 +1,4 @@
+import { LogLevel } from 'src/config/configuration.interface';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -16,6 +17,8 @@ import { ProxyModule } from './modules/proxy/proxy.module';
 import * as Joi from '@hapi/joi';
 import { ScheduleModule } from '@nestjs/schedule';
 import { HealthModule } from './modules/health/health.module';
+import { LoggerModule } from './modules/logger/logger.module';
+import { commaDelimitedLogLevel } from './utils/regex.patterns';
 
 @Module({
   imports: [
@@ -28,7 +31,10 @@ import { HealthModule } from './modules/health/health.module';
           .valid('development', 'production')
           .default('development'),
         PORT: Joi.number().default(3000),
-        DOMAIN: Joi.string().required(),
+        LOG_LEVEL: Joi.string()
+          .pattern(new RegExp(commaDelimitedLogLevel))
+          .default(`${LogLevel.Warn},${LogLevel.Error}`),
+        DOMAIN: Joi.string().domain().required(),
         DATABASE_URI: Joi.string().required(),
         ADMIN_EMAIL: Joi.string().email().required(),
         ADMIN_PASSWORD: Joi.string().min(8).required(),
@@ -88,6 +94,7 @@ import { HealthModule } from './modules/health/health.module';
     KubernetesModule,
     ProxyModule,
     HealthModule,
+    LoggerModule,
   ],
 })
 export class AppModule {}
