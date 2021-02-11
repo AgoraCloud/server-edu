@@ -1,3 +1,5 @@
+import { DeploymentDto } from './dto/deployment.dto';
+import { TransformInterceptor } from './../../interceptors/transform.interceptor';
 import { FindOneParams } from './../../utils/find-one-params';
 import { JwtAuthenticationGuard } from '../authentication/guards/jwt-authentication.guard';
 import { WorkspaceInterceptor } from './../../interceptors/workspace.interceptor';
@@ -25,8 +27,8 @@ import {
 } from './schemas/deployment.schema';
 
 @UseGuards(JwtAuthenticationGuard)
-@UseInterceptors(WorkspaceInterceptor)
 @Controller('api/workspaces/:workspaceId/deployments')
+@UseInterceptors(WorkspaceInterceptor, new TransformInterceptor(DeploymentDto))
 export class DeploymentsController {
   constructor(private readonly deploymentsService: DeploymentsService) {}
 

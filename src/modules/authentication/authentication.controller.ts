@@ -1,9 +1,11 @@
+import { UserDto } from './../users/dto/user.dto';
+import { TransformInterceptor } from './../../interceptors/transform.interceptor';
 import { MongoExceptionFilter } from './../../filters/mongo-exception.filter';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { VerifyAccountDto } from './dto/verify-account.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { accessTokenConstants, refreshTokenConstants } from './constants';
-import { User as UserModel, UserDocument } from '../users/schemas/user.schema';
+import { UserDocument } from '../users/schemas/user.schema';
 import { LocalAuthenticationGuard } from './guards/local-authentication.guard';
 import { JwtAuthenticationGuard } from './guards/jwt-authentication.guard';
 import { CreateUserDto } from '../users/dto/create-user.dto';
@@ -12,12 +14,13 @@ import {
   Post,
   Body,
   UseGuards,
-  Res,
   HttpCode,
   UseFilters,
+  UseInterceptors,
+  Request,
 } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
-import { Response } from 'express';
+import { Request as Req } from 'express';
 import { User } from '../../decorators/user.decorator';
 import JwtRefreshGuard from './guards/jwt-refresh-authentication.guard';
 
@@ -33,63 +36,62 @@ export class AuthenticationController {
 
   @Post('login')
   @UseGuards(LocalAuthenticationGuard)
+  @UseInterceptors(new TransformInterceptor(UserDto))
   async logIn(
-    @User() user: UserModel,
-    @Res() response: Response,
-  ): Promise<Response<UserDocument>> {
+    @Request() request: Req,
+    @User() user: UserDocument,
+  ): Promise<UserDocument> {
     const accessToken: string = this.authenticationService.generateAccessToken(
       user.email,
     );
     const refreshToken: string = await this.authenticationService.generateRefreshToken(
       user.email,
     );
-    response.cookie(
+    request.res.cookie(
       accessTokenConstants.name,
       accessToken,
       accessTokenConstants.cookieOptions,
     );
-    response.cookie(
+    request.res.cookie(
       refreshTokenConstants.name,
       refreshToken,
       refreshTokenConstants.cookieOptions,
     );
-    return response.send(user);
+    return user;
   }
 
   @HttpCode(200)
   @Post('logout')
   @UseGuards(JwtAuthenticationGuard)
   async logOut(
-    @User() user: UserModel,
-    @Res() response: Response,
-  ): Promise<Response<void>> {
+    @Request() request: Req,
+    @User() user: UserDocument,
+  ): Promise<void> {
     await this.authenticationService.clearRefreshToken(user.email);
-    response.clearCookie(
+    request.res.clearCookie(
       accessTokenConstants.name,
       accessTokenConstants.cookieOptions,
     );
-    response.clearCookie(
+    request.res.clearCookie(
       refreshTokenConstants.name,
       refreshTokenConstants.cookieOptions,
     );
-    return response.send();
   }
 
   @Post('refresh')
   @UseGuards(JwtRefreshGuard)
   async refreshToken(
-    @User() user: UserModel,
-    @Res() response: Response,
-  ): Promise<Response<void>> {
+    @Request() request: Req,
+    @User() user: UserDocument,
+  ): Promise<void> {
     const refreshToken: string = await this.authenticationService.generateRefreshToken(
       user.email,
     );
-    response.cookie(
+    request.res.cookie(
       refreshTokenConstants.name,
       refreshToken,
       refreshTokenConstants.cookieOptions,
     );
-    return response.send();
   }
 
   @HttpCode(200)
