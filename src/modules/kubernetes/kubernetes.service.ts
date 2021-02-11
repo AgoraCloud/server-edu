@@ -246,6 +246,24 @@ export class KubernetesService {
   }
 
   /**
+   * Get a Kubernetes resource quota
+   * @param namespace the Kubernetes namespace
+   * @param workspaceId the workspace id
+   */
+  private getResourceQuota(
+    namespace: string,
+    workspaceId: string,
+  ): Promise<{
+    response: http.IncomingMessage;
+    body: k8s.V1ResourceQuota;
+  }> {
+    return this.k8sCoreV1Api.readNamespacedResourceQuota(
+      this.generateResourceName(workspaceId),
+      namespace,
+    );
+  }
+
+  /**
    * Create a Kubernetes resource quota
    * @param namespace the Kubernetes namespace
    * @param workspaceId the workspace id
@@ -902,20 +920,36 @@ export class KubernetesService {
     const namespace: string = this.generateResourceName(workspaceId);
     const workspaceResources: WorkspaceResources =
       payload.workspace.properties?.resources;
+    // Check if a resource quota for the workspaces namespace exists
+    let resourceQuotaExists = true;
+    try {
+      await this.getResourceQuota(namespace, workspaceId);
+    } catch (err) {
+      // The resource quota does not exist, set the flag
+      resourceQuotaExists = false;
+    }
     try {
       if (!workspaceResources) return;
       if (
-        !workspaceResources.cpuCount &&
-        !workspaceResources.memoryCount &&
-        !workspaceResources.storageCount
+        workspaceResources.cpuCount ||
+        workspaceResources.memoryCount ||
+        workspaceResources.storageCount
       ) {
+        if (resourceQuotaExists) {
+          await this.updateResourceQuota(
+            namespace,
+            workspaceId,
+            workspaceResources,
+          );
+        } else {
+          await this.createResourceQuota(
+            namespace,
+            workspaceId,
+            workspaceResources,
+          );
+        }
+      } else if (resourceQuotaExists) {
         await this.deleteResourceQuota(namespace, workspaceId);
-      } else {
-        await this.updateResourceQuota(
-          namespace,
-          workspaceId,
-          workspaceResources,
-        );
       }
     } catch (error) {
       // TODO: handle errors
