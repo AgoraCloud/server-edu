@@ -32,24 +32,24 @@ npm i
 
 ```bash
 # Development
-$ npm run start
+npm run start
 
 # Watch mode
-$ npm run start:dev
+npm run start:dev
 
 # Production mode
-$ npm run start:prod
+npm run start:prod
 ```
 
 ### Testing
 
 ```bash
 # Unit tests
-$ npm run test
+npm run test
 
 # E2E tests
-$ npm run test:e2e
+npm run test:e2e
 
 # Test coverage
-$ npm run test:cov
+npm run test:cov
 ```
