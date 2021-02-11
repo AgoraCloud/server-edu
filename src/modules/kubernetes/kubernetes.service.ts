@@ -1011,15 +1011,16 @@ export class KubernetesService {
         payload.deployment.properties,
       );
     } catch (error) {
-      // TODO: add a message to the deployment to indicate failure reason
       // TODO: retry creation based on the creation failure reason
+      const failureReason: string = error.response?.body?.message;
       this.logger.error({
         error: `Error creating deployment ${deploymentId}`,
-        failureReason: error.response?.body?.message,
+        failureReason,
       });
       await this.deploymentsService.updateStatus(
         deploymentId,
         DeploymentStatus.Failed,
+        failureReason,
       );
     }
   }
@@ -1046,13 +1047,15 @@ export class KubernetesService {
       );
     } catch (error) {
       // TODO: roll back the deployment update
+      const failureReason: string = error.response?.body?.message;
       this.logger.error({
         error: `Error updating deployment ${deploymentId}`,
-        failureReason: error.response?.body?.message,
+        failureReason,
       });
       await this.deploymentsService.updateStatus(
         deploymentId,
         DeploymentStatus.Failed,
+        failureReason,
       );
     }
   }
@@ -1077,7 +1080,6 @@ export class KubernetesService {
       }
       await this.deleteSecret(namespace, deploymentId);
     } catch (error) {
-      // TODO: handle deletion failure
       this.logger.error({
         error: `Error deleting deployment ${deploymentId}`,
         failureReason: error.response?.body?.message,
