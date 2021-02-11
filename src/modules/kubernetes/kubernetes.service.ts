@@ -1,6 +1,9 @@
 import { DeploymentDocument } from './../deployments/schemas/deployment.schema';
 import { WorkspaceNamespace } from './schemas/workspace-namespace.schema';
-import { WorkspaceDocument } from './../workspaces/schemas/workspace.schema';
+import {
+  WorkspaceDocument,
+  WorkspaceResources,
+} from './../workspaces/schemas/workspace.schema';
 import { WorkspacesService } from './../workspaces/workspaces.service';
 import { WorkspaceDeletedEvent } from './../../events/workspace-deleted.event';
 import { WorkspaceCreatedEvent } from './../../events/workspace-created.event';
@@ -186,6 +189,8 @@ export class KubernetesService {
             'services',
             'secrets',
             'persistentvolumeclaims',
+            // TODO: check if this is valid
+            'resourceQuotas',
           ],
           verbs: ['*'],
         },
@@ -239,6 +244,45 @@ export class KubernetesService {
         ],
       },
     );
+  }
+
+  /**
+   * Create a Kubernetes resource quota
+   * @param namespace the Kubernetes namespace
+   * @param workspaceId the workspace id
+   * @param workspaceResources the workspace resources
+   */
+  private createResourceQuota(
+    namespace: string,
+    workspaceId: string,
+    workspaceResources: WorkspaceResources,
+  ): Promise<{
+    response: http.IncomingMessage;
+    body: k8s.V1ResourceQuota;
+  }> {
+    const hardQuotas: { [key: string]: string } = {};
+    if (workspaceResources.cpuCount) {
+      hardQuotas['limits.cpu'] = `${workspaceResources.cpuCount}`;
+    }
+    if (workspaceResources.memoryCount) {
+      hardQuotas['limits.memory'] = `${workspaceResources.memoryCount}Gi`;
+    }
+    if (workspaceResources.storageCount) {
+      hardQuotas['requests.storage'] = `${workspaceResources.storageCount}Gi`;
+    }
+    return this.k8sCoreV1Api.createNamespacedResourceQuota(namespace, {
+      apiVersion: 'v1',
+      kind: 'ResourceQuota',
+      metadata: {
+        name: this.generateResourceName(workspaceId),
+        labels: {
+          app: this.resourcePrefix,
+        },
+      },
+      spec: {
+        hard: hardQuotas,
+      },
+    });
   }
 
   /**
@@ -759,12 +803,21 @@ export class KubernetesService {
     payload: WorkspaceCreatedEvent,
   ): Promise<void> {
     const workspaceId: string = payload.workspace._id;
+    const workspaceResources: WorkspaceResources =
+      payload.workspace.properties?.resources;
     const namespace: string = this.generateResourceName(workspaceId);
     try {
       await this.createNamespace(namespace, workspaceId);
       await this.createNetworkPolicy(namespace, workspaceId);
       await this.createRole(namespace, workspaceId);
       await this.createRoleBinding(namespace, workspaceId);
+      if (workspaceResources) {
+        await this.createResourceQuota(
+          namespace,
+          workspaceId,
+          workspaceResources,
+        );
+      }
       await this.startNamespacedPodInformer(namespace);
     } catch (error) {
       // TODO: handle errors
