@@ -1,3 +1,4 @@
+import { WorkspaceUpdatedEvent } from './../../events/workspace-updated.event';
 import { DeploymentDocument } from './../deployments/schemas/deployment.schema';
 import { WorkspaceNamespace } from './schemas/workspace-namespace.schema';
 import {
@@ -189,7 +190,6 @@ export class KubernetesService {
             'services',
             'secrets',
             'persistentvolumeclaims',
-            'resourcequotas',
           ],
           verbs: ['*'],
         },
@@ -284,8 +284,12 @@ export class KubernetesService {
     });
   }
 
-  // TODO: see if this is needed
-  // TODO: add comments
+  /**
+   * Update a Kubernetes resource quota
+   * @param namespace the Kubernetes namespace
+   * @param workspaceId the workspace id
+   * @param workspaceResources the workspace resources
+   */
   private updateResourceQuota(
     namespace: string,
     workspaceId: string,
@@ -295,15 +299,15 @@ export class KubernetesService {
     body: k8s.V1ResourceQuota;
   }> {
     const hardQuotas: { [key: string]: string } = {};
-    if (workspaceResources.cpuCount) {
-      hardQuotas['limits.cpu'] = `${workspaceResources.cpuCount}`;
-    }
-    if (workspaceResources.memoryCount) {
-      hardQuotas['limits.memory'] = `${workspaceResources.memoryCount}Gi`;
-    }
-    if (workspaceResources.storageCount) {
-      hardQuotas['requests.storage'] = `${workspaceResources.storageCount}Gi`;
-    }
+    hardQuotas['limits.cpu'] = workspaceResources.cpuCount
+      ? `${workspaceResources.cpuCount}`
+      : '';
+    hardQuotas['limits.memory'] = workspaceResources.memoryCount
+      ? `${workspaceResources.memoryCount}Gi`
+      : '';
+    hardQuotas['requests.storage'] = workspaceResources.storageCount
+      ? `${workspaceResources.storageCount}Gi`
+      : '';
     return this.k8sCoreV1Api.patchNamespacedResourceQuota(
       this.generateResourceName(workspaceId),
       namespace,
@@ -320,8 +324,11 @@ export class KubernetesService {
     );
   }
 
-  // TODO: see if this is needed
-  // TODO: add comments
+  /**
+   * Delete a Kubernetes resource quota
+   * @param namespace the Kubernetes namespace
+   * @param workspaceId the workspace id
+   */
   private deleteResourceQuota(
     namespace: string,
     workspaceId: string,
@@ -861,7 +868,12 @@ export class KubernetesService {
       await this.createNetworkPolicy(namespace, workspaceId);
       await this.createRole(namespace, workspaceId);
       await this.createRoleBinding(namespace, workspaceId);
-      if (workspaceResources) {
+      if (
+        workspaceResources &&
+        (workspaceResources.cpuCount ||
+          workspaceResources.memoryCount ||
+          workspaceResources.storageCount)
+      ) {
         await this.createResourceQuota(
           namespace,
           workspaceId,
@@ -872,8 +884,44 @@ export class KubernetesService {
     } catch (error) {
       // TODO: handle errors
       this.logger.error({
-        message: `Error creating a namespace for workspace ${workspaceId}`,
-        error,
+        error: `Error creating a namespace for workspace ${workspaceId}`,
+        failureReason: error.response?.body?.message,
+      });
+    }
+  }
+
+  /**
+   * Handles the workspace.updated event
+   * @param payload the workspace.updated event payload
+   */
+  @OnEvent(Event.WorkspaceUpdated)
+  private async handleWorkspaceUpdatedEvent(
+    payload: WorkspaceUpdatedEvent,
+  ): Promise<void> {
+    const workspaceId: string = payload.workspace._id;
+    const namespace: string = this.generateResourceName(workspaceId);
+    const workspaceResources: WorkspaceResources =
+      payload.workspace.properties?.resources;
+    try {
+      if (!workspaceResources) return;
+      if (
+        !workspaceResources.cpuCount &&
+        !workspaceResources.memoryCount &&
+        !workspaceResources.storageCount
+      ) {
+        await this.deleteResourceQuota(namespace, workspaceId);
+      } else {
+        await this.updateResourceQuota(
+          namespace,
+          workspaceId,
+          workspaceResources,
+        );
+      }
+    } catch (error) {
+      // TODO: handle errors
+      this.logger.error({
+        error: `Error updating the resource quota for workspace ${workspaceId}`,
+        failureReason: error.response?.body?.message,
       });
     }
   }
@@ -890,7 +938,8 @@ export class KubernetesService {
       const namespace: string = this.generateResourceName(payload.id);
       await this.deleteNamespace(namespace);
     } catch (err) {
-      // TODO: do nothing, this will get picked up by the scheduler
+      // Do nothing, this will get picked up by the
+      // deleteRemainingKubernetesNamespacesJob scheduler
     }
   }
 
@@ -931,8 +980,8 @@ export class KubernetesService {
       // TODO: add a message to the deployment to indicate failure reason
       // TODO: retry creation based on the creation failure reason
       this.logger.error({
-        message: `Error creating deployment ${deploymentId}`,
-        error,
+        error: `Error creating deployment ${deploymentId}`,
+        failureReason: error.response?.body?.message,
       });
       await this.deploymentsService.updateStatus(
         deploymentId,
@@ -964,8 +1013,8 @@ export class KubernetesService {
     } catch (error) {
       // TODO: roll back the deployment update
       this.logger.error({
-        message: `Error updating deployment ${deploymentId}`,
-        error,
+        error: `Error updating deployment ${deploymentId}`,
+        failureReason: error.response?.body?.message,
       });
       await this.deploymentsService.updateStatus(
         deploymentId,
@@ -996,8 +1045,8 @@ export class KubernetesService {
     } catch (error) {
       // TODO: handle deletion failure
       this.logger.error({
-        message: `Error deleting deployment ${deploymentId}`,
-        error,
+        error: `Error deleting deployment ${deploymentId}`,
+        failureReason: error.response?.body?.message,
       });
     }
   }

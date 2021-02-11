@@ -13,19 +13,19 @@ export class UpdateDeploymentResourcesDto {
   @Min(1)
   @IsInt()
   @IsOptional()
-  cpuCount: number;
+  cpuCount?: number;
 
   @Min(2)
   @IsInt()
   @IsOptional()
-  memoryCount: number;
+  memoryCount?: number;
 }
 
 export class UpdateDeploymentPropertiesDto {
+  @IsOptional()
   @ValidateNested()
   @Type(() => UpdateDeploymentResourcesDto)
-  @IsOptional()
-  resources: UpdateDeploymentResourcesDto;
+  resources?: UpdateDeploymentResourcesDto;
 }
 
 export class UpdateDeploymentDto {
@@ -33,7 +33,7 @@ export class UpdateDeploymentDto {
   @IsNotEmpty()
   @MinLength(4)
   @IsOptional()
-  name: string;
+  name?: string;
 
   @IsOptional()
   @ValidateNested()
