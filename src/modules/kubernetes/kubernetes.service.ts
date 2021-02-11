@@ -189,8 +189,7 @@ export class KubernetesService {
             'services',
             'secrets',
             'persistentvolumeclaims',
-            // TODO: check if this is valid
-            'resourceQuotas',
+            'resourcequotas',
           ],
           verbs: ['*'],
         },
@@ -283,6 +282,57 @@ export class KubernetesService {
         hard: hardQuotas,
       },
     });
+  }
+
+  // TODO: see if this is needed
+  // TODO: add comments
+  private updateResourceQuota(
+    namespace: string,
+    workspaceId: string,
+    workspaceResources: WorkspaceResources,
+  ): Promise<{
+    response: http.IncomingMessage;
+    body: k8s.V1ResourceQuota;
+  }> {
+    const hardQuotas: { [key: string]: string } = {};
+    if (workspaceResources.cpuCount) {
+      hardQuotas['limits.cpu'] = `${workspaceResources.cpuCount}`;
+    }
+    if (workspaceResources.memoryCount) {
+      hardQuotas['limits.memory'] = `${workspaceResources.memoryCount}Gi`;
+    }
+    if (workspaceResources.storageCount) {
+      hardQuotas['requests.storage'] = `${workspaceResources.storageCount}Gi`;
+    }
+    return this.k8sCoreV1Api.patchNamespacedResourceQuota(
+      this.generateResourceName(workspaceId),
+      namespace,
+      { spec: { hard: hardQuotas } },
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      {
+        headers: {
+          'Content-type': k8s.PatchUtils.PATCH_FORMAT_STRATEGIC_MERGE_PATCH,
+        },
+      },
+    );
+  }
+
+  // TODO: see if this is needed
+  // TODO: add comments
+  private deleteResourceQuota(
+    namespace: string,
+    workspaceId: string,
+  ): Promise<{
+    response: http.IncomingMessage;
+    body: k8s.V1ResourceQuota;
+  }> {
+    return this.k8sCoreV1Api.deleteNamespacedResourceQuota(
+      this.generateResourceName(workspaceId),
+      namespace,
+    );
   }
 
   /**
