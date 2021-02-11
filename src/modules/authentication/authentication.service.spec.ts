@@ -3,7 +3,7 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { TokenPayload } from './interfaces/token-payload.interface';
 import { InvalidCredentialsException } from './../../exceptions/invalid-credentials.exception';
 import { TokenExpiredException } from './../../exceptions/token-expired.exception';
-import { UserDocument } from 'src/modules/users/schemas/user.schema';
+import { UserDocument } from './../users/schemas/user.schema';
 import { VerifyAccountDto } from './dto/verify-account.dto';
 import { CreateUserDto } from './../users/dto/create-user.dto';
 import {

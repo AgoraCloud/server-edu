@@ -1,5 +1,5 @@
 import { LoggerMiddleware } from './middlewares/logger.middleware';
-import { LogLevel } from 'src/config/configuration.interface';
+import { LogLevel } from './config/configuration.interface';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
