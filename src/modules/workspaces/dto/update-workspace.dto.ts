@@ -13,24 +13,24 @@ export class UpdateWorkspaceResourcesDto {
   @Min(0)
   @IsInt()
   @IsOptional()
-  cpuCount?: number;
+  readonly cpuCount?: number;
 
   @Min(0)
   @IsInt()
   @IsOptional()
-  memoryCount?: number;
+  readonly memoryCount?: number;
 
   @Min(0)
   @IsInt()
   @IsOptional()
-  storageCount?: number;
+  readonly storageCount?: number;
 }
 
 export class UpdateWorkspacePropertiesDto {
   @IsOptional()
   @ValidateNested()
   @Type(() => UpdateWorkspaceResourcesDto)
-  resources?: UpdateWorkspaceResourcesDto;
+  readonly resources?: UpdateWorkspaceResourcesDto;
 }
 
 export class UpdateWorkspaceDto {
@@ -38,10 +38,10 @@ export class UpdateWorkspaceDto {
   @IsNotEmpty()
   @MinLength(4)
   @IsOptional()
-  name?: string;
+  readonly name?: string;
 
   @IsOptional()
   @ValidateNested()
   @Type(() => UpdateWorkspacePropertiesDto)
-  properties?: UpdateWorkspacePropertiesDto;
+  readonly properties?: UpdateWorkspacePropertiesDto;
 }

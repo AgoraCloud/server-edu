@@ -4,32 +4,32 @@ import { Exclude, Expose } from 'class-transformer';
 @Exclude()
 export class WorkspaceResourcesDto {
   @Expose()
-  cpuCount?: number;
+  readonly cpuCount?: number;
 
   @Expose()
-  memoryCount?: number;
+  readonly memoryCount?: number;
 
   @Expose()
-  storageCount?: number;
+  readonly storageCount?: number;
 }
 
 @Exclude()
 export class WorkspacePropertiesDto {
   @Expose()
-  resources?: WorkspaceResourcesDto;
+  readonly resources?: WorkspaceResourcesDto;
 }
 
 @Exclude()
 export class WorkspaceDto {
   @Expose()
-  id: string;
+  readonly id: string;
 
   @Expose()
-  name: string;
+  readonly name: string;
 
   @Expose()
-  properties?: WorkspacePropertiesDto;
+  readonly properties?: WorkspacePropertiesDto;
 
   @Expose()
-  users: UserDto[];
+  readonly users: UserDto[];
 }

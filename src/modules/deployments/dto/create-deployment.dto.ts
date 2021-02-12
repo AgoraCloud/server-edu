@@ -39,26 +39,26 @@ class IsValidDeploymentImage implements ValidatorConstraintInterface {
 export class CreateDeploymentImageDto {
   @IsString()
   @IsNotEmpty()
-  name: string;
+  readonly name: string;
 
   @IsString()
   @IsNotEmpty()
-  tag: string;
+  readonly tag: string;
 }
 
 export class CreateDeploymentResourcesDto {
   @Min(1)
   @IsInt()
-  cpuCount: number;
+  readonly cpuCount: number;
 
   @Min(2)
   @IsInt()
-  memoryCount: number;
+  readonly memoryCount: number;
 
   @Min(8)
   @IsInt()
   @IsOptional()
-  storageCount: number;
+  readonly storageCount: number;
 }
 
 export class CreateDeploymentPropertiesDto {
@@ -66,12 +66,12 @@ export class CreateDeploymentPropertiesDto {
   @ValidateNested()
   @Type(() => CreateDeploymentImageDto)
   @Validate(IsValidDeploymentImage)
-  image: CreateDeploymentImageDto;
+  readonly image: CreateDeploymentImageDto;
 
   @IsDefined()
   @ValidateNested()
   @Type(() => CreateDeploymentResourcesDto)
-  resources: CreateDeploymentResourcesDto;
+  readonly resources: CreateDeploymentResourcesDto;
 
   @IsString()
   @IsNotEmpty()
@@ -83,10 +83,10 @@ export class CreateDeploymentDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(4)
-  name: string;
+  readonly name: string;
 
   @IsDefined()
   @ValidateNested()
   @Type(() => CreateDeploymentPropertiesDto)
-  properties: CreateDeploymentPropertiesDto;
+  readonly properties: CreateDeploymentPropertiesDto;
 }

@@ -13,24 +13,24 @@ export class CreateWorkspaceResourcesDto {
   @Min(1)
   @IsInt()
   @IsOptional()
-  cpuCount?: number;
+  readonly cpuCount?: number;
 
   @Min(2)
   @IsInt()
   @IsOptional()
-  memoryCount?: number;
+  readonly memoryCount?: number;
 
   @Min(8)
   @IsInt()
   @IsOptional()
-  storageCount?: number;
+  readonly storageCount?: number;
 }
 
 export class CreateWorkspacePropertiesDto {
   @IsOptional()
   @ValidateNested()
   @Type(() => CreateWorkspaceResourcesDto)
-  resources?: CreateWorkspaceResourcesDto;
+  readonly resources?: CreateWorkspaceResourcesDto;
 }
 
 export class CreateWorkspaceDto {
@@ -42,5 +42,5 @@ export class CreateWorkspaceDto {
   @IsOptional()
   @ValidateNested()
   @Type(() => CreateWorkspacePropertiesDto)
-  properties?: CreateWorkspacePropertiesDto;
+  readonly properties?: CreateWorkspacePropertiesDto;
 }

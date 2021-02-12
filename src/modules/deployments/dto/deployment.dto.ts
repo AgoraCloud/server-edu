@@ -5,53 +5,53 @@ import { Exclude, Expose } from 'class-transformer';
 @Exclude()
 export class DeploymentResourcesDto {
   @Expose()
-  cpuCount: number;
+  readonly cpuCount: number;
 
   @Expose()
-  memoryCount: number;
+  readonly memoryCount: number;
 
   @Expose()
-  storageCount?: number;
+  readonly storageCount?: number;
 }
 
 @Exclude()
 export class DeploymentImageDto {
   @Expose()
-  name: string;
+  readonly name: string;
 
   @Expose()
-  tag: string;
+  readonly tag: string;
 }
 
 @Exclude()
 export class DeploymentPropertiesDto {
   @Expose()
-  image: DeploymentImageDto;
+  readonly image: DeploymentImageDto;
 
   @Expose()
-  resources: DeploymentResourcesDto;
+  readonly resources: DeploymentResourcesDto;
 }
 
 @Exclude()
 export class DeploymentDto {
   @Expose()
-  id: string;
+  readonly id: string;
 
   @Expose()
-  name: string;
+  readonly name: string;
 
   @Expose()
-  status: string;
+  readonly status: string;
 
   @Expose()
-  failureReason?: string;
+  readonly failureReason?: string;
 
   @Expose()
-  properties: DeploymentPropertiesDto;
+  readonly properties: DeploymentPropertiesDto;
 
   @Expose()
-  workspace: WorkspaceDto;
+  readonly workspace: WorkspaceDto;
 
   @Expose()
-  user: UserDto;
+  readonly user: UserDto;
 }
