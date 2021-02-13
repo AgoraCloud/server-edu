@@ -20,6 +20,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { HealthModule } from './modules/health/health.module';
 import { LoggerModule } from './modules/logger/logger.module';
 import { commaDelimitedLogLevel } from './utils/regex.patterns';
+import { SectionsModule } from './modules/wiki/sections/sections.module';
+import { PagesModule } from './modules/wiki/pages/pages.module';
 
 @Module({
   imports: [
@@ -96,6 +98,8 @@ import { commaDelimitedLogLevel } from './utils/regex.patterns';
     ProxyModule,
     HealthModule,
     LoggerModule,
+    SectionsModule,
+    PagesModule,
   ],
 })
 export class AppModule implements NestModule {
