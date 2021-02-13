@@ -5,11 +5,14 @@ import { Exclude, Expose } from 'class-transformer';
 @Exclude()
 export class WikiSectionDto {
   @Expose()
-  name: string;
+  readonly id: string;
 
   @Expose()
-  workspace: WorkspaceDto;
+  readonly name: string;
 
   @Expose()
-  user: UserDto;
+  readonly workspace: WorkspaceDto;
+
+  @Expose()
+  readonly user: UserDto;
 }
