@@ -3,6 +3,7 @@ import { WorkspaceDocument } from '../../../workspaces/schemas/workspace.schema'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import * as mongoose from 'mongoose';
+import { WikiSectionDocument } from '../../sections/schemas/section.schema';
 
 export type WikiPageDocument = WikiPage & Document;
 
@@ -29,6 +30,14 @@ export class WikiPage {
     index: true,
   })
   user: UserDocument;
+
+  @Prop({
+    required: true,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'WikiSection',
+    index: true,
+  })
+  section: WikiSectionDocument;
 
   constructor(partial: Partial<WikiPage>) {
     Object.assign(this, partial);

@@ -1158,22 +1158,22 @@ export class KubernetesService implements OnModuleInit {
    * Cron job that runs every hour and deletes any Kubernetes
    * namespace that was not deleted when a workspace was deleted
    */
-  @Cron(CronExpression.EVERY_HOUR)
-  private async deleteRemainingKubernetesNamespacesJob(): Promise<void> {
-    const {
-      body: { items: namespaces },
-    } = await this.getAllNamespaces();
-    const workspaceNamespaces: WorkspaceNamespace[] = await this.getAllWorkspaceNamespaces();
-    for (const namespace of namespaces) {
-      const namespaceName: string = namespace.metadata?.name;
-      if (
-        workspaceNamespaces.findIndex((w) => w.namespace === namespaceName) ===
-        -1
-      ) {
-        await this.deleteNamespace(namespaceName);
-      }
-    }
-  }
+  // @Cron(CronExpression.EVERY_HOUR)
+  // private async deleteRemainingKubernetesNamespacesJob(): Promise<void> {
+  //   const {
+  //     body: { items: namespaces },
+  //   } = await this.getAllNamespaces();
+  //   const workspaceNamespaces: WorkspaceNamespace[] = await this.getAllWorkspaceNamespaces();
+  //   for (const namespace of namespaces) {
+  //     const namespaceName: string = namespace.metadata?.name;
+  //     if (
+  //       workspaceNamespaces.findIndex((w) => w.namespace === namespaceName) ===
+  //       -1
+  //     ) {
+  //       await this.deleteNamespace(namespaceName);
+  //     }
+  //   }
+  // }
 
   /**
    * Cron job that runs every hour and deletes any Kubernetes

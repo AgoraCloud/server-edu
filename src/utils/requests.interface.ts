@@ -1,3 +1,4 @@
+import { WikiSectionDocument } from './../modules/wiki/sections/schemas/section.schema';
 import { DeploymentDocument } from './../modules/deployments/schemas/deployment.schema';
 import { WorkspaceDocument } from './../modules/workspaces/schemas/workspace.schema';
 import { UserDocument } from '../modules/users/schemas/user.schema';
@@ -15,6 +16,10 @@ interface RequestWithDeployment extends Request {
   deployment: DeploymentDocument;
 }
 
+interface RequestWithWikiSection extends Request {
+  wikiSection: WikiSectionDocument;
+}
+
 interface RequestWithWorkspaceAndUser extends RequestWithUser {
   workspace: WorkspaceDocument;
 }
@@ -24,10 +29,17 @@ interface RequestWithWorkspaceDeploymentAndUser
   deployment: DeploymentDocument;
 }
 
+interface RequestWithWorkspaceUserAndWikiSection
+  extends RequestWithWorkspaceAndUser {
+  wikiSection: WikiSectionDocument;
+}
+
 export {
   RequestWithUser,
   RequestWithWorkspace,
   RequestWithDeployment,
+  RequestWithWikiSection,
   RequestWithWorkspaceAndUser,
   RequestWithWorkspaceDeploymentAndUser,
+  RequestWithWorkspaceUserAndWikiSection,
 };

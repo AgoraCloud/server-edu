@@ -1,3 +1,8 @@
+import { FindOneParams } from './../../../utils/find-one-params';
+import { WikiSectionDocument } from 'src/modules/wiki/sections/schemas/section.schema';
+import { WorkspaceDocument } from './../../workspaces/schemas/workspace.schema';
+import { UserDocument } from './../../users/schemas/user.schema';
+import { WikiSectionInterceptor } from './../../../interceptors/wiki-section.interceptor';
 import { WikiPageDto } from './dto/page.dto';
 import { TransformInterceptor } from './../../../interceptors/transform.interceptor';
 import { WorkspaceInterceptor } from './../../../interceptors/workspace.interceptor';
@@ -16,39 +21,84 @@ import { WikiPagesService } from './pages.service';
 import { CreateWikiPageDto } from './dto/create-page.dto';
 import { UpdateWikiPageDto } from './dto/update-page.dto';
 import { JwtAuthenticationGuard } from '../../authentication/guards/jwt-authentication.guard';
+import { User } from '../../../decorators/user.decorator';
+import { Workspace } from '../../../decorators/workspace.decorator';
+import { WikiSection } from '../../../decorators/wiki-section.decorator';
+import { WikiPageDocument } from './schemas/page.schema';
 
 @UseGuards(JwtAuthenticationGuard)
 @Controller('api/workspaces/:workspaceId/sections/:sectionId/pages')
-// TODO: add the sections interceptor when it is created
-@UseInterceptors(WorkspaceInterceptor, new TransformInterceptor(WikiPageDto))
+@UseInterceptors(
+  WorkspaceInterceptor,
+  WikiSectionInterceptor,
+  new TransformInterceptor(WikiPageDto),
+)
 export class WikiPagesController {
   constructor(private readonly wikiPagesService: WikiPagesService) {}
 
   @Post()
-  create(@Body() createWikiPageDto: CreateWikiPageDto) {
-    return this.wikiPagesService.create(createWikiPageDto);
+  create(
+    @User() user: UserDocument,
+    @Workspace() workspace: WorkspaceDocument,
+    @WikiSection() wikiSection: WikiSectionDocument,
+    @Body() createWikiPageDto: CreateWikiPageDto,
+  ): Promise<WikiPageDocument> {
+    return this.wikiPagesService.create(
+      user,
+      workspace,
+      wikiSection,
+      createWikiPageDto,
+    );
   }
 
   @Get()
-  findAll() {
-    return this.wikiPagesService.findAll();
+  findAll(
+    @User('_id') userId: string,
+    @Workspace('_id') workspaceId: string,
+    @WikiSection('_id') wikiSectionId: string,
+  ): Promise<WikiPageDocument[]> {
+    return this.wikiPagesService.findAll(userId, workspaceId, wikiSectionId);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.wikiPagesService.findOne(+id);
+  findOne(
+    @User('_id') userId: string,
+    @Workspace('_id') workspaceId: string,
+    @WikiSection('_id') wikiSectionId: string,
+    @Param() { id }: FindOneParams,
+  ): Promise<WikiPageDocument> {
+    return this.wikiPagesService.findOne(
+      userId,
+      workspaceId,
+      wikiSectionId,
+      id,
+    );
   }
 
   @Put(':id')
   update(
-    @Param('id') id: string,
+    @User('_id') userId: string,
+    @Workspace('_id') workspaceId: string,
+    @WikiSection('_id') wikiSectionId: string,
+    @Param() { id }: FindOneParams,
     @Body() updateWikiPageDto: UpdateWikiPageDto,
-  ) {
-    return this.wikiPagesService.update(+id, updateWikiPageDto);
+  ): Promise<WikiPageDocument> {
+    return this.wikiPagesService.update(
+      userId,
+      workspaceId,
+      wikiSectionId,
+      id,
+      updateWikiPageDto,
+    );
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.wikiPagesService.remove(+id);
+  remove(
+    @User('_id') userId: string,
+    @Workspace('_id') workspaceId: string,
+    @WikiSection('_id') wikiSectionId: string,
+    @Param() { id }: FindOneParams,
+  ): Promise<void> {
+    return this.wikiPagesService.remove(userId, workspaceId, wikiSectionId, id);
   }
 }

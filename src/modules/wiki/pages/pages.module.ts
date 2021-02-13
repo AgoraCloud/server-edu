@@ -8,7 +8,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: 'Page', schema: WikiPageSchema }]),
+    MongooseModule.forFeature([{ name: 'WikiPage', schema: WikiPageSchema }]),
     WorkspacesModule,
     WikiSectionsModule,
   ],
