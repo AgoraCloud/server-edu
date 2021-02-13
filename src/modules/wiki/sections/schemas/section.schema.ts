@@ -3,7 +3,7 @@ import { WorkspaceDocument } from '../../../workspaces/schemas/workspace.schema'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 
-export type WikiSectionDocument = WikiSection & Document;
+export type WikiSectionDocument = WikiSection & mongoose.Document;
 
 @Schema({ collection: 'wiki_sections' })
 export class WikiSection {
@@ -25,6 +25,10 @@ export class WikiSection {
     index: true,
   })
   user: UserDocument;
+
+  constructor(partial: Partial<WikiSection>) {
+    Object.assign(this, partial);
+  }
 }
 
 export const WikiSectionSchema = SchemaFactory.createForClass(WikiSection);

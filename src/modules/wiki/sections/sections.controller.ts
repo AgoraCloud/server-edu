@@ -1,3 +1,6 @@
+import { WorkspaceDocument } from './../../workspaces/schemas/workspace.schema';
+import { FindOneParams } from './../../../utils/find-one-params';
+import { UserDocument } from './../../users/schemas/user.schema';
 import { WikiSectionDto } from './dto/section.dto';
 import { TransformInterceptor } from './../../../interceptors/transform.interceptor';
 import { JwtAuthenticationGuard } from './../../authentication/guards/jwt-authentication.guard';
@@ -15,7 +18,10 @@ import {
 import { WikiSectionsService } from './sections.service';
 import { CreateWikiSectionDto } from './dto/create-section.dto';
 import { UpdateWikiSectionDto } from './dto/update-section.dto';
-import { WorkspaceInterceptor } from 'src/interceptors/workspace.interceptor';
+import { WorkspaceInterceptor } from '../../../interceptors/workspace.interceptor';
+import { User } from '../../../decorators/user.decorator';
+import { Workspace } from '../../../decorators/workspace.decorator';
+import { WikiSectionDocument } from './schemas/section.schema';
 
 @UseGuards(JwtAuthenticationGuard)
 @Controller('api/workspaces/:workspaceId/sections')
@@ -24,30 +30,56 @@ export class WikiSectionsController {
   constructor(private readonly wikiSectionsService: WikiSectionsService) {}
 
   @Post()
-  create(@Body() createWikiSectionDto: CreateWikiSectionDto) {
-    return this.wikiSectionsService.create(createWikiSectionDto);
+  create(
+    @User() user: UserDocument,
+    @Workspace() workspace: WorkspaceDocument,
+    @Body() createWikiSectionDto: CreateWikiSectionDto,
+  ): Promise<WikiSectionDocument> {
+    return this.wikiSectionsService.create(
+      user,
+      workspace,
+      createWikiSectionDto,
+    );
   }
 
   @Get()
-  findAll() {
-    return this.wikiSectionsService.findAll();
+  findAll(
+    @User('_id') userId: string,
+    @Workspace('_id') workspaceId: string,
+  ): Promise<WikiSectionDocument[]> {
+    return this.wikiSectionsService.findAll(workspaceId, userId);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.wikiSectionsService.findOne(+id);
+  findOne(
+    @User('_id') userId: string,
+    @Workspace('_id') workspaceId: string,
+    @Param() { id }: FindOneParams,
+  ): Promise<WikiSectionDocument> {
+    return this.wikiSectionsService.findOne(userId, workspaceId, id);
   }
 
   @Put(':id')
   update(
-    @Param('id') id: string,
+    @User('_id') userId: string,
+    @Workspace('_id') workspaceId: string,
+    @Param() { id }: FindOneParams,
     @Body() updateWikiSectionDto: UpdateWikiSectionDto,
-  ) {
-    return this.wikiSectionsService.update(+id, updateWikiSectionDto);
+  ): Promise<WikiSectionDocument> {
+    return this.wikiSectionsService.update(
+      userId,
+      workspaceId,
+      id,
+      updateWikiSectionDto,
+    );
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.wikiSectionsService.remove(+id);
+  remove(
+    @User('_id') userId: string,
+    @Workspace('_id') workspaceId: string,
+    @Param() { id }: FindOneParams,
+  ): Promise<void> {
+    return this.wikiSectionsService.remove(userId, workspaceId, id);
   }
 }

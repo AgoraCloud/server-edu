@@ -15,7 +15,7 @@ import {
 import { WikiPagesService } from './pages.service';
 import { CreateWikiPageDto } from './dto/create-page.dto';
 import { UpdateWikiPageDto } from './dto/update-page.dto';
-import { JwtAuthenticationGuard } from 'src/modules/authentication/guards/jwt-authentication.guard';
+import { JwtAuthenticationGuard } from '../../authentication/guards/jwt-authentication.guard';
 
 @UseGuards(JwtAuthenticationGuard)
 @Controller('api/workspaces/:workspaceId/sections/:sectionId/pages')

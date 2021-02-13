@@ -13,4 +13,6 @@ export enum Event {
   DeploymentCreated = 'deployment.created',
   DeploymentUpdated = 'deployment.updated',
   DeploymentDeleted = 'deployment.deleted',
+  // Wiki Section Events
+  WikiSectionDeleted = 'wiki.section.deleted',
 }

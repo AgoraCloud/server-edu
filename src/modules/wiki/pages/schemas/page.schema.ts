@@ -29,6 +29,10 @@ export class WikiPage {
     index: true,
   })
   user: UserDocument;
+
+  constructor(partial: Partial<WikiPage>) {
+    Object.assign(this, partial);
+  }
 }
 
 export const WikiPageSchema = SchemaFactory.createForClass(WikiPage);

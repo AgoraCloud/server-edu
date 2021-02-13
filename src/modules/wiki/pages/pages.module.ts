@@ -1,5 +1,5 @@
 import { WikiSectionsModule } from './../sections/sections.module';
-import { WikiPageSchema } from './schemas/wiki-page.schema';
+import { WikiPageSchema } from './schemas/page.schema';
 import { WorkspacesModule } from './../../workspaces/workspaces.module';
 import { Module } from '@nestjs/common';
 import { WikiPagesService } from './pages.service';
