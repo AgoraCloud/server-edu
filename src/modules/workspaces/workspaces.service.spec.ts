@@ -126,6 +126,13 @@ describe('WorkspacesService', () => {
     it('should update the users workspace', async () => {
       const updateWorkspaceDto: UpdateWorkspaceDto = {
         name: 'New Test Workspace',
+        properties: {
+          resources: {
+            cpuCount: 5,
+            memoryCount: 8,
+            storageCount: 16,
+          },
+        },
       };
       const updatedWorkspace: WorkspaceDocument = await service.update(
         user._id,
@@ -135,6 +142,15 @@ describe('WorkspacesService', () => {
       expect(updatedWorkspace._id).toEqual(workspaceId);
       expect(updatedWorkspace.users[0]._id).toEqual(user._id);
       expect(updatedWorkspace.name).toBe(updateWorkspaceDto.name);
+      expect(updatedWorkspace.properties.resources.cpuCount).toBe(
+        updateWorkspaceDto.properties.resources.cpuCount,
+      );
+      expect(updatedWorkspace.properties.resources.memoryCount).toBe(
+        updateWorkspaceDto.properties.resources.memoryCount,
+      );
+      expect(updatedWorkspace.properties.resources.storageCount).toBe(
+        updateWorkspaceDto.properties.resources.storageCount,
+      );
     });
   });
 

@@ -18,9 +18,23 @@ enum EnvironmentConfig {
   Production = 'production',
 }
 
+enum LogLevel {
+  Log = 'log',
+  Error = 'error',
+  Warn = 'warn',
+  Debug = 'debug',
+  Verbose = 'verbose',
+}
+
 interface AdminConfig {
   email: string;
   password: string;
 }
 
-export { KubernetesConfig, JwtConfig, EnvironmentConfig, AdminConfig };
+export {
+  KubernetesConfig,
+  JwtConfig,
+  EnvironmentConfig,
+  LogLevel,
+  AdminConfig,
+};

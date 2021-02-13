@@ -1,6 +1,10 @@
+import { WorkspaceUpdatedEvent } from './../../events/workspace-updated.event';
 import { DeploymentDocument } from './../deployments/schemas/deployment.schema';
 import { WorkspaceNamespace } from './schemas/workspace-namespace.schema';
-import { WorkspaceDocument } from './../workspaces/schemas/workspace.schema';
+import {
+  WorkspaceDocument,
+  WorkspaceResources,
+} from './../workspaces/schemas/workspace.schema';
 import { WorkspacesService } from './../workspaces/workspaces.service';
 import { WorkspaceDeletedEvent } from './../../events/workspace-deleted.event';
 import { WorkspaceCreatedEvent } from './../../events/workspace-created.event';
@@ -24,7 +28,7 @@ import { ConfigService } from '@nestjs/config';
 import { DeploymentDeletedEvent } from '../../events/deployment-deleted.event';
 import { DeploymentUpdatedEvent } from '../../events/deployment-updated.event';
 import { DeploymentCreatedEvent } from '../../events/deployment-created.event';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import * as k8s from '@kubernetes/client-node';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Event } from '../../events/events.enum';
@@ -33,17 +37,19 @@ import * as request from 'request';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
-export class KubernetesService {
-  private readonly k8sCoreV1Api: k8s.CoreV1Api;
-  private readonly k8sAppsV1Api: k8s.AppsV1Api;
-  private readonly k8sNetworkingV1Api: k8s.NetworkingV1Api;
-  private readonly k8sRbacAuthorizationV1Api: k8s.RbacAuthorizationV1Api;
+export class KubernetesService implements OnModuleInit {
   private readonly kubernetesConfig: KubernetesConfig;
   private readonly resourcePrefix: string = 'agoracloud';
-  private readonly logger = new Logger(KubernetesService.name);
+  private readonly logger: Logger = new Logger(KubernetesService.name);
 
   constructor(
     @Inject(k8s.KubeConfig) private readonly kc: k8s.KubeConfig,
+    @Inject(k8s.CoreV1Api) private readonly k8sCoreV1Api: k8s.CoreV1Api,
+    @Inject(k8s.AppsV1Api) private readonly k8sAppsV1Api: k8s.AppsV1Api,
+    @Inject(k8s.NetworkingV1Api)
+    private readonly k8sNetworkingV1Api: k8s.NetworkingV1Api,
+    @Inject(k8s.RbacAuthorizationV1Api)
+    private readonly k8sRbacAuthorizationV1Api: k8s.RbacAuthorizationV1Api,
     private readonly configService: ConfigService,
     private readonly deploymentsService: DeploymentsService,
     private readonly workspacesService: WorkspacesService,
@@ -51,14 +57,10 @@ export class KubernetesService {
     this.kubernetesConfig = this.configService.get<KubernetesConfig>(
       'kubernetes',
     );
-    this.kc.loadFromDefault();
-    this.k8sCoreV1Api = this.kc.makeApiClient(k8s.CoreV1Api);
-    this.k8sAppsV1Api = this.kc.makeApiClient(k8s.AppsV1Api);
-    this.k8sNetworkingV1Api = this.kc.makeApiClient(k8s.NetworkingV1Api);
-    this.k8sRbacAuthorizationV1Api = this.kc.makeApiClient(
-      k8s.RbacAuthorizationV1Api,
-    );
-    this.startPodInformer();
+  }
+
+  async onModuleInit(): Promise<void> {
+    await this.startPodInformer();
   }
 
   /**
@@ -238,6 +240,121 @@ export class KubernetesService {
           },
         ],
       },
+    );
+  }
+
+  /**
+   * Get a Kubernetes resource quota
+   * @param namespace the Kubernetes namespace
+   * @param workspaceId the workspace id
+   */
+  private getResourceQuota(
+    namespace: string,
+    workspaceId: string,
+  ): Promise<{
+    response: http.IncomingMessage;
+    body: k8s.V1ResourceQuota;
+  }> {
+    return this.k8sCoreV1Api.readNamespacedResourceQuota(
+      this.generateResourceName(workspaceId),
+      namespace,
+    );
+  }
+
+  /**
+   * Create a Kubernetes resource quota
+   * @param namespace the Kubernetes namespace
+   * @param workspaceId the workspace id
+   * @param workspaceResources the workspace resources
+   */
+  private createResourceQuota(
+    namespace: string,
+    workspaceId: string,
+    workspaceResources: WorkspaceResources,
+  ): Promise<{
+    response: http.IncomingMessage;
+    body: k8s.V1ResourceQuota;
+  }> {
+    const hardQuotas: { [key: string]: string } = {};
+    if (workspaceResources.cpuCount) {
+      hardQuotas['limits.cpu'] = `${workspaceResources.cpuCount}`;
+    }
+    if (workspaceResources.memoryCount) {
+      hardQuotas['limits.memory'] = `${workspaceResources.memoryCount}Gi`;
+    }
+    if (workspaceResources.storageCount) {
+      hardQuotas['requests.storage'] = `${workspaceResources.storageCount}Gi`;
+    }
+    return this.k8sCoreV1Api.createNamespacedResourceQuota(namespace, {
+      apiVersion: 'v1',
+      kind: 'ResourceQuota',
+      metadata: {
+        name: this.generateResourceName(workspaceId),
+        labels: {
+          app: this.resourcePrefix,
+        },
+      },
+      spec: {
+        hard: hardQuotas,
+      },
+    });
+  }
+
+  /**
+   * Update a Kubernetes resource quota
+   * @param namespace the Kubernetes namespace
+   * @param workspaceId the workspace id
+   * @param workspaceResources the workspace resources
+   */
+  private updateResourceQuota(
+    namespace: string,
+    workspaceId: string,
+    workspaceResources: WorkspaceResources,
+  ): Promise<{
+    response: http.IncomingMessage;
+    body: k8s.V1ResourceQuota;
+  }> {
+    const hardQuotas: { [key: string]: string } = {};
+    hardQuotas['limits.cpu'] = workspaceResources.cpuCount
+      ? `${workspaceResources.cpuCount}`
+      : '';
+    hardQuotas['limits.memory'] = workspaceResources.memoryCount
+      ? `${workspaceResources.memoryCount}Gi`
+      : '';
+    hardQuotas['requests.storage'] = workspaceResources.storageCount
+      ? `${workspaceResources.storageCount}Gi`
+      : '';
+    return this.k8sCoreV1Api.patchNamespacedResourceQuota(
+      this.generateResourceName(workspaceId),
+      namespace,
+      { spec: { hard: hardQuotas } },
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      {
+        headers: {
+          'Content-type': k8s.PatchUtils.PATCH_FORMAT_STRATEGIC_MERGE_PATCH,
+        },
+      },
+    );
+  }
+
+  /**
+   * Delete a Kubernetes resource quota
+   * @param namespace the Kubernetes namespace
+   * @param workspaceId the workspace id
+   */
+  private deleteResourceQuota(
+    namespace: string,
+    workspaceId: string,
+  ): Promise<{
+    response: http.IncomingMessage;
+    body: k8s.V1ResourceQuota;
+  }> {
+    return this.k8sCoreV1Api.deleteNamespacedResourceQuota(
+      this.generateResourceName(workspaceId),
+      namespace,
     );
   }
 
@@ -759,18 +876,84 @@ export class KubernetesService {
     payload: WorkspaceCreatedEvent,
   ): Promise<void> {
     const workspaceId: string = payload.workspace._id;
+    const workspaceResources: WorkspaceResources =
+      payload.workspace.properties?.resources;
     const namespace: string = this.generateResourceName(workspaceId);
     try {
       await this.createNamespace(namespace, workspaceId);
       await this.createNetworkPolicy(namespace, workspaceId);
       await this.createRole(namespace, workspaceId);
       await this.createRoleBinding(namespace, workspaceId);
+      if (
+        workspaceResources &&
+        (workspaceResources.cpuCount ||
+          workspaceResources.memoryCount ||
+          workspaceResources.storageCount)
+      ) {
+        await this.createResourceQuota(
+          namespace,
+          workspaceId,
+          workspaceResources,
+        );
+      }
       await this.startNamespacedPodInformer(namespace);
     } catch (error) {
       // TODO: handle errors
       this.logger.error({
-        message: `Error creating a namespace for workspace ${workspaceId}`,
-        error,
+        error: `Error creating a namespace for workspace ${workspaceId}`,
+        failureReason: error.response?.body?.message,
+      });
+    }
+  }
+
+  /**
+   * Handles the workspace.updated event
+   * @param payload the workspace.updated event payload
+   */
+  @OnEvent(Event.WorkspaceUpdated)
+  private async handleWorkspaceUpdatedEvent(
+    payload: WorkspaceUpdatedEvent,
+  ): Promise<void> {
+    const workspaceId: string = payload.workspace._id;
+    const namespace: string = this.generateResourceName(workspaceId);
+    const workspaceResources: WorkspaceResources =
+      payload.workspace.properties?.resources;
+    // Check if a resource quota for the workspaces namespace exists
+    let resourceQuotaExists = true;
+    try {
+      await this.getResourceQuota(namespace, workspaceId);
+    } catch (err) {
+      // The resource quota does not exist, set the flag
+      resourceQuotaExists = false;
+    }
+    try {
+      if (!workspaceResources) return;
+      if (
+        workspaceResources.cpuCount ||
+        workspaceResources.memoryCount ||
+        workspaceResources.storageCount
+      ) {
+        if (resourceQuotaExists) {
+          await this.updateResourceQuota(
+            namespace,
+            workspaceId,
+            workspaceResources,
+          );
+        } else {
+          await this.createResourceQuota(
+            namespace,
+            workspaceId,
+            workspaceResources,
+          );
+        }
+      } else if (resourceQuotaExists) {
+        await this.deleteResourceQuota(namespace, workspaceId);
+      }
+    } catch (error) {
+      // TODO: handle errors
+      this.logger.error({
+        error: `Error updating the resource quota for workspace ${workspaceId}`,
+        failureReason: error.response?.body?.message,
       });
     }
   }
@@ -787,7 +970,8 @@ export class KubernetesService {
       const namespace: string = this.generateResourceName(payload.id);
       await this.deleteNamespace(namespace);
     } catch (err) {
-      // TODO: do nothing, this will get picked up by the scheduler
+      // Do nothing, this will get picked up by the
+      // deleteRemainingKubernetesNamespacesJob scheduler
     }
   }
 
@@ -825,15 +1009,16 @@ export class KubernetesService {
         payload.deployment.properties,
       );
     } catch (error) {
-      // TODO: add a message to the deployment to indicate failure reason
       // TODO: retry creation based on the creation failure reason
+      const failureReason: string = error.response?.body?.message;
       this.logger.error({
-        message: `Error creating deployment ${deploymentId}`,
-        error,
+        error: `Error creating deployment ${deploymentId}`,
+        failureReason,
       });
       await this.deploymentsService.updateStatus(
         deploymentId,
         DeploymentStatus.Failed,
+        failureReason,
       );
     }
   }
@@ -860,13 +1045,15 @@ export class KubernetesService {
       );
     } catch (error) {
       // TODO: roll back the deployment update
+      const failureReason: string = error.response?.body?.message;
       this.logger.error({
-        message: `Error updating deployment ${deploymentId}`,
-        error,
+        error: `Error updating deployment ${deploymentId}`,
+        failureReason,
       });
       await this.deploymentsService.updateStatus(
         deploymentId,
         DeploymentStatus.Failed,
+        failureReason,
       );
     }
   }
@@ -891,10 +1078,9 @@ export class KubernetesService {
       }
       await this.deleteSecret(namespace, deploymentId);
     } catch (error) {
-      // TODO: handle deletion failure
       this.logger.error({
-        message: `Error deleting deployment ${deploymentId}`,
-        error,
+        error: `Error deleting deployment ${deploymentId}`,
+        failureReason: error.response?.body?.message,
       });
     }
   }

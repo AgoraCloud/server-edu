@@ -2,8 +2,8 @@
 
 # Prerequisites
 
-1. Docker
-2. Kubernetes
+1. Kubernetes
+2. Helm (version 3+)
 
 # Installation
 

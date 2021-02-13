@@ -11,7 +11,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { Deployment } from 'src/decorators/deployment.decorator';
+import { Deployment } from '../../decorators/deployment.decorator';
 
 @Controller('proxy/:deploymentId')
 @UseGuards(JwtAuthenticationGuard)

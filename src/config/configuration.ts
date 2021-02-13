@@ -1,6 +1,7 @@
 export default () => ({
   environment: process.env.NODE_ENV,
   port: parseInt(process.env.PORT, 10),
+  logLevel: process.env.LOG_LEVEL.split(','),
   domain: process.env.DOMAIN,
   databaseUri: process.env.DATABASE_URI,
   admin: {

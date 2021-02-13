@@ -19,7 +19,10 @@ import { DeploymentDocument } from './schemas/deployment.schema';
 import { Model, Query } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { CreateDeploymentDto } from './dto/create-deployment.dto';
-import { UpdateDeploymentDto } from './dto/update-deployment.dto';
+import {
+  UpdateDeploymentDto,
+  UpdateDeploymentResourcesDto,
+} from './dto/update-deployment.dto';
 import { Event } from '../../events/events.enum';
 
 @Injectable()
@@ -137,13 +140,15 @@ export class DeploymentsService {
       throw new DeploymentNotRunningException(deploymentId);
     }
 
+    const updateDeploymentResourcesDto: UpdateDeploymentResourcesDto =
+      updateDeploymentDto.properties?.resources;
     // Change the updated fields only
     deployment.name = updateDeploymentDto.name || deployment.name;
     deployment.properties.resources.cpuCount =
-      updateDeploymentDto.properties?.resources?.cpuCount ||
+      updateDeploymentResourcesDto?.cpuCount ||
       deployment.properties.resources.cpuCount;
     deployment.properties.resources.memoryCount =
-      updateDeploymentDto.properties?.resources?.memoryCount ||
+      updateDeploymentResourcesDto?.memoryCount ||
       deployment.properties.resources.memoryCount;
     await this.deploymentModel
       .updateOne(null, deployment)
@@ -156,12 +161,12 @@ export class DeploymentsService {
       .exec();
 
     /**
-     * Send the deployment.updated event only if cpuCount or
+     * Send the deployment.updated event only if cpuCount and/or
      * memoryCount have been updated
      */
     if (
-      updateDeploymentDto.properties?.resources?.cpuCount ||
-      updateDeploymentDto.properties?.resources?.memoryCount
+      updateDeploymentResourcesDto?.cpuCount ||
+      updateDeploymentResourcesDto?.memoryCount
     ) {
       this.eventEmitter.emit(
         Event.DeploymentUpdated,

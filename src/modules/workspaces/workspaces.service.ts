@@ -8,10 +8,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Workspace, WorkspaceDocument } from './schemas/workspace.schema';
 import { Injectable } from '@nestjs/common';
 import { CreateWorkspaceDto } from './dto/create-workspace.dto';
-import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
+import {
+  UpdateWorkspaceDto,
+  UpdateWorkspaceResourcesDto,
+} from './dto/update-workspace.dto';
 import { UserDocument } from '../users/schemas/user.schema';
 import { Model, Query } from 'mongoose';
 import { Event } from '../../events/events.enum';
+import { WorkspaceUpdatedEvent } from '../../events/workspace-updated.event';
 
 @Injectable()
 export class WorkspacesService {
@@ -88,14 +92,70 @@ export class WorkspacesService {
     workspaceId: string,
     updateWorkspaceDto: UpdateWorkspaceDto,
   ): Promise<WorkspaceDocument> {
-    const workspace: WorkspaceDocument = await this.workspaceModel
-      .findOneAndUpdate(null, updateWorkspaceDto, { new: true })
+    const workspace: WorkspaceDocument = await this.findOne(
+      userId,
+      workspaceId,
+    );
+
+    // Change the updated fields only
+    workspace.name = updateWorkspaceDto.name || workspace.name;
+    const updateWorkspaceResourcesDto: UpdateWorkspaceResourcesDto =
+      updateWorkspaceDto.properties?.resources;
+    if (!workspace.properties) {
+      workspace.properties = {};
+    }
+    if (!workspace.properties.resources) {
+      workspace.properties.resources = {};
+    }
+    if (updateWorkspaceResourcesDto?.cpuCount === 0) {
+      workspace.properties.resources.cpuCount = null;
+    } else {
+      workspace.properties.resources.cpuCount =
+        updateWorkspaceResourcesDto?.cpuCount ||
+        workspace.properties.resources.cpuCount;
+    }
+    if (updateWorkspaceResourcesDto?.memoryCount === 0) {
+      workspace.properties.resources.memoryCount = null;
+    } else {
+      workspace.properties.resources.memoryCount =
+        updateWorkspaceResourcesDto?.memoryCount ||
+        workspace.properties.resources.memoryCount;
+    }
+    if (updateWorkspaceResourcesDto?.storageCount === 0) {
+      workspace.properties.resources.storageCount = null;
+    } else {
+      workspace.properties.resources.storageCount =
+        updateWorkspaceResourcesDto?.storageCount ||
+        workspace.properties.resources.storageCount;
+    }
+    await this.workspaceModel
+      .updateOne(null, workspace)
       .where('_id')
       .equals(workspaceId)
       .where('users')
       .in([userId])
       .exec();
-    if (!workspace) throw new WorkspaceNotFoundException(workspaceId);
+    /**
+     * Checks if a number is defined
+     * @param num the number to check
+     */
+    const isDefined = (num: number): boolean => {
+      return num !== undefined;
+    };
+    /**
+     * Send the workspace.updated event only if cpuCount, memoryCount
+     *  and/or storageCount have been updated
+     */
+    if (
+      isDefined(updateWorkspaceResourcesDto?.cpuCount) ||
+      isDefined(updateWorkspaceResourcesDto?.memoryCount) ||
+      isDefined(updateWorkspaceResourcesDto?.storageCount)
+    ) {
+      this.eventEmitter.emit(
+        Event.WorkspaceUpdated,
+        new WorkspaceUpdatedEvent(workspace),
+      );
+    }
     return workspace;
   }
 

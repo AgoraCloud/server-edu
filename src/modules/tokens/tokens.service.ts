@@ -5,7 +5,7 @@ import { TokenType, Token, TokenDocument } from './schemas/token.schema';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Event } from 'src/events/events.enum';
+import { Event } from '../../events/events.enum';
 
 @Injectable()
 export class TokensService {

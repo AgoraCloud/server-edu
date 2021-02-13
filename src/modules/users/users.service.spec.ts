@@ -2,7 +2,7 @@ import { AccountNotVerifiedException } from './../../exceptions/account-not-veri
 import { AccountDisabledException } from './../../exceptions/account-disabled.exception';
 import { UserNotFoundException } from '../../exceptions/user-not-found.exception';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UserDocument } from 'src/modules/users/schemas/user.schema';
+import { UserDocument } from './../users/schemas/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { TokenSchema } from './../tokens/schemas/token.schema';
 import { TokensService } from './../tokens/tokens.service';
