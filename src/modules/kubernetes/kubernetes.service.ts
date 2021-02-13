@@ -28,7 +28,7 @@ import { ConfigService } from '@nestjs/config';
 import { DeploymentDeletedEvent } from '../../events/deployment-deleted.event';
 import { DeploymentUpdatedEvent } from '../../events/deployment-updated.event';
 import { DeploymentCreatedEvent } from '../../events/deployment-created.event';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import * as k8s from '@kubernetes/client-node';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Event } from '../../events/events.enum';
@@ -37,17 +37,19 @@ import * as request from 'request';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
-export class KubernetesService {
-  private readonly k8sCoreV1Api: k8s.CoreV1Api;
-  private readonly k8sAppsV1Api: k8s.AppsV1Api;
-  private readonly k8sNetworkingV1Api: k8s.NetworkingV1Api;
-  private readonly k8sRbacAuthorizationV1Api: k8s.RbacAuthorizationV1Api;
+export class KubernetesService implements OnModuleInit {
   private readonly kubernetesConfig: KubernetesConfig;
   private readonly resourcePrefix: string = 'agoracloud';
   private readonly logger: Logger = new Logger(KubernetesService.name);
 
   constructor(
     @Inject(k8s.KubeConfig) private readonly kc: k8s.KubeConfig,
+    @Inject(k8s.CoreV1Api) private readonly k8sCoreV1Api: k8s.CoreV1Api,
+    @Inject(k8s.AppsV1Api) private readonly k8sAppsV1Api: k8s.AppsV1Api,
+    @Inject(k8s.NetworkingV1Api)
+    private readonly k8sNetworkingV1Api: k8s.NetworkingV1Api,
+    @Inject(k8s.RbacAuthorizationV1Api)
+    private readonly k8sRbacAuthorizationV1Api: k8s.RbacAuthorizationV1Api,
     private readonly configService: ConfigService,
     private readonly deploymentsService: DeploymentsService,
     private readonly workspacesService: WorkspacesService,
@@ -55,14 +57,10 @@ export class KubernetesService {
     this.kubernetesConfig = this.configService.get<KubernetesConfig>(
       'kubernetes',
     );
-    this.kc.loadFromDefault();
-    this.k8sCoreV1Api = this.kc.makeApiClient(k8s.CoreV1Api);
-    this.k8sAppsV1Api = this.kc.makeApiClient(k8s.AppsV1Api);
-    this.k8sNetworkingV1Api = this.kc.makeApiClient(k8s.NetworkingV1Api);
-    this.k8sRbacAuthorizationV1Api = this.kc.makeApiClient(
-      k8s.RbacAuthorizationV1Api,
-    );
-    this.startPodInformer();
+  }
+
+  async onModuleInit(): Promise<void> {
+    await this.startPodInformer();
   }
 
   /**
