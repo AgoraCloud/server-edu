@@ -1,4 +1,4 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { CreatePageDto } from './create-page.dto';
+import { CreateWikiPageDto } from './create-page.dto';
 
-export class UpdatePageDto extends PartialType(CreatePageDto) {}
+export class UpdateWikiPageDto extends PartialType(CreateWikiPageDto) {}

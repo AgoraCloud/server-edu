@@ -1,17 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PagesController } from './pages.controller';
-import { PagesService } from './pages.service';
+import { WikiPagesController } from './pages.controller';
+import { WikiPagesService } from './pages.service';
 
-describe('PagesController', () => {
-  let controller: PagesController;
+describe('WikiPagesController', () => {
+  let controller: WikiPagesController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [PagesController],
-      providers: [PagesService],
+      controllers: [WikiPagesController],
+      providers: [WikiPagesService],
     }).compile();
 
-    controller = module.get<PagesController>(PagesController);
+    controller = module.get<WikiPagesController>(WikiPagesController);
   });
 
   it('should be defined', () => {

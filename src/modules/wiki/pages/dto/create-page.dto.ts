@@ -1,1 +1,1 @@
-export class CreatePageDto {}
+export class CreateWikiPageDto {}

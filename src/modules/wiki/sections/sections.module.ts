@@ -1,9 +1,17 @@
+import { WorkspacesModule } from './../../workspaces/workspaces.module';
+import { WikiSectionSchema } from './schemas/wiki-section.schema';
 import { Module } from '@nestjs/common';
-import { SectionsService } from './sections.service';
-import { SectionsController } from './sections.controller';
+import { WikiSectionsService } from './sections.service';
+import { WikiSectionsController } from './sections.controller';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
-  controllers: [SectionsController],
-  providers: [SectionsService],
+  imports: [
+    MongooseModule.forFeature([{ name: 'Section', schema: WikiSectionSchema }]),
+    WorkspacesModule,
+  ],
+  controllers: [WikiSectionsController],
+  providers: [WikiSectionsService],
+  exports: [WikiSectionsService],
 })
-export class SectionsModule {}
+export class WikiSectionsModule {}

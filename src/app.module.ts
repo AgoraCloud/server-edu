@@ -20,8 +20,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { HealthModule } from './modules/health/health.module';
 import { LoggerModule } from './modules/logger/logger.module';
 import { commaDelimitedLogLevel } from './utils/regex.patterns';
-import { SectionsModule } from './modules/wiki/sections/sections.module';
-import { PagesModule } from './modules/wiki/pages/pages.module';
+import { WikiSectionsModule } from './modules/wiki/sections/sections.module';
+import { WikiPagesModule } from './modules/wiki/pages/pages.module';
 
 @Module({
   imports: [
@@ -98,8 +98,8 @@ import { PagesModule } from './modules/wiki/pages/pages.module';
     ProxyModule,
     HealthModule,
     LoggerModule,
-    SectionsModule,
-    PagesModule,
+    WikiSectionsModule,
+    WikiPagesModule,
   ],
 })
 export class AppModule implements NestModule {

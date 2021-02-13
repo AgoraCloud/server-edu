@@ -1,1 +1,1 @@
-export class CreateSectionDto {}
+export class CreateWikiSectionDto {}

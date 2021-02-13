@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { CreatePageDto } from './dto/create-page.dto';
-import { UpdatePageDto } from './dto/update-page.dto';
+import { CreateWikiPageDto } from './dto/create-page.dto';
+import { UpdateWikiPageDto } from './dto/update-page.dto';
 
 @Injectable()
-export class PagesService {
-  create(createPageDto: CreatePageDto) {
+export class WikiPagesService {
+  create(createWikiPageDto: CreateWikiPageDto) {
     return 'This action adds a new page';
   }
 
@@ -16,7 +16,7 @@ export class PagesService {
     return `This action returns a #${id} page`;
   }
 
-  update(id: number, updatePageDto: UpdatePageDto) {
+  update(id: number, updateWikiPageDto: UpdateWikiPageDto) {
     return `This action updates a #${id} page`;
   }
 

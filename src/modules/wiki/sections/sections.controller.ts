@@ -1,3 +1,6 @@
+import { WikiSectionDto } from './dto/section.dto';
+import { TransformInterceptor } from './../../../interceptors/transform.interceptor';
+import { JwtAuthenticationGuard } from './../../authentication/guards/jwt-authentication.guard';
 import {
   Controller,
   Get,
@@ -6,37 +9,45 @@ import {
   Put,
   Param,
   Delete,
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import { SectionsService } from './sections.service';
-import { CreateSectionDto } from './dto/create-section.dto';
-import { UpdateSectionDto } from './dto/update-section.dto';
+import { WikiSectionsService } from './sections.service';
+import { CreateWikiSectionDto } from './dto/create-section.dto';
+import { UpdateWikiSectionDto } from './dto/update-section.dto';
+import { WorkspaceInterceptor } from 'src/interceptors/workspace.interceptor';
 
+@UseGuards(JwtAuthenticationGuard)
 @Controller('api/workspaces/:workspaceId/sections')
-export class SectionsController {
-  constructor(private readonly sectionsService: SectionsService) {}
+@UseInterceptors(WorkspaceInterceptor, new TransformInterceptor(WikiSectionDto))
+export class WikiSectionsController {
+  constructor(private readonly wikiSectionsService: WikiSectionsService) {}
 
   @Post()
-  create(@Body() createSectionDto: CreateSectionDto) {
-    return this.sectionsService.create(createSectionDto);
+  create(@Body() createWikiSectionDto: CreateWikiSectionDto) {
+    return this.wikiSectionsService.create(createWikiSectionDto);
   }
 
   @Get()
   findAll() {
-    return this.sectionsService.findAll();
+    return this.wikiSectionsService.findAll();
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.sectionsService.findOne(+id);
+    return this.wikiSectionsService.findOne(+id);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateSectionDto: UpdateSectionDto) {
-    return this.sectionsService.update(+id, updateSectionDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateWikiSectionDto: UpdateWikiSectionDto,
+  ) {
+    return this.wikiSectionsService.update(+id, updateWikiSectionDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.sectionsService.remove(+id);
+    return this.wikiSectionsService.remove(+id);
   }
 }
