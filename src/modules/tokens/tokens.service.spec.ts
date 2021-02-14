@@ -1,5 +1,5 @@
 import { addDays } from '../../utils/date';
-import { UserSchema } from './../users/schemas/user.schema';
+import { User, UserSchema } from './../users/schemas/user.schema';
 import { TokenNotFoundException } from './../../exceptions/token-not-found.exception';
 import { UserDocument } from '../users/schemas/user.schema';
 import {
@@ -45,8 +45,8 @@ describe('TokensService', () => {
         MongooseMockModule({
           connectionName: (new Date().getTime() * Math.random()).toString(16),
         }),
-        MongooseModule.forFeature([{ name: 'Token', schema: TokenSchema }]),
-        MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]),
+        MongooseModule.forFeature([{ name: Token.name, schema: TokenSchema }]),
+        MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
       ],
       providers: [TokensService],
     }).compile();

@@ -1,5 +1,5 @@
 import { TokensModule } from './../tokens/tokens.module';
-import { UserSchema } from './schemas/user.schema';
+import { User, UserSchema } from './schemas/user.schema';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Module, Global } from '@nestjs/common';
 import { UsersService } from './users.service';
@@ -8,7 +8,7 @@ import { UsersController } from './users.controller';
 @Global()
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]),
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     TokensModule,
   ],
   controllers: [UsersController],

@@ -3,7 +3,7 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { TokenPayload } from './interfaces/token-payload.interface';
 import { InvalidCredentialsException } from './../../exceptions/invalid-credentials.exception';
 import { TokenExpiredException } from './../../exceptions/token-expired.exception';
-import { UserDocument } from './../users/schemas/user.schema';
+import { User, UserDocument } from './../users/schemas/user.schema';
 import { VerifyAccountDto } from './dto/verify-account.dto';
 import { CreateUserDto } from './../users/dto/create-user.dto';
 import {
@@ -67,8 +67,8 @@ describe('AuthenticationService', () => {
         MongooseMockModule({
           connectionName: (new Date().getTime() * Math.random()).toString(16),
         }),
-        MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]),
-        MongooseModule.forFeature([{ name: 'Token', schema: TokenSchema }]),
+        MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+        MongooseModule.forFeature([{ name: Token.name, schema: TokenSchema }]),
         ConfigModule,
       ],
       providers: [

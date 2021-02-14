@@ -1,4 +1,4 @@
-import { DeploymentSchema } from './schemas/deployment.schema';
+import { Deployment, DeploymentSchema } from './schemas/deployment.schema';
 import { MongooseModule } from '@nestjs/mongoose';
 import { WorkspacesModule } from './../workspaces/workspaces.module';
 import { Module } from '@nestjs/common';
@@ -8,7 +8,7 @@ import { DeploymentsController } from './deployments.controller';
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: 'Deployment', schema: DeploymentSchema },
+      { name: Deployment.name, schema: DeploymentSchema },
     ]),
     WorkspacesModule,
   ],
