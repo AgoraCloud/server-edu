@@ -1,12 +1,12 @@
 import { WikiPageNotFoundException } from './../../../exceptions/wiki-page-not-found.exception';
-import { WikiSectionDocument } from 'src/modules/wiki/sections/schemas/section.schema';
+import { WikiSectionDocument } from '../../wiki/sections/schemas/section.schema';
 import { WorkspaceDocument } from './../../workspaces/schemas/workspace.schema';
 import { UserDocument } from './../../users/schemas/user.schema';
 import { WikiPage } from './schemas/page.schema';
 import { WikiSectionDeletedEvent } from './../../../events/wiki-section-deleted.event';
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { Event } from 'src/events/events.enum';
+import { Event } from '../../../events/events.enum';
 import { CreateWikiPageDto } from './dto/create-page.dto';
 import { UpdateWikiPageDto } from './dto/update-page.dto';
 import { WikiPageDocument } from './schemas/page.schema';

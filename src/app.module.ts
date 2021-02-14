@@ -22,6 +22,7 @@ import { LoggerModule } from './modules/logger/logger.module';
 import { commaDelimitedLogLevel } from './utils/regex.patterns';
 import { WikiSectionsModule } from './modules/wiki/sections/sections.module';
 import { WikiPagesModule } from './modules/wiki/pages/pages.module';
+import { ProjectsModule } from './modules/projects/projects.module';
 
 @Module({
   imports: [
@@ -100,6 +101,7 @@ import { WikiPagesModule } from './modules/wiki/pages/pages.module';
     LoggerModule,
     WikiSectionsModule,
     WikiPagesModule,
+    ProjectsModule,
   ],
 })
 export class AppModule implements NestModule {

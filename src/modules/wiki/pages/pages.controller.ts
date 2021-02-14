@@ -1,5 +1,5 @@
 import { FindOneParams } from './../../../utils/find-one-params';
-import { WikiSectionDocument } from 'src/modules/wiki/sections/schemas/section.schema';
+import { WikiSectionDocument } from '../../wiki/sections/schemas/section.schema';
 import { WorkspaceDocument } from './../../workspaces/schemas/workspace.schema';
 import { UserDocument } from './../../users/schemas/user.schema';
 import { WikiSectionInterceptor } from './../../../interceptors/wiki-section.interceptor';

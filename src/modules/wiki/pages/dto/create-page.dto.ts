@@ -4,9 +4,9 @@ export class CreateWikiPageDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(1)
-  title: string;
+  readonly title: string;
 
   @IsString()
   @IsNotEmpty()
-  body: string;
+  readonly body: string;
 }

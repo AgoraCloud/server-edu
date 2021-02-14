@@ -1,4 +1,15 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { CreateWikiPageDto } from './create-page.dto';
+import { IsOptional, IsNotEmpty, IsString, MinLength } from 'class-validator';
 
-export class UpdateWikiPageDto extends PartialType(CreateWikiPageDto) {}
+export class UpdateWikiPageDto {
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(1)
+  @IsOptional()
+  readonly title: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  readonly body: string;
+}
