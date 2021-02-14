@@ -1,3 +1,4 @@
+import { ProjectLaneDocument } from './../modules/projects/lanes/schemas/lane.schema';
 import { ProjectDocument } from './../modules/projects/schemas/project.schema';
 import { WikiSectionDocument } from './../modules/wiki/sections/schemas/section.schema';
 import { DeploymentDocument } from './../modules/deployments/schemas/deployment.schema';
@@ -25,6 +26,10 @@ interface RequestWithProject extends Request {
   project: ProjectDocument;
 }
 
+interface RequestWithProjectLane extends Request {
+  projectLane: ProjectLaneDocument;
+}
+
 interface RequestWithWorkspaceAndUser extends RequestWithUser {
   workspace: WorkspaceDocument;
 }
@@ -44,14 +49,21 @@ interface RequestWithWorkspaceUserAndProject
   project: ProjectDocument;
 }
 
+interface RequestWithWorkspaceUserProjectAndProjectLane
+  extends RequestWithWorkspaceUserAndProject {
+  projectLane: ProjectLaneDocument;
+}
+
 export {
   RequestWithUser,
   RequestWithWorkspace,
   RequestWithDeployment,
   RequestWithWikiSection,
   RequestWithProject,
+  RequestWithProjectLane,
   RequestWithWorkspaceAndUser,
   RequestWithWorkspaceDeploymentAndUser,
   RequestWithWorkspaceUserAndWikiSection,
   RequestWithWorkspaceUserAndProject,
+  RequestWithWorkspaceUserProjectAndProjectLane,
 };

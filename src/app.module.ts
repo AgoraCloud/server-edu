@@ -1,3 +1,4 @@
+import { ProjectTasksModule } from './modules/projects/tasks/tasks.module';
 import { ProjectLanesModule } from './modules/projects/lanes/lanes.module';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { LogLevel } from './config/configuration.interface';
@@ -104,6 +105,7 @@ import { ProjectsModule } from './modules/projects/projects.module';
     WikiPagesModule,
     ProjectsModule,
     ProjectLanesModule,
+    ProjectTasksModule,
   ],
 })
 export class AppModule implements NestModule {

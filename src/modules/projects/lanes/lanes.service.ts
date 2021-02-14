@@ -162,7 +162,7 @@ export class ProjectLanesService {
   }
 
   /**
-   * Deletes all project lanes
+   * Delete all project lanes
    * @param projectId the project id
    */
   private async removeAll(projectId: string): Promise<void> {
