@@ -1,3 +1,4 @@
+import { ProjectCreatedEvent } from './../../events/project-created.event';
 import { WorkspaceUserRemovedEvent } from './../../events/workspace-user-removed.event';
 import { WorkspaceDeletedEvent } from './../../events/workspace-deleted.event';
 import { ProjectDeletedEvent } from './../../events/project-deleted.event';
@@ -37,6 +38,10 @@ export class ProjectsService {
     project.workspace = workspace;
     const createdProject: ProjectDocument = await this.projectModel.create(
       project,
+    );
+    this.eventEmitter.emit(
+      Event.ProjectCreated,
+      new ProjectCreatedEvent(createdProject),
     );
     return createdProject;
   }

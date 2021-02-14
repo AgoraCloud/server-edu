@@ -1,9 +1,21 @@
+import { ProjectLane, ProjectLaneSchema } from './schemas/lane.schema';
+import { MongooseModule } from '@nestjs/mongoose';
+import { ProjectsModule } from './../projects.module';
+import { WorkspacesModule } from './../../workspaces/workspaces.module';
 import { Module } from '@nestjs/common';
-import { LanesService } from './lanes.service';
-import { LanesController } from './lanes.controller';
+import { ProjectLanesService } from './lanes.service';
+import { ProjectLanesController } from './lanes.controller';
 
 @Module({
-  controllers: [LanesController],
-  providers: [LanesService],
+  imports: [
+    MongooseModule.forFeature([
+      { name: ProjectLane.name, schema: ProjectLaneSchema },
+    ]),
+    WorkspacesModule,
+    ProjectsModule,
+  ],
+  controllers: [ProjectLanesController],
+  providers: [ProjectLanesService],
+  exports: [ProjectLanesService],
 })
-export class LanesModule {}
+export class ProjectLanesModule {}

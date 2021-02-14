@@ -1,3 +1,4 @@
+import { ProjectDocument } from './../modules/projects/schemas/project.schema';
 import { WikiSectionDocument } from './../modules/wiki/sections/schemas/section.schema';
 import { DeploymentDocument } from './../modules/deployments/schemas/deployment.schema';
 import { WorkspaceDocument } from './../modules/workspaces/schemas/workspace.schema';
@@ -20,6 +21,10 @@ interface RequestWithWikiSection extends Request {
   wikiSection: WikiSectionDocument;
 }
 
+interface RequestWithProject extends Request {
+  project: ProjectDocument;
+}
+
 interface RequestWithWorkspaceAndUser extends RequestWithUser {
   workspace: WorkspaceDocument;
 }
@@ -34,12 +39,19 @@ interface RequestWithWorkspaceUserAndWikiSection
   wikiSection: WikiSectionDocument;
 }
 
+interface RequestWithWorkspaceUserAndProject
+  extends RequestWithWorkspaceAndUser {
+  project: ProjectDocument;
+}
+
 export {
   RequestWithUser,
   RequestWithWorkspace,
   RequestWithDeployment,
   RequestWithWikiSection,
+  RequestWithProject,
   RequestWithWorkspaceAndUser,
   RequestWithWorkspaceDeploymentAndUser,
   RequestWithWorkspaceUserAndWikiSection,
+  RequestWithWorkspaceUserAndProject,
 };

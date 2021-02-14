@@ -1,4 +1,3 @@
-import { PartialType } from '@nestjs/mapped-types';
 import { IsOptional, IsNotEmpty, IsString, MinLength } from 'class-validator';
 
 export class UpdateWikiPageDto {
