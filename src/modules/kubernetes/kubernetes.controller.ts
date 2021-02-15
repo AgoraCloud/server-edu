@@ -1,4 +1,12 @@
-import { ApiTags, ApiCookieAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiCookieAuth,
+  ApiUnauthorizedResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiInternalServerErrorResponse,
+  ApiBadRequestResponse,
+} from '@nestjs/swagger';
 import { DeploymentInterceptor } from '../../interceptors/deployment.interceptor';
 import { DeploymentMetricsDto } from './dto/deployment-metrics.dto';
 import { KubernetesService } from './kubernetes.service';
@@ -26,6 +34,17 @@ export class KubernetesController {
    * @param deploymentId the deployment id
    */
   @Get('logs')
+  @ApiOkResponse({
+    description: 'The deployment logs have been successfully retrieved',
+    type: 'string',
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({
+    description: 'The workspace or deployment with the given id was not found',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Kubernetes pod for the given deployment did not exist',
+  })
   findOneLogs(
     @Param('workspaceId') workspaceId: string,
     @Param('deploymentId') deploymentId: string,
@@ -39,6 +58,21 @@ export class KubernetesController {
    * @param deploymentId the deployment id
    */
   @Get('metrics')
+  @ApiOkResponse({
+    description: 'The deployment metrics have been successfully retrieved',
+    type: DeploymentMetricsDto,
+  })
+  @ApiBadRequestResponse({
+    description:
+      'Kubernetes pod metrics for the given deployment were not available',
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({
+    description: 'The workspace or deployment with the given id was not found',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Kubernetes pod for the given deployment did not exist',
+  })
   findOneMetrics(
     @Param('workspaceId') workspaceId: string,
     @Param('deploymentId') deploymentId: string,

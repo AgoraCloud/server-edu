@@ -23,7 +23,16 @@ import { AuthenticationService } from './authentication.service';
 import { Request as Req } from 'express';
 import { User } from '../../decorators/user.decorator';
 import JwtRefreshGuard from './guards/jwt-refresh-authentication.guard';
-import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiCookieAuth,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 
 @Controller('api/auth')
 @ApiTags('Authentication')
@@ -36,6 +45,10 @@ export class AuthenticationController {
    * @param createUserDto the user to create
    */
   @Post('register')
+  @ApiCreatedResponse({
+    description: 'The users account has been successfully created',
+  })
+  @ApiBadRequestResponse({ description: 'The supplied email was in use' })
   register(@Body() createUserDto: CreateUserDto): Promise<void> {
     return this.authenticationService.register(createUserDto);
   }
@@ -49,6 +62,19 @@ export class AuthenticationController {
   @ApiCookieAuth()
   @UseGuards(LocalAuthenticationGuard)
   @UseInterceptors(new TransformInterceptor(UserDto))
+  @ApiCreatedResponse({
+    description: 'The user has been successfully logged in',
+  })
+  @ApiBadRequestResponse({
+    description: 'The supplied email and/or password were invalid',
+  })
+  @ApiForbiddenResponse({
+    description: 'The user with the given email was disabled or not verified',
+  })
+  @ApiNotFoundResponse({
+    description: 'The user with the given email was not found',
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   async logIn(
     @Request() request: Req,
     @User() user: UserDocument,
@@ -81,6 +107,8 @@ export class AuthenticationController {
   @Post('logout')
   @ApiCookieAuth()
   @UseGuards(JwtAuthenticationGuard)
+  @ApiOkResponse({ description: 'The user has been successfully logged out' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   async logOut(
     @Request() request: Req,
     @User() user: UserDocument,
@@ -104,6 +132,11 @@ export class AuthenticationController {
   @Post('refresh')
   @ApiCookieAuth()
   @UseGuards(JwtRefreshGuard)
+  @ApiCreatedResponse({
+    description:
+      'The new access and refresh tokens were successfully refreshed',
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   async refreshToken(
     @Request() request: Req,
     @User() user: UserDocument,
@@ -124,6 +157,15 @@ export class AuthenticationController {
    */
   @HttpCode(200)
   @Post('forgot-password')
+  @ApiOkResponse({
+    description: 'The forgot password request has been successfully processed',
+  })
+  @ApiForbiddenResponse({
+    description: 'The user with the given email was disabled or not verified',
+  })
+  @ApiNotFoundResponse({
+    description: 'The user with the given email was not found',
+  })
   async forgotPassword(
     @Body() forgotPasswordDto: ForgotPasswordDto,
   ): Promise<void> {
@@ -136,6 +178,16 @@ export class AuthenticationController {
    */
   @HttpCode(200)
   @Post('change-password')
+  @ApiOkResponse({
+    description: 'The users password has been successfully changed',
+  })
+  @ApiBadRequestResponse({
+    description:
+      'The change password token was expired or the provided change password information was not valid',
+  })
+  @ApiNotFoundResponse({
+    description: 'The change password token with the given id was not found',
+  })
   async changePassword(
     @Body() changePasswordDto: ChangePasswordDto,
   ): Promise<void> {
@@ -148,6 +200,17 @@ export class AuthenticationController {
    */
   @HttpCode(200)
   @Post('verify-account')
+  @ApiOkResponse({
+    description: 'The users account has been successfully verified',
+  })
+  @ApiBadRequestResponse({
+    description:
+      'The account verification token was expired or the provided account verification information was not valid',
+  })
+  @ApiNotFoundResponse({
+    description:
+      'The account verification token with the given id was not found',
+  })
   async verifyAccount(
     @Body() verifyAccountDto: VerifyAccountDto,
   ): Promise<void> {

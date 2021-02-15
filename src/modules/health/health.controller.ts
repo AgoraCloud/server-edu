@@ -18,11 +18,27 @@ export class HealthController {
   ) {}
 
   /**
-   * Health and readiness check
+   * Get the readiness state of the server
    */
   @HealthCheck()
-  @Get(['readiness', 'liveness'])
-  healthCheck(): Promise<HealthCheckResult> {
+  @Get('readiness')
+  readinessCheck(): Promise<HealthCheckResult> {
+    return this.healthCheck();
+  }
+
+  /**
+   * Get the liveness state of the server
+   */
+  @HealthCheck()
+  @Get('liveness')
+  livenessCheck(): Promise<HealthCheckResult> {
+    return this.healthCheck();
+  }
+
+  /**
+   * Checks if the server is healthy
+   */
+  private async healthCheck(): Promise<HealthCheckResult> {
     return this.healthCheckService.check([
       async () => this.mongooseHealthIndicator.pingCheck('mongodb'),
       async () =>

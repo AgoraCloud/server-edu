@@ -1,4 +1,12 @@
-import { ApiTags, ApiCookieAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiCookieAuth,
+  ApiCreatedResponse,
+  ApiBadRequestResponse,
+  ApiUnauthorizedResponse,
+  ApiOkResponse,
+  ApiNotFoundResponse,
+} from '@nestjs/swagger';
 import { WorkspaceDto } from './dto/workspace.dto';
 import { TransformInterceptor } from './../../interceptors/transform.interceptor';
 import { WorkspaceDocument } from './schemas/workspace.schema';
@@ -35,6 +43,14 @@ export class WorkspacesController {
    * @param createWorkspaceDto the workspace to create
    */
   @Post()
+  @ApiCreatedResponse({
+    description: 'The workspace has been successfully created',
+    type: WorkspaceDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'The provided workspace is not valid',
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   create(
     @User() user: UserDocument,
     @Body() createWorkspaceDto: CreateWorkspaceDto,
@@ -47,6 +63,11 @@ export class WorkspacesController {
    * @param userId the users id
    */
   @Get()
+  @ApiOkResponse({
+    description: 'The workspaces have been successfully retrieved',
+    type: [WorkspaceDto],
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   findAll(@User('_id') userId: string): Promise<WorkspaceDocument[]> {
     return this.workspacesService.findAll(userId);
   }
@@ -57,6 +78,14 @@ export class WorkspacesController {
    * @param workspaceId the workspace id
    */
   @Get(':id')
+  @ApiOkResponse({
+    description: 'The workspace has been successfully retrieved',
+    type: WorkspaceDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({
+    description: 'The workspace with the given id was not found',
+  })
   findOne(
     @User('_id') userId: string,
     @Param() { id: workspaceId }: FindOneParams,
@@ -71,6 +100,17 @@ export class WorkspacesController {
    * @param updateWorkspaceDto the updated workspace
    */
   @Put(':id')
+  @ApiOkResponse({
+    description: 'The workspace has been successfully updated',
+    type: WorkspaceDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'The provided workspace is not valid',
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({
+    description: 'The workspace with the given id was not found',
+  })
   update(
     @User('_id') userId: string,
     @Param() { id: workspaceId }: FindOneParams,
@@ -89,6 +129,13 @@ export class WorkspacesController {
    * @param workspaceId the workspace id
    */
   @Delete(':id')
+  @ApiOkResponse({
+    description: 'The workspace has been successfully deleted',
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({
+    description: 'The workspace with the given id was not found',
+  })
   remove(
     @User('_id') userId: string,
     @Param() { id: workspaceId }: FindOneParams,

@@ -1,4 +1,12 @@
-import { ApiTags, ApiCookieAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiCookieAuth,
+  ApiCreatedResponse,
+  ApiBadRequestResponse,
+  ApiUnauthorizedResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+} from '@nestjs/swagger';
 import { FindOneParams } from './../../../utils/find-one-params';
 import { WikiSectionDocument } from '../../wiki/sections/schemas/section.schema';
 import { WorkspaceDocument } from './../../workspaces/schemas/workspace.schema';
@@ -47,6 +55,18 @@ export class WikiPagesController {
    * @param createWikiPageDto the wiki page to create
    */
   @Post()
+  @ApiCreatedResponse({
+    description: 'The wiki page has been successfully created',
+    type: WikiPageDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'The provided wiki page is not valid',
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({
+    description:
+      'The workspace or wiki section with the given id was not found',
+  })
   create(
     @User() user: UserDocument,
     @Workspace() workspace: WorkspaceDocument,
@@ -68,6 +88,15 @@ export class WikiPagesController {
    * @param wikiSectionId the wiki section id
    */
   @Get()
+  @ApiOkResponse({
+    description: 'The wiki pages have been successfully retrieved',
+    type: [WikiPageDto],
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({
+    description:
+      'The workspace or wiki section with the given id was not found',
+  })
   findAll(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,
@@ -84,6 +113,15 @@ export class WikiPagesController {
    * @param wikiPageId the wiki page id
    */
   @Get(':id')
+  @ApiOkResponse({
+    description: 'The wiki page has been successfully retrieved',
+    type: WikiPageDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({
+    description:
+      'The workspace, wiki section or wiki page with the given id was not found',
+  })
   findOne(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,
@@ -107,6 +145,18 @@ export class WikiPagesController {
    * @param updateWikiPageDto the updated wiki page
    */
   @Put(':id')
+  @ApiOkResponse({
+    description: 'The wiki page has been successfully updated',
+    type: WikiPageDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'The provided wiki page is not valid',
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({
+    description:
+      'The workspace, wiki section or wiki page with the given id was not found',
+  })
   update(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,
@@ -131,6 +181,14 @@ export class WikiPagesController {
    * @param wikiPageId the wiki page id
    */
   @Delete(':id')
+  @ApiOkResponse({
+    description: 'The wiki page has been successfully deleted',
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({
+    description:
+      'The workspace, wiki section or wiki page with the given id was not found',
+  })
   remove(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,

@@ -1,4 +1,12 @@
-import { ApiTags, ApiCookieAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiCookieAuth,
+  ApiCreatedResponse,
+  ApiUnauthorizedResponse,
+  ApiBadRequestResponse,
+  ApiOkResponse,
+  ApiNotFoundResponse,
+} from '@nestjs/swagger';
 import { FindOneParams } from './../../../utils/find-one-params';
 import { ProjectDocument } from './../schemas/project.schema';
 import { WorkspaceDocument } from './../../workspaces/schemas/workspace.schema';
@@ -47,6 +55,17 @@ export class ProjectLanesController {
    * @param createProjectLaneDto the project lane to create
    */
   @Post()
+  @ApiCreatedResponse({
+    description: 'The project lane has been successfully created',
+    type: ProjectLaneDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'The provided project lane is not valid',
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({
+    description: 'The workspace or project with the given id was not found',
+  })
   create(
     @User() user: UserDocument,
     @Workspace() workspace: WorkspaceDocument,
@@ -68,6 +87,14 @@ export class ProjectLanesController {
    * @param projectId the project id
    */
   @Get()
+  @ApiOkResponse({
+    description: 'The project lanes have been successfully retrieved',
+    type: [ProjectLaneDto],
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({
+    description: 'The workspace or project with the given id was not found',
+  })
   findAll(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,
@@ -84,6 +111,15 @@ export class ProjectLanesController {
    * @param projectLaneId the project lane id
    */
   @Get(':id')
+  @ApiOkResponse({
+    description: 'The project lane has been successfully retrieved',
+    type: ProjectLaneDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({
+    description:
+      'The workspace, project or project lane with the given id was not found',
+  })
   findOne(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,
@@ -107,6 +143,18 @@ export class ProjectLanesController {
    * @param updateProjectLaneDto the updated project lane
    */
   @Put(':id')
+  @ApiOkResponse({
+    description: 'The project lane has been successfully updated',
+    type: ProjectLaneDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'The provided project lane is not valid',
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({
+    description:
+      'The workspace, project or project lane with the given id was not found',
+  })
   update(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,
@@ -131,6 +179,14 @@ export class ProjectLanesController {
    * @param projectLaneId the project lane id
    */
   @Delete(':id')
+  @ApiOkResponse({
+    description: 'The project lane has been successfully deleted',
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({
+    description:
+      'The workspace, project or project lane with the given id was not found',
+  })
   remove(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,

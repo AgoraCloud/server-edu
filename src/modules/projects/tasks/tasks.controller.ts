@@ -1,4 +1,12 @@
-import { ApiTags, ApiCookieAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiCookieAuth,
+  ApiCreatedResponse,
+  ApiBadRequestResponse,
+  ApiUnauthorizedResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+} from '@nestjs/swagger';
 import { FindOneParams } from './../../../utils/find-one-params';
 import { ProjectLaneDocument } from './../lanes/schemas/lane.schema';
 import { ProjectDocument } from './../schemas/project.schema';
@@ -54,6 +62,18 @@ export class ProjectTasksController {
    * @param createProjectTaskDto the project task to create
    */
   @Post()
+  @ApiCreatedResponse({
+    description: 'The project task has been successfully created',
+    type: ProjectTaskDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'The provided project task is not valid',
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({
+    description:
+      'The workspace, project or project lane with the given id was not found',
+  })
   create(
     @User() user: UserDocument,
     @Workspace() workspace: WorkspaceDocument,
@@ -78,6 +98,15 @@ export class ProjectTasksController {
    * @param projectLaneId the project lane id
    */
   @Get()
+  @ApiOkResponse({
+    description: 'The project tasks have been successfully retrieved',
+    type: [ProjectTaskDto],
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({
+    description:
+      'The workspace, project or project lane with the given id was not found',
+  })
   findAll(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,
@@ -101,6 +130,15 @@ export class ProjectTasksController {
    * @param projectTaskId the project task id
    */
   @Get(':id')
+  @ApiOkResponse({
+    description: 'The project task has been successfully retrieved',
+    type: ProjectTaskDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({
+    description:
+      'The workspace, project, project lane or project task with the given id was not found',
+  })
   findOne(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,
@@ -127,6 +165,18 @@ export class ProjectTasksController {
    * @param updateProjectTaskDto the updated project task
    */
   @Put(':id')
+  @ApiOkResponse({
+    description: 'The project task has been successfully updated',
+    type: ProjectTaskDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'The provided project task is not valid',
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({
+    description:
+      'The workspace, project, project lane or project task with the given id was not found',
+  })
   update(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,
@@ -154,6 +204,14 @@ export class ProjectTasksController {
    * @param projectTaskId the project task id
    */
   @Delete(':id')
+  @ApiOkResponse({
+    description: 'The project task has been successfully deleted',
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({
+    description:
+      'The workspace, project, project lane or project task with the given id was not found',
+  })
   remove(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,

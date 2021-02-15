@@ -1,4 +1,12 @@
-import { ApiTags, ApiCookieAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiCookieAuth,
+  ApiNotFoundResponse,
+  ApiUnauthorizedResponse,
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiOkResponse,
+} from '@nestjs/swagger';
 import { WorkspaceDocument } from './../../workspaces/schemas/workspace.schema';
 import { FindOneParams } from './../../../utils/find-one-params';
 import { UserDocument } from './../../users/schemas/user.schema';
@@ -39,6 +47,17 @@ export class WikiSectionsController {
    * @param createWikiSectionDto the wiki section to create
    */
   @Post()
+  @ApiCreatedResponse({
+    description: 'The wiki section has been successfully created',
+    type: WikiSectionDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'The provided wiki section is not valid',
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({
+    description: 'The workspace with the given id was not found',
+  })
   create(
     @User() user: UserDocument,
     @Workspace() workspace: WorkspaceDocument,
@@ -57,6 +76,14 @@ export class WikiSectionsController {
    * @param workspaceId the workspace id
    */
   @Get()
+  @ApiOkResponse({
+    description: 'The wiki sections have been successfully retrieved',
+    type: [WikiSectionDto],
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({
+    description: 'The workspace with the given id was not found',
+  })
   findAll(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,
@@ -71,6 +98,15 @@ export class WikiSectionsController {
    * @param wikiSectionId the wiki section id
    */
   @Get(':id')
+  @ApiOkResponse({
+    description: 'The wiki section has been successfully retrieved',
+    type: WikiSectionDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({
+    description:
+      'The workspace or wiki section with the given id was not found',
+  })
   findOne(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,
@@ -87,6 +123,18 @@ export class WikiSectionsController {
    * @param updateWikiSectionDto the updated wiki section
    */
   @Put(':id')
+  @ApiOkResponse({
+    description: 'The wiki section has been successfully updated',
+    type: WikiSectionDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'The provided wiki section is not valid',
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({
+    description:
+      'The workspace or wiki section with the given id was not found',
+  })
   update(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,
@@ -108,6 +156,14 @@ export class WikiSectionsController {
    * @param wikiSectionId the wiki section id
    */
   @Delete(':id')
+  @ApiOkResponse({
+    description: 'The wiki section has been successfully deleted',
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({
+    description:
+      'The workspace or wiki section with the given id was not found',
+  })
   remove(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,

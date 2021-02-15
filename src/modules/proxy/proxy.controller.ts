@@ -1,4 +1,9 @@
-import { ApiTags, ApiCookieAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiCookieAuth,
+  ApiUnauthorizedResponse,
+  ApiInternalServerErrorResponse,
+} from '@nestjs/swagger';
 import { DeploymentDocument } from './../deployments/schemas/deployment.schema';
 import { ProxyService } from './proxy.service';
 import { DeploymentInterceptor } from './../../interceptors/deployment.interceptor';
@@ -29,6 +34,10 @@ export class ProxyController {
    * @param res the response
    */
   @All()
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiInternalServerErrorResponse({
+    description: 'An error occurred when the api request was being proxied',
+  })
   proxy(
     @Deployment() deployment: DeploymentDocument,
     @Req() req: Request,
