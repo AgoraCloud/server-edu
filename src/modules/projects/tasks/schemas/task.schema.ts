@@ -1,7 +1,13 @@
-import { ProjectLaneDocument } from './../../lanes/schemas/lane.schema';
-import { ProjectDocument } from './../../schemas/project.schema';
-import { UserDocument } from './../../../users/schemas/user.schema';
-import { WorkspaceDocument } from './../../../workspaces/schemas/workspace.schema';
+import {
+  ProjectLane,
+  ProjectLaneDocument,
+} from './../../lanes/schemas/lane.schema';
+import { Project, ProjectDocument } from './../../schemas/project.schema';
+import { User, UserDocument } from './../../../users/schemas/user.schema';
+import {
+  Workspace,
+  WorkspaceDocument,
+} from './../../../workspaces/schemas/workspace.schema';
 import { SchemaFactory, Prop, Schema } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 
@@ -18,7 +24,7 @@ export class ProjectTask {
   @Prop({
     required: true,
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Workspace',
+    ref: Workspace.name,
     index: true,
   })
   workspace: WorkspaceDocument;
@@ -26,7 +32,7 @@ export class ProjectTask {
   @Prop({
     required: true,
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: User.name,
     index: true,
   })
   user: UserDocument;
@@ -34,7 +40,7 @@ export class ProjectTask {
   @Prop({
     required: true,
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Project',
+    ref: Project.name,
     index: true,
   })
   project: ProjectDocument;
@@ -42,7 +48,7 @@ export class ProjectTask {
   @Prop({
     required: true,
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'ProjectLane',
+    ref: ProjectLane.name,
     index: true,
   })
   lane: ProjectLaneDocument;

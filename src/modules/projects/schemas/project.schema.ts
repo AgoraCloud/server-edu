@@ -1,5 +1,8 @@
-import { WorkspaceDocument } from './../../workspaces/schemas/workspace.schema';
-import { UserDocument } from './../../users/schemas/user.schema';
+import {
+  Workspace,
+  WorkspaceDocument,
+} from './../../workspaces/schemas/workspace.schema';
+import { User, UserDocument } from './../../users/schemas/user.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 
@@ -16,7 +19,7 @@ export class Project {
   @Prop({
     required: true,
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Workspace',
+    ref: Workspace.name,
     index: true,
   })
   workspace: WorkspaceDocument;
@@ -24,7 +27,7 @@ export class Project {
   @Prop({
     required: true,
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: User.name,
     index: true,
   })
   user: UserDocument;
