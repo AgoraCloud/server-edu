@@ -1,3 +1,4 @@
+import { ApiTags, ApiCookieAuth } from '@nestjs/swagger';
 import { FindOneParams } from './../../../utils/find-one-params';
 import { ProjectDocument } from './../schemas/project.schema';
 import { WorkspaceDocument } from './../../workspaces/schemas/workspace.schema';
@@ -26,6 +27,8 @@ import { Workspace } from '../../../decorators/workspace.decorator';
 import { Project } from '../../../decorators/project.decorator';
 import { ProjectLaneDocument } from './schemas/lane.schema';
 
+@ApiCookieAuth()
+@ApiTags('Project Lanes')
 @UseGuards(JwtAuthenticationGuard)
 @Controller('api/workspaces/:workspaceId/projects/:projectId/lanes')
 @UseInterceptors(

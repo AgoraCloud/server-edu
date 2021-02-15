@@ -1,3 +1,4 @@
+import { ApiTags, ApiCookieAuth } from '@nestjs/swagger';
 import { FindOneParams } from './../../utils/find-one-params';
 import { WorkspaceDocument } from './../workspaces/schemas/workspace.schema';
 import { UserDocument } from './../users/schemas/user.schema';
@@ -23,6 +24,8 @@ import { User } from '../../decorators/user.decorator';
 import { Workspace } from '../../decorators/workspace.decorator';
 import { ProjectDocument } from './schemas/project.schema';
 
+@ApiCookieAuth()
+@ApiTags('Projects')
 @UseGuards(JwtAuthenticationGuard)
 @Controller('api/workspaces/:workspaceId/projects')
 @UseInterceptors(WorkspaceInterceptor, new TransformInterceptor(ProjectDto))

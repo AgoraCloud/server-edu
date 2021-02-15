@@ -1,3 +1,4 @@
+import { ApiTags, ApiCookieAuth } from '@nestjs/swagger';
 import { WorkspaceDocument } from './../../workspaces/schemas/workspace.schema';
 import { FindOneParams } from './../../../utils/find-one-params';
 import { UserDocument } from './../../users/schemas/user.schema';
@@ -23,6 +24,8 @@ import { User } from '../../../decorators/user.decorator';
 import { Workspace } from '../../../decorators/workspace.decorator';
 import { WikiSectionDocument } from './schemas/section.schema';
 
+@ApiCookieAuth()
+@ApiTags('Wiki Sections')
 @UseGuards(JwtAuthenticationGuard)
 @Controller('api/workspaces/:workspaceId/sections')
 @UseInterceptors(WorkspaceInterceptor, new TransformInterceptor(WikiSectionDto))

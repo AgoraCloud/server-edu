@@ -1,3 +1,4 @@
+import { ApiTags, ApiCookieAuth } from '@nestjs/swagger';
 import { DeploymentDto } from './dto/deployment.dto';
 import { TransformInterceptor } from './../../interceptors/transform.interceptor';
 import { FindOneParams } from './../../utils/find-one-params';
@@ -26,6 +27,8 @@ import {
   DeploymentImage,
 } from './schemas/deployment.schema';
 
+@ApiCookieAuth()
+@ApiTags('Deployments')
 @UseGuards(JwtAuthenticationGuard)
 @Controller('api/workspaces/:workspaceId/deployments')
 @UseInterceptors(WorkspaceInterceptor, new TransformInterceptor(DeploymentDto))

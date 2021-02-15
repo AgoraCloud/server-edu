@@ -1,3 +1,4 @@
+import { accessTokenConstants } from './modules/authentication/constants';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
@@ -6,6 +7,8 @@ import * as cookieParser from 'cookie-parser';
 import * as helmet from 'helmet';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { LoggerService } from './modules/logger/logger.service';
+import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
+import { EnvironmentConfig } from './config/configuration.interface';
 
 declare const module: any;
 
@@ -18,6 +21,10 @@ async function bootstrap() {
   // Get configuration values
   const configService: ConfigService = app.get(ConfigService);
   const port: number = configService.get<number>('port');
+  const environment: EnvironmentConfig = configService.get<EnvironmentConfig>(
+    'environment',
+  );
+  const version: number = configService.get<number>('version');
 
   app.useGlobalPipes(
     new ValidationPipe({ forbidUnknownValues: true, whitelist: true }),
@@ -27,6 +34,21 @@ async function bootstrap() {
   // app.use(helmet());
   // app.enableCors();
   app.set('trust proxy', 1);
+  // Swagger
+  if (environment === EnvironmentConfig.Development) {
+    const config: Pick<
+      OpenAPIObject,
+      'openapi' | 'info' | 'servers' | 'security' | 'tags' | 'externalDocs'
+    > = new DocumentBuilder()
+      .setTitle('AgoraCloud Server APIs')
+      .setDescription('A list of all the AgoraCloud Server APIs')
+      .setVersion(`v${version}`)
+      .addCookieAuth(accessTokenConstants.name)
+      .build();
+    const document: OpenAPIObject = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api/docs', app, document);
+  }
+
   await app.listen(port);
 
   // Hot Reload

@@ -1,3 +1,4 @@
+import { ApiTags, ApiCookieAuth } from '@nestjs/swagger';
 import { WorkspaceDto } from './dto/workspace.dto';
 import { TransformInterceptor } from './../../interceptors/transform.interceptor';
 import { WorkspaceDocument } from './schemas/workspace.schema';
@@ -20,6 +21,8 @@ import { CreateWorkspaceDto } from './dto/create-workspace.dto';
 import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
 import { User } from '../../decorators/user.decorator';
 
+@ApiCookieAuth()
+@ApiTags('Workspaces')
 @Controller('api/workspaces')
 @UseGuards(JwtAuthenticationGuard)
 @UseInterceptors(new TransformInterceptor(WorkspaceDto))

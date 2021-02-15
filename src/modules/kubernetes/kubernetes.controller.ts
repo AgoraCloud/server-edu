@@ -1,3 +1,4 @@
+import { ApiTags, ApiCookieAuth } from '@nestjs/swagger';
 import { DeploymentInterceptor } from '../../interceptors/deployment.interceptor';
 import { DeploymentMetricsDto } from './dto/deployment-metrics.dto';
 import { KubernetesService } from './kubernetes.service';
@@ -11,6 +12,8 @@ import {
   Param,
 } from '@nestjs/common';
 
+@ApiCookieAuth()
+@ApiTags('Deployments')
 @UseGuards(JwtAuthenticationGuard)
 @UseInterceptors(WorkspaceInterceptor, DeploymentInterceptor)
 @Controller('api/workspaces/:workspaceId/deployments/:deploymentId')

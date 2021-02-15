@@ -23,8 +23,10 @@ import { AuthenticationService } from './authentication.service';
 import { Request as Req } from 'express';
 import { User } from '../../decorators/user.decorator';
 import JwtRefreshGuard from './guards/jwt-refresh-authentication.guard';
+import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 
 @Controller('api/auth')
+@ApiTags('Authentication')
 @UseFilters(new MongoExceptionFilter())
 export class AuthenticationController {
   constructor(private readonly authenticationService: AuthenticationService) {}
@@ -35,6 +37,7 @@ export class AuthenticationController {
   }
 
   @Post('login')
+  @ApiCookieAuth()
   @UseGuards(LocalAuthenticationGuard)
   @UseInterceptors(new TransformInterceptor(UserDto))
   async logIn(
@@ -62,6 +65,7 @@ export class AuthenticationController {
 
   @HttpCode(200)
   @Post('logout')
+  @ApiCookieAuth()
   @UseGuards(JwtAuthenticationGuard)
   async logOut(
     @Request() request: Req,
@@ -79,6 +83,7 @@ export class AuthenticationController {
   }
 
   @Post('refresh')
+  @ApiCookieAuth()
   @UseGuards(JwtRefreshGuard)
   async refreshToken(
     @Request() request: Req,

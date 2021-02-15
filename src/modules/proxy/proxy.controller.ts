@@ -1,3 +1,4 @@
+import { ApiTags, ApiCookieAuth } from '@nestjs/swagger';
 import { DeploymentDocument } from './../deployments/schemas/deployment.schema';
 import { ProxyService } from './proxy.service';
 import { DeploymentInterceptor } from './../../interceptors/deployment.interceptor';
@@ -13,6 +14,8 @@ import {
 import { Request, Response } from 'express';
 import { Deployment } from '../../decorators/deployment.decorator';
 
+@ApiCookieAuth()
+@ApiTags('Proxy')
 @Controller('proxy/:deploymentId')
 @UseGuards(JwtAuthenticationGuard)
 @UseInterceptors(DeploymentInterceptor)
