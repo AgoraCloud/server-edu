@@ -22,6 +22,12 @@ import { Deployment } from '../../decorators/deployment.decorator';
 export class ProxyController {
   constructor(private readonly proxyService: ProxyService) {}
 
+  /**
+   * Proxy a deployment API request
+   * @param deployment the deployment
+   * @param req the request
+   * @param res the response
+   */
   @All()
   proxy(
     @Deployment() deployment: DeploymentDocument,

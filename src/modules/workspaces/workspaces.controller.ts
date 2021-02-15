@@ -29,6 +29,11 @@ import { User } from '../../decorators/user.decorator';
 export class WorkspacesController {
   constructor(private readonly workspacesService: WorkspacesService) {}
 
+  /**
+   * Create a workspace
+   * @param user the user
+   * @param createWorkspaceDto the workspace to create
+   */
   @Post()
   create(
     @User() user: UserDocument,
@@ -37,33 +42,57 @@ export class WorkspacesController {
     return this.workspacesService.create(user, createWorkspaceDto);
   }
 
+  /**
+   * Get all workspaces
+   * @param userId the users id
+   */
   @Get()
   findAll(@User('_id') userId: string): Promise<WorkspaceDocument[]> {
     return this.workspacesService.findAll(userId);
   }
 
+  /**
+   * Get a workspace
+   * @param userId the users id
+   * @param workspaceId the workspace id
+   */
   @Get(':id')
   findOne(
     @User('_id') userId: string,
-    @Param() { id }: FindOneParams,
+    @Param() { id: workspaceId }: FindOneParams,
   ): Promise<WorkspaceDocument> {
-    return this.workspacesService.findOne(userId, id);
+    return this.workspacesService.findOne(userId, workspaceId);
   }
 
+  /**
+   * Update a workspace
+   * @param userId the users id
+   * @param workspaceId the workspace id
+   * @param updateWorkspaceDto the updated workspace
+   */
   @Put(':id')
   update(
     @User('_id') userId: string,
-    @Param() { id }: FindOneParams,
+    @Param() { id: workspaceId }: FindOneParams,
     @Body() updateWorkspaceDto: UpdateWorkspaceDto,
   ): Promise<WorkspaceDocument> {
-    return this.workspacesService.update(userId, id, updateWorkspaceDto);
+    return this.workspacesService.update(
+      userId,
+      workspaceId,
+      updateWorkspaceDto,
+    );
   }
 
+  /**
+   * Delete a workspace
+   * @param userId the users id
+   * @param workspaceId the workspace id
+   */
   @Delete(':id')
   remove(
     @User('_id') userId: string,
-    @Param() { id }: FindOneParams,
+    @Param() { id: workspaceId }: FindOneParams,
   ): Promise<void> {
-    return this.workspacesService.remove(userId, id);
+    return this.workspacesService.remove(userId, workspaceId);
   }
 }

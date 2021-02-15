@@ -35,6 +35,12 @@ import {
 export class DeploymentsController {
   constructor(private readonly deploymentsService: DeploymentsService) {}
 
+  /**
+   * Create a new deployment
+   * @param user the user
+   * @param workspace the workspace
+   * @param createDeploymentDto the deployment to create
+   */
   @Post()
   create(
     @User() user: UserDocument,
@@ -44,11 +50,19 @@ export class DeploymentsController {
     return this.deploymentsService.create(user, workspace, createDeploymentDto);
   }
 
+  /**
+   * Get all allowed deployment images
+   */
   @Get('images')
   findAllImages(): DeploymentImage[] {
     return this.deploymentsService.findAllImages();
   }
 
+  /**
+   * Get all deployments
+   * @param userId the users id
+   * @param workspaceId the workspace id
+   */
   @Get()
   findAll(
     @User('_id') userId: string,
@@ -57,36 +71,55 @@ export class DeploymentsController {
     return this.deploymentsService.findAll(workspaceId, userId);
   }
 
+  /**
+   * Get a deployment
+   * @param userId the users id
+   * @param workspaceId the workspace id
+   * @param deploymentId the deployment id
+   */
   @Get(':id')
   findOne(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,
-    @Param() { id }: FindOneParams,
+    @Param() { id: deploymentId }: FindOneParams,
   ): Promise<DeploymentDocument> {
-    return this.deploymentsService.findOne(id, userId, workspaceId);
+    return this.deploymentsService.findOne(deploymentId, userId, workspaceId);
   }
 
+  /**
+   * Update a deployment
+   * @param userId the users id
+   * @param workspaceId the workspace id
+   * @param deploymentId the deployment id
+   * @param updateDeploymentDto the updated deployment
+   */
   @Put(':id')
   update(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,
-    @Param() { id }: FindOneParams,
+    @Param() { id: deploymentId }: FindOneParams,
     @Body() updateDeploymentDto: UpdateDeploymentDto,
   ): Promise<DeploymentDocument> {
     return this.deploymentsService.update(
       userId,
       workspaceId,
-      id,
+      deploymentId,
       updateDeploymentDto,
     );
   }
 
+  /**
+   * Delete a deployment
+   * @param userId the users id
+   * @param workspaceId the workspace id
+   * @param deploymentId the deployment id
+   */
   @Delete(':id')
   remove(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,
-    @Param() { id }: FindOneParams,
+    @Param() { id: deploymentId }: FindOneParams,
   ): Promise<void> {
-    return this.deploymentsService.remove(userId, workspaceId, id);
+    return this.deploymentsService.remove(userId, workspaceId, deploymentId);
   }
 }

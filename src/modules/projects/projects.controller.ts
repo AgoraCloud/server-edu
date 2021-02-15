@@ -32,6 +32,12 @@ import { ProjectDocument } from './schemas/project.schema';
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
+  /**
+   * Create a new project
+   * @param user the user
+   * @param workspace the workspace
+   * @param createProjectDto the project to create
+   */
   @Post()
   create(
     @User() user: UserDocument,
@@ -41,6 +47,11 @@ export class ProjectsController {
     return this.projectsService.create(user, workspace, createProjectDto);
   }
 
+  /**
+   * Get all projects
+   * @param userId the users id
+   * @param workspaceId the workspace id
+   */
   @Get()
   findAll(
     @User('_id') userId: string,
@@ -49,36 +60,55 @@ export class ProjectsController {
     return this.projectsService.findAll(workspaceId, userId);
   }
 
+  /**
+   * Get a project
+   * @param userId the users id
+   * @param workspaceId the workspace id
+   * @param projectId the project id
+   */
   @Get(':id')
   findOne(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,
-    @Param() { id }: FindOneParams,
+    @Param() { id: deploymentId }: FindOneParams,
   ): Promise<ProjectDocument> {
-    return this.projectsService.findOne(userId, workspaceId, id);
+    return this.projectsService.findOne(userId, workspaceId, deploymentId);
   }
 
+  /**
+   * Update a project
+   * @param userId the users id
+   * @param workspaceId the workspace id
+   * @param projectId the project id
+   * @param updateProjectDto the updated project
+   */
   @Put(':id')
   update(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,
-    @Param() { id }: FindOneParams,
+    @Param() { id: deploymentId }: FindOneParams,
     @Body() updateProjectDto: UpdateProjectDto,
   ): Promise<ProjectDocument> {
     return this.projectsService.update(
       userId,
       workspaceId,
-      id,
+      deploymentId,
       updateProjectDto,
     );
   }
 
+  /**
+   * Delete a project
+   * @param userId the users id
+   * @param workspaceId the workspace id
+   * @param projectId the project id
+   */
   @Delete(':id')
   remove(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,
-    @Param() { id }: FindOneParams,
+    @Param() { id: deploymentId }: FindOneParams,
   ): Promise<void> {
-    return this.projectsService.remove(userId, workspaceId, id);
+    return this.projectsService.remove(userId, workspaceId, deploymentId);
   }
 }

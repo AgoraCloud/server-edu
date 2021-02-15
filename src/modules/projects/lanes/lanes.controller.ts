@@ -39,6 +39,13 @@ import { ProjectLaneDocument } from './schemas/lane.schema';
 export class ProjectLanesController {
   constructor(private readonly projectLanesService: ProjectLanesService) {}
 
+  /**
+   * Create a project lane
+   * @param user the user
+   * @param workspace the workspace
+   * @param project the project
+   * @param createProjectLaneDto the project lane to create
+   */
   @Post()
   create(
     @User() user: UserDocument,
@@ -54,6 +61,12 @@ export class ProjectLanesController {
     );
   }
 
+  /**
+   * Get all project lanes
+   * @param userId the users id
+   * @param workspaceId the workspace id
+   * @param projectId the project id
+   */
   @Get()
   findAll(
     @User('_id') userId: string,
@@ -63,40 +76,72 @@ export class ProjectLanesController {
     return this.projectLanesService.findAll(projectId, userId, workspaceId);
   }
 
+  /**
+   * Get a project lane
+   * @param userId the users id
+   * @param workspaceId the workspace id
+   * @param projectId the project id
+   * @param projectLaneId the project lane id
+   */
   @Get(':id')
   findOne(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,
     @Project('_id') projectId: string,
-    @Param() { id }: FindOneParams,
+    @Param() { id: projectLaneId }: FindOneParams,
   ): Promise<ProjectLaneDocument> {
-    return this.projectLanesService.findOne(userId, workspaceId, projectId, id);
+    return this.projectLanesService.findOne(
+      userId,
+      workspaceId,
+      projectId,
+      projectLaneId,
+    );
   }
 
+  /**
+   * Update a project lane
+   * @param userId the users id
+   * @param workspaceId the workspace id
+   * @param projectId the project id
+   * @param projectLaneId the project lane id
+   * @param updateProjectLaneDto the updated project lane
+   */
   @Put(':id')
   update(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,
     @Project('_id') projectId: string,
-    @Param() { id }: FindOneParams,
+    @Param() { id: projectLaneId }: FindOneParams,
     @Body() updateProjectLaneDto: UpdateProjectLaneDto,
   ): Promise<ProjectLaneDocument> {
     return this.projectLanesService.update(
       userId,
       workspaceId,
       projectId,
-      id,
+      projectLaneId,
       updateProjectLaneDto,
     );
   }
 
+  /**
+   * Delete a project lane
+   * @param userId the users id
+   * @param workspaceId the workspace id
+   * @param projectId the project id
+   * @param projectLaneId the project lane id
+   */
   @Delete(':id')
   remove(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,
     @Project('_id') projectId: string,
-    @Param() { id }: FindOneParams,
+    @Param() { id: projectLaneId }: FindOneParams,
   ): Promise<void> {
-    return this.projectLanesService.remove(userId, workspaceId, projectId, id);
+    return this.projectLanesService.remove(
+      userId,
+      workspaceId,
+      projectId,
+      projectLaneId,
+    );
   }
 }

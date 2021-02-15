@@ -24,11 +24,20 @@ import { UserDocument } from '../users/schemas/user.schema';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  /**
+   * Get a user
+   * @param user the user
+   */
   @Get()
   find(@User() user: UserDocument): UserDocument {
     return user;
   }
 
+  /**
+   * Update a user
+   * @param userId the users id
+   * @param updateUserDto the updated user
+   */
   @Put()
   update(
     @User('_id') userId: string,
@@ -37,6 +46,10 @@ export class UsersController {
     return this.usersService.update(userId, updateUserDto);
   }
 
+  /**
+   * Delete a user
+   * @param userId the users id
+   */
   @Delete()
   async remove(@User('_id') userId: string): Promise<void> {
     return this.usersService.remove(userId);

@@ -39,6 +39,13 @@ import { WikiPageDocument } from './schemas/page.schema';
 export class WikiPagesController {
   constructor(private readonly wikiPagesService: WikiPagesService) {}
 
+  /**
+   * Create a wiki page
+   * @param user the user
+   * @param workspace the workspace
+   * @param wikiSection the wiki section
+   * @param createWikiPageDto the wiki page to create
+   */
   @Post()
   create(
     @User() user: UserDocument,
@@ -54,6 +61,12 @@ export class WikiPagesController {
     );
   }
 
+  /**
+   * Get all wiki pages
+   * @param userId the users id
+   * @param workspaceId the workspace id
+   * @param wikiSectionId the wiki section id
+   */
   @Get()
   findAll(
     @User('_id') userId: string,
@@ -63,45 +76,72 @@ export class WikiPagesController {
     return this.wikiPagesService.findAll(userId, workspaceId, wikiSectionId);
   }
 
+  /**
+   * Get a wiki page
+   * @param userId the users id
+   * @param workspaceId the workspace id
+   * @param wikiSectionId the wiki section id
+   * @param wikiPageId the wiki page id
+   */
   @Get(':id')
   findOne(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,
     @WikiSection('_id') wikiSectionId: string,
-    @Param() { id }: FindOneParams,
+    @Param() { id: wikiPageId }: FindOneParams,
   ): Promise<WikiPageDocument> {
     return this.wikiPagesService.findOne(
       userId,
       workspaceId,
       wikiSectionId,
-      id,
+      wikiPageId,
     );
   }
 
+  /**
+   * Update a wiki page
+   * @param userId the users id
+   * @param workspaceId the workspace id
+   * @param wikiSectionId the wiki section id
+   * @param wikiPageId the wiki page id
+   * @param updateWikiPageDto the updated wiki page
+   */
   @Put(':id')
   update(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,
     @WikiSection('_id') wikiSectionId: string,
-    @Param() { id }: FindOneParams,
+    @Param() { id: wikiPageId }: FindOneParams,
     @Body() updateWikiPageDto: UpdateWikiPageDto,
   ): Promise<WikiPageDocument> {
     return this.wikiPagesService.update(
       userId,
       workspaceId,
       wikiSectionId,
-      id,
+      wikiPageId,
       updateWikiPageDto,
     );
   }
 
+  /**
+   * Delete a wiki page
+   * @param userId the users id
+   * @param workspaceId the workspace id
+   * @param wikiSectionId the wiki section id
+   * @param wikiPageId the wiki page id
+   */
   @Delete(':id')
   remove(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,
     @WikiSection('_id') wikiSectionId: string,
-    @Param() { id }: FindOneParams,
+    @Param() { id: wikiPageId }: FindOneParams,
   ): Promise<void> {
-    return this.wikiPagesService.remove(userId, workspaceId, wikiSectionId, id);
+    return this.wikiPagesService.remove(
+      userId,
+      workspaceId,
+      wikiSectionId,
+      wikiPageId,
+    );
   }
 }

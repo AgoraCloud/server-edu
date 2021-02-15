@@ -32,6 +32,12 @@ import { WikiSectionDocument } from './schemas/section.schema';
 export class WikiSectionsController {
   constructor(private readonly wikiSectionsService: WikiSectionsService) {}
 
+  /**
+   * Create a wiki section
+   * @param user the user
+   * @param workspace the workspace
+   * @param createWikiSectionDto the wiki section to create
+   */
   @Post()
   create(
     @User() user: UserDocument,
@@ -45,6 +51,11 @@ export class WikiSectionsController {
     );
   }
 
+  /**
+   * Get all wiki sections
+   * @param userId the users id
+   * @param workspaceId the workspace id
+   */
   @Get()
   findAll(
     @User('_id') userId: string,
@@ -53,36 +64,55 @@ export class WikiSectionsController {
     return this.wikiSectionsService.findAll(workspaceId, userId);
   }
 
+  /**
+   * Get a wiki section
+   * @param userId the users id
+   * @param workspaceId the workspace id
+   * @param wikiSectionId the wiki section id
+   */
   @Get(':id')
   findOne(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,
-    @Param() { id }: FindOneParams,
+    @Param() { id: wikiSectionId }: FindOneParams,
   ): Promise<WikiSectionDocument> {
-    return this.wikiSectionsService.findOne(userId, workspaceId, id);
+    return this.wikiSectionsService.findOne(userId, workspaceId, wikiSectionId);
   }
 
+  /**
+   * Update a wiki section
+   * @param userId the users id
+   * @param workspaceId the workspace id
+   * @param wikiSectionId the wiki section id
+   * @param updateWikiSectionDto the updated wiki section
+   */
   @Put(':id')
   update(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,
-    @Param() { id }: FindOneParams,
+    @Param() { id: wikiSectionId }: FindOneParams,
     @Body() updateWikiSectionDto: UpdateWikiSectionDto,
   ): Promise<WikiSectionDocument> {
     return this.wikiSectionsService.update(
       userId,
       workspaceId,
-      id,
+      wikiSectionId,
       updateWikiSectionDto,
     );
   }
 
+  /**
+   * Delete a wiki section
+   * @param userId the users id
+   * @param workspaceId the workspace id
+   * @param wikiSectionId the wiki section id
+   */
   @Delete(':id')
   remove(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,
-    @Param() { id }: FindOneParams,
+    @Param() { id: wikiSectionId }: FindOneParams,
   ): Promise<void> {
-    return this.wikiSectionsService.remove(userId, workspaceId, id);
+    return this.wikiSectionsService.remove(userId, workspaceId, wikiSectionId);
   }
 }

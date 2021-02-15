@@ -31,11 +31,20 @@ import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 export class AuthenticationController {
   constructor(private readonly authenticationService: AuthenticationService) {}
 
+  /**
+   * Create a new account
+   * @param createUserDto the user to create
+   */
   @Post('register')
   register(@Body() createUserDto: CreateUserDto): Promise<void> {
     return this.authenticationService.register(createUserDto);
   }
 
+  /**
+   * Log in
+   * @param request the request
+   * @param user the user
+   */
   @Post('login')
   @ApiCookieAuth()
   @UseGuards(LocalAuthenticationGuard)
@@ -63,6 +72,11 @@ export class AuthenticationController {
     return user;
   }
 
+  /**
+   * Sign out
+   * @param request the request
+   * @param user the user
+   */
   @HttpCode(200)
   @Post('logout')
   @ApiCookieAuth()
@@ -82,6 +96,11 @@ export class AuthenticationController {
     );
   }
 
+  /**
+   * Refresh a users access and refresh tokens
+   * @param request the request
+   * @param user the user
+   */
   @Post('refresh')
   @ApiCookieAuth()
   @UseGuards(JwtRefreshGuard)
@@ -99,6 +118,10 @@ export class AuthenticationController {
     );
   }
 
+  /**
+   * Request a change password email
+   * @param forgotPasswordDto the forgot password information
+   */
   @HttpCode(200)
   @Post('forgot-password')
   async forgotPassword(
@@ -107,6 +130,10 @@ export class AuthenticationController {
     return this.authenticationService.forgotPassword(forgotPasswordDto);
   }
 
+  /**
+   * Change a users password
+   * @param changePasswordDto the change password information
+   */
   @HttpCode(200)
   @Post('change-password')
   async changePassword(
@@ -115,6 +142,10 @@ export class AuthenticationController {
     return this.authenticationService.changePassword(changePasswordDto);
   }
 
+  /**
+   * Verify a users account
+   * @param verifyAccountDto the verify account information
+   */
   @HttpCode(200)
   @Post('verify-account')
   async verifyAccount(

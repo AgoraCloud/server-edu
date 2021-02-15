@@ -17,6 +17,9 @@ export class HealthController {
     private readonly memoryHealthIndicator: MemoryHealthIndicator,
   ) {}
 
+  /**
+   * Health and readiness check
+   */
   @HealthCheck()
   @Get(['readiness', 'liveness'])
   healthCheck(): Promise<HealthCheckResult> {

@@ -20,6 +20,11 @@ import {
 export class KubernetesController {
   constructor(private readonly kubernetesService: KubernetesService) {}
 
+  /**
+   * Get a deployments logs
+   * @param workspaceId the workspace id
+   * @param deploymentId the deployment id
+   */
   @Get('logs')
   findOneLogs(
     @Param('workspaceId') workspaceId: string,
@@ -28,6 +33,11 @@ export class KubernetesController {
     return this.kubernetesService.getPodLogs(workspaceId, deploymentId);
   }
 
+  /**
+   * Get a deployments metrics (cpu and memory)
+   * @param workspaceId the workspace id
+   * @param deploymentId the deployment id
+   */
   @Get('metrics')
   findOneMetrics(
     @Param('workspaceId') workspaceId: string,

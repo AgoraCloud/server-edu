@@ -45,6 +45,14 @@ import { ProjectLane } from '../../../decorators/project-lane.decorator';
 export class ProjectTasksController {
   constructor(private readonly projectTasksService: ProjectTasksService) {}
 
+  /**
+   * Create a new project task
+   * @param user the user
+   * @param workspace the workspace
+   * @param project the project
+   * @param projectLane the project lane
+   * @param createProjectTaskDto the project task to create
+   */
   @Post()
   create(
     @User() user: UserDocument,
@@ -62,6 +70,13 @@ export class ProjectTasksController {
     );
   }
 
+  /**
+   * Get all project tasks
+   * @param userId the users id
+   * @param workspaceId the workspace id
+   * @param projectId the project id
+   * @param projectLaneId the project lane id
+   */
   @Get()
   findAll(
     @User('_id') userId: string,
@@ -77,30 +92,47 @@ export class ProjectTasksController {
     );
   }
 
+  /**
+   * Get a project task
+   * @param userId the users id
+   * @param workspaceId the workspace id
+   * @param projectId the project id
+   * @param projectLaneId the project lane id
+   * @param projectTaskId the project task id
+   */
   @Get(':id')
   findOne(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,
     @Project('_id') projectId: string,
     @ProjectLane('_id') projectLaneId: string,
-    @Param() { id }: FindOneParams,
+    @Param() { id: projectTaskId }: FindOneParams,
   ): Promise<ProjectTaskDocument> {
     return this.projectTasksService.findOne(
       userId,
       workspaceId,
       projectId,
       projectLaneId,
-      id,
+      projectTaskId,
     );
   }
 
+  /**
+   * Update a project task
+   * @param userId the users id
+   * @param workspaceId the workspace id
+   * @param projectId the project id
+   * @param projectLaneId the project lane id
+   * @param projectTaskId the project task id
+   * @param updateProjectTaskDto the updated project task
+   */
   @Put(':id')
   update(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,
     @Project('_id') projectId: string,
     @ProjectLane('_id') projectLaneId: string,
-    @Param() { id }: FindOneParams,
+    @Param() { id: projectTaskId }: FindOneParams,
     @Body() updateProjectTaskDto: UpdateProjectTaskDto,
   ): Promise<ProjectTaskDocument> {
     return this.projectTasksService.update(
@@ -108,25 +140,33 @@ export class ProjectTasksController {
       workspaceId,
       projectId,
       projectLaneId,
-      id,
+      projectTaskId,
       updateProjectTaskDto,
     );
   }
 
+  /**
+   * Delete a project task
+   * @param userId the users id
+   * @param workspaceId the workspace id
+   * @param projectId the project id
+   * @param projectLaneId the project lane id
+   * @param projectTaskId the project task id
+   */
   @Delete(':id')
   remove(
     @User('_id') userId: string,
     @Workspace('_id') workspaceId: string,
     @Project('_id') projectId: string,
     @ProjectLane('_id') projectLaneId: string,
-    @Param() { id }: FindOneParams,
+    @Param() { id: projectTaskId }: FindOneParams,
   ): Promise<void> {
     return this.projectTasksService.remove(
       userId,
       workspaceId,
       projectId,
       projectLaneId,
-      id,
+      projectTaskId,
     );
   }
 }
