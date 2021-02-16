@@ -53,7 +53,7 @@ export class DeploymentsController {
    * @param createDeploymentDto the deployment to create
    */
   @Post()
-  @ApiParam({ name: 'workspaceId' })
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiOperation({ summary: 'Create a new deployment' })
   @ApiCreatedResponse({
     description: 'The deployment has been successfully created',
@@ -80,7 +80,7 @@ export class DeploymentsController {
    * Get all allowed deployment images
    */
   @Get('images')
-  @ApiParam({ name: 'workspaceId' })
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiOperation({ summary: 'Get all allowed deployment images' })
   @ApiOkResponse({
     description: 'The deployment images have been successfully retrieved',
@@ -101,7 +101,7 @@ export class DeploymentsController {
    * @param workspaceId the workspace id
    */
   @Get()
-  @ApiParam({ name: 'workspaceId' })
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiOperation({ summary: 'Get all deployments' })
   @ApiOkResponse({
     description: 'The deployments have been successfully retrieved',
@@ -126,8 +126,8 @@ export class DeploymentsController {
    * @param deploymentId the deployment id
    */
   @Get(':id')
-  @ApiParam({ name: 'workspaceId' })
-  @ApiParam({ name: 'id' })
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
+  @ApiParam({ name: 'id', description: 'The deployment id' })
   @ApiOperation({ summary: 'Get a deployment' })
   @ApiOkResponse({
     description: 'The deployment has been successfully retrieved',
@@ -154,8 +154,8 @@ export class DeploymentsController {
    * @param updateDeploymentDto the updated deployment
    */
   @Put(':id')
-  @ApiParam({ name: 'workspaceId' })
-  @ApiParam({ name: 'id' })
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
+  @ApiParam({ name: 'id', description: 'The deployment id' })
   @ApiOperation({ summary: 'Update a deployment' })
   @ApiOkResponse({
     description: 'The deployment has been successfully updated',
@@ -191,8 +191,8 @@ export class DeploymentsController {
    * @param deploymentId the deployment id
    */
   @Delete(':id')
-  @ApiParam({ name: 'workspaceId' })
-  @ApiParam({ name: 'id' })
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
+  @ApiParam({ name: 'id', description: 'The deployment id' })
   @ApiOperation({ summary: 'Delete a deployment' })
   @ApiOkResponse({
     description: 'The deployment has been successfully deleted',

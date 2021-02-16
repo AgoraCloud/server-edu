@@ -65,9 +65,9 @@ export class ProjectTasksController {
    * @param createProjectTaskDto the project task to create
    */
   @Post()
-  @ApiParam({ name: 'workspaceId' })
-  @ApiParam({ name: 'projectId' })
-  @ApiParam({ name: 'laneId' })
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
+  @ApiParam({ name: 'projectId', description: 'The project id' })
+  @ApiParam({ name: 'laneId', description: 'The project lane id' })
   @ApiOperation({ summary: 'Create a new project task' })
   @ApiCreatedResponse({
     description: 'The project task has been successfully created',
@@ -107,9 +107,9 @@ export class ProjectTasksController {
    * @param projectLaneId the project lane id
    */
   @Get()
-  @ApiParam({ name: 'workspaceId' })
-  @ApiParam({ name: 'projectId' })
-  @ApiParam({ name: 'laneId' })
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
+  @ApiParam({ name: 'projectId', description: 'The project id' })
+  @ApiParam({ name: 'laneId', description: 'The project lane id' })
   @ApiOperation({ summary: 'Get all project tasks' })
   @ApiOkResponse({
     description: 'The project tasks have been successfully retrieved',
@@ -144,10 +144,10 @@ export class ProjectTasksController {
    * @param projectTaskId the project task id
    */
   @Get(':id')
-  @ApiParam({ name: 'workspaceId' })
-  @ApiParam({ name: 'projectId' })
-  @ApiParam({ name: 'laneId' })
-  @ApiParam({ name: 'id' })
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
+  @ApiParam({ name: 'projectId', description: 'The project id' })
+  @ApiParam({ name: 'laneId', description: 'The project lane id' })
+  @ApiParam({ name: 'id', description: 'The project task id' })
   @ApiOperation({ summary: 'Get a project task' })
   @ApiOkResponse({
     description: 'The project task has been successfully retrieved',
@@ -185,10 +185,10 @@ export class ProjectTasksController {
    * @param updateProjectTaskDto the updated project task
    */
   @Put(':id')
-  @ApiParam({ name: 'workspaceId' })
-  @ApiParam({ name: 'projectId' })
-  @ApiParam({ name: 'laneId' })
-  @ApiParam({ name: 'id' })
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
+  @ApiParam({ name: 'projectId', description: 'The project id' })
+  @ApiParam({ name: 'laneId', description: 'The project lane id' })
+  @ApiParam({ name: 'id', description: 'The project task id' })
   @ApiOperation({ summary: 'Update a project task' })
   @ApiOkResponse({
     description: 'The project task has been successfully updated',
@@ -231,10 +231,10 @@ export class ProjectTasksController {
    * @param projectTaskId the project task id
    */
   @Delete(':id')
-  @ApiParam({ name: 'workspaceId' })
-  @ApiParam({ name: 'projectId' })
-  @ApiParam({ name: 'laneId' })
-  @ApiParam({ name: 'id' })
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
+  @ApiParam({ name: 'projectId', description: 'The project id' })
+  @ApiParam({ name: 'laneId', description: 'The project lane id' })
+  @ApiParam({ name: 'id', description: 'The project task id' })
   @ApiOperation({ summary: 'Delete a project task' })
   @ApiOkResponse({
     description: 'The project task has been successfully deleted',

@@ -50,7 +50,7 @@ export class ProjectsController {
    * @param createProjectDto the project to create
    */
   @Post()
-  @ApiParam({ name: 'workspaceId' })
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiOperation({ summary: 'Create a new project' })
   @ApiCreatedResponse({
     description: 'The project has been successfully created',
@@ -79,7 +79,7 @@ export class ProjectsController {
    * @param workspaceId the workspace id
    */
   @Get()
-  @ApiParam({ name: 'workspaceId' })
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiOperation({ summary: 'Get all projects' })
   @ApiOkResponse({
     description: 'The projects have been successfully retrieved',
@@ -104,8 +104,8 @@ export class ProjectsController {
    * @param projectId the project id
    */
   @Get(':id')
-  @ApiParam({ name: 'workspaceId' })
-  @ApiParam({ name: 'id' })
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
+  @ApiParam({ name: 'id', description: 'The project id' })
   @ApiOperation({ summary: 'Get a project' })
   @ApiOkResponse({
     description: 'The project has been successfully retrieved',
@@ -132,8 +132,8 @@ export class ProjectsController {
    * @param updateProjectDto the updated project
    */
   @Put(':id')
-  @ApiParam({ name: 'workspaceId' })
-  @ApiParam({ name: 'id' })
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
+  @ApiParam({ name: 'id', description: 'The project id' })
   @ApiOperation({ summary: 'Update a project' })
   @ApiOkResponse({
     description: 'The project has been successfully updated',
@@ -169,8 +169,8 @@ export class ProjectsController {
    * @param projectId the project id
    */
   @Delete(':id')
-  @ApiParam({ name: 'workspaceId' })
-  @ApiParam({ name: 'id' })
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
+  @ApiParam({ name: 'id', description: 'The project id' })
   @ApiOperation({ summary: 'Delete a project' })
   @ApiOkResponse({
     description: 'The project has been successfully deleted',

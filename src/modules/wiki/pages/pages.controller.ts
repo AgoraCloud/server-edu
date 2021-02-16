@@ -58,8 +58,8 @@ export class WikiPagesController {
    * @param createWikiPageDto the wiki page to create
    */
   @Post()
-  @ApiParam({ name: 'workspaceId' })
-  @ApiParam({ name: 'sectionId' })
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
+  @ApiParam({ name: 'sectionId', description: 'The wiki section id' })
   @ApiOperation({ summary: 'Create a wiki page' })
   @ApiCreatedResponse({
     description: 'The wiki page has been successfully created',
@@ -96,8 +96,8 @@ export class WikiPagesController {
    * @param wikiSectionId the wiki section id
    */
   @Get()
-  @ApiParam({ name: 'workspaceId' })
-  @ApiParam({ name: 'sectionId' })
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
+  @ApiParam({ name: 'sectionId', description: 'The wiki section id' })
   @ApiOperation({ summary: 'Get all wiki pages' })
   @ApiOkResponse({
     description: 'The wiki pages have been successfully retrieved',
@@ -125,9 +125,9 @@ export class WikiPagesController {
    * @param wikiPageId the wiki page id
    */
   @Get(':id')
-  @ApiParam({ name: 'workspaceId' })
-  @ApiParam({ name: 'sectionId' })
-  @ApiParam({ name: 'id' })
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
+  @ApiParam({ name: 'sectionId', description: 'The wiki section id' })
+  @ApiParam({ name: 'id', description: 'The wiki page id' })
   @ApiOperation({ summary: 'Get a wiki page' })
   @ApiOkResponse({
     description: 'The wiki page has been successfully retrieved',
@@ -162,9 +162,9 @@ export class WikiPagesController {
    * @param updateWikiPageDto the updated wiki page
    */
   @Put(':id')
-  @ApiParam({ name: 'workspaceId' })
-  @ApiParam({ name: 'sectionId' })
-  @ApiParam({ name: 'id' })
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
+  @ApiParam({ name: 'sectionId', description: 'The wiki section id' })
+  @ApiParam({ name: 'id', description: 'The wiki page id' })
   @ApiOperation({ summary: 'Update a wiki page' })
   @ApiOkResponse({
     description: 'The wiki page has been successfully updated',
@@ -204,9 +204,9 @@ export class WikiPagesController {
    * @param wikiPageId the wiki page id
    */
   @Delete(':id')
-  @ApiParam({ name: 'workspaceId' })
-  @ApiParam({ name: 'sectionId' })
-  @ApiParam({ name: 'id' })
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
+  @ApiParam({ name: 'sectionId', description: 'The wiki section id' })
+  @ApiParam({ name: 'id', description: 'The wiki page id' })
   @ApiOperation({ summary: 'Delete a wiki page' })
   @ApiOkResponse({
     description: 'The wiki page has been successfully deleted',

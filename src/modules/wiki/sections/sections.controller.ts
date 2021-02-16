@@ -50,7 +50,7 @@ export class WikiSectionsController {
    * @param createWikiSectionDto the wiki section to create
    */
   @Post()
-  @ApiParam({ name: 'workspaceId' })
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiOperation({ summary: 'Create a wiki section' })
   @ApiCreatedResponse({
     description: 'The wiki section has been successfully created',
@@ -83,7 +83,7 @@ export class WikiSectionsController {
    * @param workspaceId the workspace id
    */
   @Get()
-  @ApiParam({ name: 'workspaceId' })
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiOperation({ summary: 'Get all wiki sections' })
   @ApiOkResponse({
     description: 'The wiki sections have been successfully retrieved',
@@ -108,8 +108,8 @@ export class WikiSectionsController {
    * @param wikiSectionId the wiki section id
    */
   @Get(':id')
-  @ApiParam({ name: 'workspaceId' })
-  @ApiParam({ name: 'id' })
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
+  @ApiParam({ name: 'id', description: 'The section id' })
   @ApiOperation({ summary: 'Get a wiki section' })
   @ApiOkResponse({
     description: 'The wiki section has been successfully retrieved',
@@ -137,8 +137,8 @@ export class WikiSectionsController {
    * @param updateWikiSectionDto the updated wiki section
    */
   @Put(':id')
-  @ApiParam({ name: 'workspaceId' })
-  @ApiParam({ name: 'id' })
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
+  @ApiParam({ name: 'id', description: 'The section id' })
   @ApiOperation({ summary: 'Update a wiki section' })
   @ApiOkResponse({
     description: 'The wiki section has been successfully updated',
@@ -175,8 +175,8 @@ export class WikiSectionsController {
    * @param wikiSectionId the wiki section id
    */
   @Delete(':id')
-  @ApiParam({ name: 'workspaceId' })
-  @ApiParam({ name: 'id' })
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
+  @ApiParam({ name: 'id', description: 'The section id' })
   @ApiOperation({ summary: 'Delete a wiki section' })
   @ApiOkResponse({
     description: 'The wiki section has been successfully deleted',

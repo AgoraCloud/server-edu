@@ -84,7 +84,7 @@ export class WorkspacesController {
    * @param workspaceId the workspace id
    */
   @Get(':id')
-  @ApiParam({ name: 'id' })
+  @ApiParam({ name: 'id', description: 'The workspace id' })
   @ApiOperation({ summary: 'Get a workspace' })
   @ApiOkResponse({
     description: 'The workspace has been successfully retrieved',
@@ -109,7 +109,7 @@ export class WorkspacesController {
    * @param updateWorkspaceDto the updated workspace
    */
   @Put(':id')
-  @ApiParam({ name: 'id' })
+  @ApiParam({ name: 'id', description: 'The workspace id' })
   @ApiOperation({ summary: 'Update a workspace' })
   @ApiOkResponse({
     description: 'The workspace has been successfully updated',
@@ -142,7 +142,7 @@ export class WorkspacesController {
    * @param workspaceId the workspace id
    */
   @Delete(':id')
-  @ApiParam({ name: 'id' })
+  @ApiParam({ name: 'id', description: 'The workspace id' })
   @ApiOperation({ summary: 'Delete a workspace' })
   @ApiOkResponse({
     description: 'The workspace has been successfully deleted',
