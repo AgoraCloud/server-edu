@@ -1,21 +1,21 @@
+import { BaseDto } from './../../../utils/base.dto';
 import { WorkspaceDto } from './../../workspaces/dto/workspace.dto';
 import { UserDto } from './../../users/dto/user.dto';
-import { Exclude, Expose } from 'class-transformer';
+import { Exclude, Expose, Type } from 'class-transformer';
 
 @Exclude()
-export class ProjectDto {
+export class ProjectDto extends BaseDto {
   @Expose()
-  id: string;
+  readonly name: string;
 
   @Expose()
-  name: string;
+  readonly description: string;
 
   @Expose()
-  description: string;
+  @Type(() => UserDto)
+  readonly user: UserDto;
 
   @Expose()
-  user: UserDto;
-
-  @Expose()
-  workspace: WorkspaceDto;
+  @Type(() => WorkspaceDto)
+  readonly workspace: WorkspaceDto;
 }
