@@ -316,15 +316,15 @@ export class KubernetesService implements OnModuleInit {
     body: k8s.V1ResourceQuota;
   }> {
     const hardQuotas: { [key: string]: string } = {};
-    hardQuotas['limits.cpu'] = workspaceResources.cpuCount
-      ? `${workspaceResources.cpuCount}`
-      : '';
-    hardQuotas['limits.memory'] = workspaceResources.memoryCount
-      ? `${workspaceResources.memoryCount}Gi`
-      : '';
-    hardQuotas['requests.storage'] = workspaceResources.storageCount
-      ? `${workspaceResources.storageCount}Gi`
-      : '';
+    if (workspaceResources.cpuCount) {
+      hardQuotas['limits.cpu'] = `${workspaceResources.cpuCount}`;
+    }
+    if (workspaceResources.memoryCount) {
+      hardQuotas['limits.memory'] = `${workspaceResources.memoryCount}Gi`;
+    }
+    if (workspaceResources.storageCount) {
+      hardQuotas['requests.storage'] = `${workspaceResources.storageCount}Gi`;
+    }
     return this.k8sCoreV1Api.patchNamespacedResourceQuota(
       this.generateResourceName(workspaceId),
       namespace,
