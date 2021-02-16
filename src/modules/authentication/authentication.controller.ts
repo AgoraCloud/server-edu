@@ -33,6 +33,7 @@ import {
   ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiOperation,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -48,6 +49,7 @@ export class AuthenticationController {
    * @param createUserDto the user to create
    */
   @Post('register')
+  @ApiOperation({ summary: ' Create a new account' })
   @ApiCreatedResponse({
     description: 'The users account has been successfully created',
   })
@@ -67,6 +69,7 @@ export class AuthenticationController {
   @Post('login')
   @ApiCookieAuth()
   @UseGuards(LocalAuthenticationGuard)
+  @ApiOperation({ summary: 'Log in' })
   @UseInterceptors(new TransformInterceptor(UserDto))
   @ApiCreatedResponse({
     description: 'The user has been successfully logged in',
@@ -117,6 +120,7 @@ export class AuthenticationController {
   @Post('logout')
   @ApiCookieAuth()
   @UseGuards(JwtAuthenticationGuard)
+  @ApiOperation({ summary: 'Sign out' })
   @ApiOkResponse({ description: 'The user has been successfully logged out' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   async logOut(
@@ -142,6 +146,7 @@ export class AuthenticationController {
   @Post('refresh')
   @ApiCookieAuth()
   @UseGuards(JwtRefreshGuard)
+  @ApiOperation({ summary: 'Refresh a users access and refresh tokens' })
   @ApiCreatedResponse({
     description:
       'The new access and refresh tokens were successfully refreshed',
@@ -167,6 +172,7 @@ export class AuthenticationController {
    */
   @HttpCode(200)
   @Post('forgot-password')
+  @ApiOperation({ summary: 'Request a change password email' })
   @ApiOkResponse({
     description: 'The forgot password request has been successfully processed',
   })
@@ -190,6 +196,7 @@ export class AuthenticationController {
    */
   @HttpCode(200)
   @Post('change-password')
+  @ApiOperation({ summary: 'Change a users password' })
   @ApiOkResponse({
     description: 'The users password has been successfully changed',
   })
@@ -214,6 +221,7 @@ export class AuthenticationController {
    */
   @HttpCode(200)
   @Post('verify-account')
+  @ApiOperation({ summary: 'Verify a users account' })
   @ApiOkResponse({
     description: 'The users account has been successfully verified',
   })

@@ -8,6 +8,7 @@ import {
   ApiOkResponse,
   ApiNotFoundResponse,
   ApiParam,
+  ApiOperation,
 } from '@nestjs/swagger';
 import { WorkspaceDto } from './dto/workspace.dto';
 import { TransformInterceptor } from './../../interceptors/transform.interceptor';
@@ -45,6 +46,7 @@ export class WorkspacesController {
    * @param createWorkspaceDto the workspace to create
    */
   @Post()
+  @ApiOperation({ summary: 'Create a workspace' })
   @ApiCreatedResponse({
     description: 'The workspace has been successfully created',
     type: WorkspaceDto,
@@ -66,6 +68,7 @@ export class WorkspacesController {
    * @param userId the users id
    */
   @Get()
+  @ApiOperation({ summary: 'Get all workspaces' })
   @ApiOkResponse({
     description: 'The workspaces have been successfully retrieved',
     type: [WorkspaceDto],
@@ -82,6 +85,7 @@ export class WorkspacesController {
    */
   @Get(':id')
   @ApiParam({ name: 'id' })
+  @ApiOperation({ summary: 'Get a workspace' })
   @ApiOkResponse({
     description: 'The workspace has been successfully retrieved',
     type: WorkspaceDto,
@@ -106,6 +110,7 @@ export class WorkspacesController {
    */
   @Put(':id')
   @ApiParam({ name: 'id' })
+  @ApiOperation({ summary: 'Update a workspace' })
   @ApiOkResponse({
     description: 'The workspace has been successfully updated',
     type: WorkspaceDto,
@@ -138,6 +143,7 @@ export class WorkspacesController {
    */
   @Delete(':id')
   @ApiParam({ name: 'id' })
+  @ApiOperation({ summary: 'Delete a workspace' })
   @ApiOkResponse({
     description: 'The workspace has been successfully deleted',
   })

@@ -8,6 +8,7 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
   ApiParam,
+  ApiOperation,
 } from '@nestjs/swagger';
 import { WorkspaceDocument } from './../../workspaces/schemas/workspace.schema';
 import { FindOneParams } from './../../../utils/find-one-params';
@@ -50,6 +51,7 @@ export class WikiSectionsController {
    */
   @Post()
   @ApiParam({ name: 'workspaceId' })
+  @ApiOperation({ summary: 'Create a wiki section' })
   @ApiCreatedResponse({
     description: 'The wiki section has been successfully created',
     type: WikiSectionDto,
@@ -82,6 +84,7 @@ export class WikiSectionsController {
    */
   @Get()
   @ApiParam({ name: 'workspaceId' })
+  @ApiOperation({ summary: 'Get all wiki sections' })
   @ApiOkResponse({
     description: 'The wiki sections have been successfully retrieved',
     type: [WikiSectionDto],
@@ -107,6 +110,7 @@ export class WikiSectionsController {
   @Get(':id')
   @ApiParam({ name: 'workspaceId' })
   @ApiParam({ name: 'id' })
+  @ApiOperation({ summary: 'Get a wiki section' })
   @ApiOkResponse({
     description: 'The wiki section has been successfully retrieved',
     type: WikiSectionDto,
@@ -135,6 +139,7 @@ export class WikiSectionsController {
   @Put(':id')
   @ApiParam({ name: 'workspaceId' })
   @ApiParam({ name: 'id' })
+  @ApiOperation({ summary: 'Update a wiki section' })
   @ApiOkResponse({
     description: 'The wiki section has been successfully updated',
     type: WikiSectionDto,
@@ -172,6 +177,7 @@ export class WikiSectionsController {
   @Delete(':id')
   @ApiParam({ name: 'workspaceId' })
   @ApiParam({ name: 'id' })
+  @ApiOperation({ summary: 'Delete a wiki section' })
   @ApiOkResponse({
     description: 'The wiki section has been successfully deleted',
   })

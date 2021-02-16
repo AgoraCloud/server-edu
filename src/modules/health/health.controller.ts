@@ -1,4 +1,4 @@
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Controller, Get } from '@nestjs/common';
 import {
   HealthCheck,
@@ -22,6 +22,7 @@ export class HealthController {
    */
   @HealthCheck()
   @Get('readiness')
+  @ApiOperation({ summary: 'Get the readiness state of the server' })
   readinessCheck(): Promise<HealthCheckResult> {
     return this.healthCheck();
   }
@@ -31,6 +32,7 @@ export class HealthController {
    */
   @HealthCheck()
   @Get('liveness')
+  @ApiOperation({ summary: 'Get the liveness state of the server' })
   livenessCheck(): Promise<HealthCheckResult> {
     return this.healthCheck();
   }

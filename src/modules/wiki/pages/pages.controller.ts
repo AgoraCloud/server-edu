@@ -8,6 +8,7 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiParam,
+  ApiOperation,
 } from '@nestjs/swagger';
 import { FindOneParams } from './../../../utils/find-one-params';
 import { WikiSectionDocument } from '../../wiki/sections/schemas/section.schema';
@@ -59,6 +60,7 @@ export class WikiPagesController {
   @Post()
   @ApiParam({ name: 'workspaceId' })
   @ApiParam({ name: 'sectionId' })
+  @ApiOperation({ summary: 'Create a wiki page' })
   @ApiCreatedResponse({
     description: 'The wiki page has been successfully created',
     type: WikiPageDto,
@@ -96,6 +98,7 @@ export class WikiPagesController {
   @Get()
   @ApiParam({ name: 'workspaceId' })
   @ApiParam({ name: 'sectionId' })
+  @ApiOperation({ summary: 'Get all wiki pages' })
   @ApiOkResponse({
     description: 'The wiki pages have been successfully retrieved',
     type: [WikiPageDto],
@@ -125,6 +128,7 @@ export class WikiPagesController {
   @ApiParam({ name: 'workspaceId' })
   @ApiParam({ name: 'sectionId' })
   @ApiParam({ name: 'id' })
+  @ApiOperation({ summary: 'Get a wiki page' })
   @ApiOkResponse({
     description: 'The wiki page has been successfully retrieved',
     type: WikiPageDto,
@@ -161,6 +165,7 @@ export class WikiPagesController {
   @ApiParam({ name: 'workspaceId' })
   @ApiParam({ name: 'sectionId' })
   @ApiParam({ name: 'id' })
+  @ApiOperation({ summary: 'Update a wiki page' })
   @ApiOkResponse({
     description: 'The wiki page has been successfully updated',
     type: WikiPageDto,
@@ -202,6 +207,7 @@ export class WikiPagesController {
   @ApiParam({ name: 'workspaceId' })
   @ApiParam({ name: 'sectionId' })
   @ApiParam({ name: 'id' })
+  @ApiOperation({ summary: 'Delete a wiki page' })
   @ApiOkResponse({
     description: 'The wiki page has been successfully deleted',
   })

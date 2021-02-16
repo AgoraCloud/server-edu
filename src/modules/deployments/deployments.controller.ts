@@ -8,6 +8,7 @@ import {
   ApiUnauthorizedResponse,
   ApiOkResponse,
   ApiParam,
+  ApiOperation,
 } from '@nestjs/swagger';
 import { DeploymentDto, DeploymentImageDto } from './dto/deployment.dto';
 import { TransformInterceptor } from './../../interceptors/transform.interceptor';
@@ -53,6 +54,7 @@ export class DeploymentsController {
    */
   @Post()
   @ApiParam({ name: 'workspaceId' })
+  @ApiOperation({ summary: 'Create a new deployment' })
   @ApiCreatedResponse({
     description: 'The deployment has been successfully created',
     type: DeploymentDto,
@@ -79,6 +81,7 @@ export class DeploymentsController {
    */
   @Get('images')
   @ApiParam({ name: 'workspaceId' })
+  @ApiOperation({ summary: 'Get all allowed deployment images' })
   @ApiOkResponse({
     description: 'The deployment images have been successfully retrieved',
     type: DeploymentImageDto,
@@ -99,6 +102,7 @@ export class DeploymentsController {
    */
   @Get()
   @ApiParam({ name: 'workspaceId' })
+  @ApiOperation({ summary: 'Get all deployments' })
   @ApiOkResponse({
     description: 'The deployments have been successfully retrieved',
     type: [DeploymentDto],
@@ -124,6 +128,7 @@ export class DeploymentsController {
   @Get(':id')
   @ApiParam({ name: 'workspaceId' })
   @ApiParam({ name: 'id' })
+  @ApiOperation({ summary: 'Get a deployment' })
   @ApiOkResponse({
     description: 'The deployment has been successfully retrieved',
     type: DeploymentDto,
@@ -151,6 +156,7 @@ export class DeploymentsController {
   @Put(':id')
   @ApiParam({ name: 'workspaceId' })
   @ApiParam({ name: 'id' })
+  @ApiOperation({ summary: 'Update a deployment' })
   @ApiOkResponse({
     description: 'The deployment has been successfully updated',
     type: DeploymentDto,
@@ -187,6 +193,7 @@ export class DeploymentsController {
   @Delete(':id')
   @ApiParam({ name: 'workspaceId' })
   @ApiParam({ name: 'id' })
+  @ApiOperation({ summary: 'Delete a deployment' })
   @ApiOkResponse({
     description: 'The deployment has been successfully deleted',
   })

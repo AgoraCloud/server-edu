@@ -8,6 +8,7 @@ import {
   ApiOkResponse,
   ApiNotFoundResponse,
   ApiParam,
+  ApiOperation,
 } from '@nestjs/swagger';
 import { FindOneParams } from './../../../utils/find-one-params';
 import { ProjectDocument } from './../schemas/project.schema';
@@ -59,6 +60,7 @@ export class ProjectLanesController {
   @Post()
   @ApiParam({ name: 'workspaceId' })
   @ApiParam({ name: 'projectId' })
+  @ApiOperation({ summary: 'Create a project lane' })
   @ApiCreatedResponse({
     description: 'The project lane has been successfully created',
     type: ProjectLaneDto,
@@ -95,6 +97,7 @@ export class ProjectLanesController {
   @Get()
   @ApiParam({ name: 'workspaceId' })
   @ApiParam({ name: 'projectId' })
+  @ApiOperation({ summary: 'Get all project lanes' })
   @ApiOkResponse({
     description: 'The project lanes have been successfully retrieved',
     type: [ProjectLaneDto],
@@ -123,6 +126,7 @@ export class ProjectLanesController {
   @ApiParam({ name: 'workspaceId' })
   @ApiParam({ name: 'projectId' })
   @ApiParam({ name: 'id' })
+  @ApiOperation({ summary: 'Get a project lane' })
   @ApiOkResponse({
     description: 'The project lane has been successfully retrieved',
     type: ProjectLaneDto,
@@ -159,6 +163,7 @@ export class ProjectLanesController {
   @ApiParam({ name: 'workspaceId' })
   @ApiParam({ name: 'projectId' })
   @ApiParam({ name: 'id' })
+  @ApiOperation({ summary: 'Update a project lane' })
   @ApiOkResponse({
     description: 'The project lane has been successfully updated',
     type: ProjectLaneDto,
@@ -200,6 +205,7 @@ export class ProjectLanesController {
   @ApiParam({ name: 'workspaceId' })
   @ApiParam({ name: 'projectId' })
   @ApiParam({ name: 'id' })
+  @ApiOperation({ summary: 'Delete a project lane' })
   @ApiOkResponse({
     description: 'The project lane has been successfully deleted',
   })

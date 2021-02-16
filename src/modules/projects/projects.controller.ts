@@ -8,6 +8,7 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiParam,
+  ApiOperation,
 } from '@nestjs/swagger';
 import { FindOneParams } from './../../utils/find-one-params';
 import { WorkspaceDocument } from './../workspaces/schemas/workspace.schema';
@@ -50,6 +51,7 @@ export class ProjectsController {
    */
   @Post()
   @ApiParam({ name: 'workspaceId' })
+  @ApiOperation({ summary: 'Create a new project' })
   @ApiCreatedResponse({
     description: 'The project has been successfully created',
     type: ProjectDto,
@@ -78,6 +80,7 @@ export class ProjectsController {
    */
   @Get()
   @ApiParam({ name: 'workspaceId' })
+  @ApiOperation({ summary: 'Get all projects' })
   @ApiOkResponse({
     description: 'The projects have been successfully retrieved',
     type: [ProjectDto],
@@ -103,6 +106,7 @@ export class ProjectsController {
   @Get(':id')
   @ApiParam({ name: 'workspaceId' })
   @ApiParam({ name: 'id' })
+  @ApiOperation({ summary: 'Get a project' })
   @ApiOkResponse({
     description: 'The project has been successfully retrieved',
     type: ProjectDto,
@@ -130,6 +134,7 @@ export class ProjectsController {
   @Put(':id')
   @ApiParam({ name: 'workspaceId' })
   @ApiParam({ name: 'id' })
+  @ApiOperation({ summary: 'Update a project' })
   @ApiOkResponse({
     description: 'The project has been successfully updated',
     type: ProjectDto,
@@ -166,6 +171,7 @@ export class ProjectsController {
   @Delete(':id')
   @ApiParam({ name: 'workspaceId' })
   @ApiParam({ name: 'id' })
+  @ApiOperation({ summary: 'Delete a project' })
   @ApiOkResponse({
     description: 'The project has been successfully deleted',
   })

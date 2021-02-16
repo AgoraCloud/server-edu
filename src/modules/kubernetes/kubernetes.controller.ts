@@ -7,6 +7,7 @@ import {
   ApiOkResponse,
   ApiInternalServerErrorResponse,
   ApiBadRequestResponse,
+  ApiOperation,
 } from '@nestjs/swagger';
 import { DeploymentInterceptor } from '../../interceptors/deployment.interceptor';
 import { DeploymentMetricsDto } from './dto/deployment-metrics.dto';
@@ -35,6 +36,7 @@ export class KubernetesController {
    * @param deploymentId the deployment id
    */
   @Get('logs')
+  @ApiOperation({ summary: 'Get a deployments logs' })
   @ApiOkResponse({
     description: 'The deployment logs have been successfully retrieved',
     type: 'string',
@@ -61,6 +63,7 @@ export class KubernetesController {
    * @param deploymentId the deployment id
    */
   @Get('metrics')
+  @ApiOperation({ summary: 'Get a deployments metrics (cpu and memory)' })
   @ApiOkResponse({
     description: 'The deployment metrics have been successfully retrieved',
     type: DeploymentMetricsDto,

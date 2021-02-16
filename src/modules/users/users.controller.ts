@@ -5,6 +5,7 @@ import {
   ApiOkResponse,
   ApiUnauthorizedResponse,
   ApiBadRequestResponse,
+  ApiOperation,
 } from '@nestjs/swagger';
 import { UserDto } from './dto/user.dto';
 import { TransformInterceptor } from './../../interceptors/transform.interceptor';
@@ -36,6 +37,7 @@ export class UsersController {
    * @param user the user
    */
   @Get()
+  @ApiOperation({ summary: 'Get a user' })
   @ApiOkResponse({
     description: 'The user has been successfully retrieved',
     type: UserDto,
@@ -51,6 +53,7 @@ export class UsersController {
    * @param updateUserDto the updated user
    */
   @Put()
+  @ApiOperation({ summary: 'Update a user' })
   @ApiOkResponse({
     description: 'The user has been successfully updated',
     type: UserDto,
@@ -72,6 +75,7 @@ export class UsersController {
    * @param userId the users id
    */
   @Delete()
+  @ApiOperation({ summary: 'Delete a user' })
   @ApiOkResponse({ description: 'The user has been successfully deleted' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   async remove(@User('_id') userId: string): Promise<void> {
