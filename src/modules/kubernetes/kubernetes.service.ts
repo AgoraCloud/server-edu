@@ -1,3 +1,4 @@
+import { WorkspaceMetricsNotAvailableException } from './../../exceptions/workspace-metrics-not-available.exception';
 import { WorkspaceUpdatedEvent } from './../../events/workspace-updated.event';
 import { DeploymentDocument } from './../deployments/schemas/deployment.schema';
 import { WorkspaceNamespace } from './schemas/workspace-namespace.schema';
@@ -17,7 +18,7 @@ import { PodPhase } from './schemas/pod-phase.schema';
 import { DeploymentsService } from '../deployments/deployments.service';
 import { UpdateDeploymentResourcesDto } from '../deployments/dto/update-deployment.dto';
 import { DeploymentPodMetricsNotAvailableException } from '../../exceptions/deployment-pod-metrics-not-available.exception';
-import { DeploymentMetricsDto } from './dto/deployment-metrics.dto';
+import { MetricsDto } from './dto/metrics.dto';
 import { DeploymentPodNotAvailableException } from '../../exceptions/deployment-pod-not-available.exception';
 import {
   DeploymentProperties,
@@ -822,7 +823,7 @@ export class KubernetesService implements OnModuleInit {
   async getPodMetrics(
     workspaceId: string,
     deploymentId: string,
-  ): Promise<DeploymentMetricsDto> {
+  ): Promise<MetricsDto> {
     const namespace: string = this.generateResourceName(workspaceId);
     const pod: k8s.V1Pod = await this.getPod(namespace, deploymentId);
     const opts: request.Options = {
@@ -859,12 +860,43 @@ export class KubernetesService implements OnModuleInit {
     if (containerIndex === -1) {
       throw new DeploymentPodMetricsNotAvailableException(deploymentId);
     }
-    const containerMetrics: DeploymentMetricsDto =
-      containers[containerIndex].usage;
+    const containerMetrics: MetricsDto = containers[containerIndex].usage;
     if (!containerMetrics?.cpu && !containerMetrics?.memory) {
       throw new DeploymentPodMetricsNotAvailableException(deploymentId);
     }
     return containerMetrics;
+  }
+
+  /**
+   * Get a Workspaces metrics (through the workspaces namespace resource quota)
+   * @param workspace the workspace
+   */
+  async getWorkspaceMetrics(workspace: WorkspaceDocument): Promise<MetricsDto> {
+    const workspaceId: string = workspace._id;
+    const workspaceResources: WorkspaceResources =
+      workspace.properties?.resources;
+    if (
+      !workspaceResources ||
+      !workspaceResources.cpuCount ||
+      !workspaceResources.memoryCount ||
+      !workspaceResources.storageCount
+    ) {
+      throw new WorkspaceMetricsNotAvailableException(workspaceId);
+    }
+    try {
+      const { body: resourceQuota } = await this.getResourceQuota(
+        this.generateResourceName(workspaceId),
+        workspaceId,
+      );
+      const workspaceMetrics: MetricsDto = new MetricsDto(
+        resourceQuota.status?.used['limits.cpu'],
+        resourceQuota.status?.used['limits.memory'],
+        resourceQuota.status?.used['requests.storage'],
+      );
+      return workspaceMetrics;
+    } catch (err) {
+      throw new WorkspaceMetricsNotAvailableException(workspaceId);
+    }
   }
 
   /**

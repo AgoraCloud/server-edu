@@ -1,3 +1,4 @@
+import { WorkspaceDocument } from './../workspaces/schemas/workspace.schema';
 import { ExceptionDto } from './../../utils/base.dto';
 import {
   ApiTags,
@@ -11,7 +12,7 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 import { DeploymentInterceptor } from '../../interceptors/deployment.interceptor';
-import { DeploymentMetricsDto } from './dto/deployment-metrics.dto';
+import { MetricsDto } from './dto/metrics.dto';
 import { KubernetesService } from './kubernetes.service';
 import { WorkspaceInterceptor } from '../../interceptors/workspace.interceptor';
 import { JwtAuthenticationGuard } from '../authentication/guards/jwt-authentication.guard';
@@ -22,12 +23,12 @@ import {
   Get,
   Param,
 } from '@nestjs/common';
+import { Workspace } from 'src/decorators/workspace.decorator';
 
 @ApiCookieAuth()
-@ApiTags('Deployments')
 @UseGuards(JwtAuthenticationGuard)
-@UseInterceptors(WorkspaceInterceptor, DeploymentInterceptor)
-@Controller('api/workspaces/:workspaceId/deployments/:deploymentId')
+@UseInterceptors(WorkspaceInterceptor)
+@Controller('api/workspaces/:workspaceId')
 export class KubernetesController {
   constructor(private readonly kubernetesService: KubernetesService) {}
 
@@ -36,7 +37,9 @@ export class KubernetesController {
    * @param workspaceId the workspace id
    * @param deploymentId the deployment id
    */
-  @Get('logs')
+  @Get('deployments/:deploymentId/logs')
+  @UseInterceptors(DeploymentInterceptor)
+  @ApiTags('Deployments')
   @ApiOperation({ summary: 'Get a deployments logs' })
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'deploymentId', description: 'The deployment id' })
@@ -57,7 +60,7 @@ export class KubernetesController {
     description: 'Kubernetes pod for the given deployment did not exist',
     type: ExceptionDto,
   })
-  findOneLogs(
+  findDeploymentLogs(
     @Param('workspaceId') workspaceId: string,
     @Param('deploymentId') deploymentId: string,
   ): Promise<string> {
@@ -69,13 +72,15 @@ export class KubernetesController {
    * @param workspaceId the workspace id
    * @param deploymentId the deployment id
    */
-  @Get('metrics')
+  @Get('deployments/:deploymentId/metrics')
+  @UseInterceptors(DeploymentInterceptor)
+  @ApiTags('Deployments')
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'deploymentId', description: 'The deployment id' })
   @ApiOperation({ summary: 'Get a deployments metrics (cpu and memory)' })
   @ApiOkResponse({
     description: 'The deployment metrics have been successfully retrieved',
-    type: DeploymentMetricsDto,
+    type: MetricsDto,
   })
   @ApiBadRequestResponse({
     description:
@@ -91,10 +96,40 @@ export class KubernetesController {
     description: 'Kubernetes pod for the given deployment did not exist',
     type: ExceptionDto,
   })
-  findOneMetrics(
+  findDeploymentMetrics(
     @Param('workspaceId') workspaceId: string,
     @Param('deploymentId') deploymentId: string,
-  ): Promise<DeploymentMetricsDto> {
+  ): Promise<MetricsDto> {
     return this.kubernetesService.getPodMetrics(workspaceId, deploymentId);
+  }
+
+  /**
+   * Get a workspaces metrics (cpu, memory and storage)
+   * @param workspace the workspace
+   */
+  @Get('metrics')
+  @ApiTags('Workspaces')
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
+  @ApiOperation({
+    summary: 'Get a workspaces metrics (cpu, memory and storage)',
+  })
+  @ApiOkResponse({
+    description: 'The workspace metrics have been successfully retrieved',
+    type: MetricsDto,
+  })
+  @ApiBadRequestResponse({
+    description:
+      'Metrics for the given workspace were not available or the provided workspace id was not valid',
+    type: ExceptionDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiNotFoundResponse({
+    description: 'The workspace with the given id was not found',
+    type: ExceptionDto,
+  })
+  findWorkspaceMetrics(
+    @Workspace() workspace: WorkspaceDocument,
+  ): Promise<MetricsDto> {
+    return this.kubernetesService.getWorkspaceMetrics(workspace);
   }
 }
