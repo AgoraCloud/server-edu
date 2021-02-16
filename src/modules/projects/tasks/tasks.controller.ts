@@ -74,7 +74,8 @@ export class ProjectTasksController {
     type: ProjectTaskDto,
   })
   @ApiBadRequestResponse({
-    description: 'The provided project task was not valid',
+    description:
+      'The provided project task, workspace id, project id or lane id was not valid',
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
@@ -115,6 +116,11 @@ export class ProjectTasksController {
     description: 'The project tasks have been successfully retrieved',
     type: [ProjectTaskDto],
   })
+  @ApiBadRequestResponse({
+    description:
+      'The provided workspace id, project id or lane id was not valid',
+    type: ExceptionDto,
+  })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description:
@@ -152,6 +158,11 @@ export class ProjectTasksController {
   @ApiOkResponse({
     description: 'The project task has been successfully retrieved',
     type: ProjectTaskDto,
+  })
+  @ApiBadRequestResponse({
+    description:
+      'The provided workspace id, project id, lane id or task id was not valid',
+    type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
@@ -195,7 +206,8 @@ export class ProjectTasksController {
     type: ProjectTaskDto,
   })
   @ApiBadRequestResponse({
-    description: 'The provided project task was not valid',
+    description:
+      'The provided project task, workspace id, project id, lane id or task id was not valid',
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
@@ -238,6 +250,11 @@ export class ProjectTasksController {
   @ApiOperation({ summary: 'Delete a project task' })
   @ApiOkResponse({
     description: 'The project task has been successfully deleted',
+  })
+  @ApiBadRequestResponse({
+    description:
+      'The provided workspace id, project id, lane id or task id was not valid',
+    type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({

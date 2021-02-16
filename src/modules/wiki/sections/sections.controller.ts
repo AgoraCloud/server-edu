@@ -57,7 +57,7 @@ export class WikiSectionsController {
     type: WikiSectionDto,
   })
   @ApiBadRequestResponse({
-    description: 'The provided wiki section was not valid',
+    description: 'The provided wiki section or workspace id was not valid',
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
@@ -89,6 +89,10 @@ export class WikiSectionsController {
     description: 'The wiki sections have been successfully retrieved',
     type: [WikiSectionDto],
   })
+  @ApiBadRequestResponse({
+    description: 'The provided workspace id was not valid',
+    type: ExceptionDto,
+  })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description: 'The workspace with the given id was not found',
@@ -114,6 +118,10 @@ export class WikiSectionsController {
   @ApiOkResponse({
     description: 'The wiki section has been successfully retrieved',
     type: WikiSectionDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'The provided workspace id or section id was not valid',
+    type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
@@ -145,7 +153,8 @@ export class WikiSectionsController {
     type: WikiSectionDto,
   })
   @ApiBadRequestResponse({
-    description: 'The provided wiki section was not valid',
+    description:
+      'The provided wiki section, workspace id or section id was not valid',
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
@@ -180,6 +189,10 @@ export class WikiSectionsController {
   @ApiOperation({ summary: 'Delete a wiki section' })
   @ApiOkResponse({
     description: 'The wiki section has been successfully deleted',
+  })
+  @ApiBadRequestResponse({
+    description: 'The provided workspace id or section id was not valid',
+    type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({

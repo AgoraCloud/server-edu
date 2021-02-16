@@ -44,6 +44,10 @@ export class KubernetesController {
     description: 'The deployment logs have been successfully retrieved',
     type: 'string',
   })
+  @ApiBadRequestResponse({
+    description: 'The provided workspace id or deployment id was not valid',
+    type: ExceptionDto,
+  })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description: 'The workspace or deployment with the given id was not found',
@@ -75,7 +79,7 @@ export class KubernetesController {
   })
   @ApiBadRequestResponse({
     description:
-      'Kubernetes pod metrics for the given deployment were not available',
+      'Kubernetes pod metrics for the given deployment were not available, the provided workspace id or deployment id was not valid',
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })

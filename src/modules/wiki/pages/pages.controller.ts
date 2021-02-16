@@ -66,7 +66,8 @@ export class WikiPagesController {
     type: WikiPageDto,
   })
   @ApiBadRequestResponse({
-    description: 'The provided wiki page was not valid',
+    description:
+      'The provided wiki page, workspace id, or section id was not valid',
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
@@ -103,6 +104,10 @@ export class WikiPagesController {
     description: 'The wiki pages have been successfully retrieved',
     type: [WikiPageDto],
   })
+  @ApiBadRequestResponse({
+    description: 'The provided workspace id or section id was not valid',
+    type: ExceptionDto,
+  })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description:
@@ -132,6 +137,11 @@ export class WikiPagesController {
   @ApiOkResponse({
     description: 'The wiki page has been successfully retrieved',
     type: WikiPageDto,
+  })
+  @ApiBadRequestResponse({
+    description:
+      'The provided workspace id, section id or page id was not valid',
+    type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
@@ -171,7 +181,8 @@ export class WikiPagesController {
     type: WikiPageDto,
   })
   @ApiBadRequestResponse({
-    description: 'The provided wiki page was not valid',
+    description:
+      'The provided wiki page, workspace id, section id or page id was not valid',
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
@@ -210,6 +221,11 @@ export class WikiPagesController {
   @ApiOperation({ summary: 'Delete a wiki page' })
   @ApiOkResponse({
     description: 'The wiki page has been successfully deleted',
+  })
+  @ApiBadRequestResponse({
+    description:
+      'The provided workspace id, section id or page id was not valid',
+    type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({

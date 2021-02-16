@@ -57,7 +57,7 @@ export class ProjectsController {
     type: ProjectDto,
   })
   @ApiBadRequestResponse({
-    description: 'The provided project was not valid',
+    description: 'The provided project or workspace id was not valid',
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
@@ -85,6 +85,10 @@ export class ProjectsController {
     description: 'The projects have been successfully retrieved',
     type: [ProjectDto],
   })
+  @ApiBadRequestResponse({
+    description: 'The provided workspace id was not valid',
+    type: ExceptionDto,
+  })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description: 'The workspace with the given id was not found',
@@ -110,6 +114,10 @@ export class ProjectsController {
   @ApiOkResponse({
     description: 'The project has been successfully retrieved',
     type: ProjectDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'The provided workspace id or project id was not valid',
+    type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
@@ -140,7 +148,8 @@ export class ProjectsController {
     type: ProjectDto,
   })
   @ApiBadRequestResponse({
-    description: 'The provided project was not valid',
+    description:
+      'The provided project, workspace id or project id was not valid',
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
@@ -174,6 +183,10 @@ export class ProjectsController {
   @ApiOperation({ summary: 'Delete a project' })
   @ApiOkResponse({
     description: 'The project has been successfully deleted',
+  })
+  @ApiBadRequestResponse({
+    description: 'The provided workspace id or project id was not valid',
+    type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({

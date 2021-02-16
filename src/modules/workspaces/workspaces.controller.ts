@@ -90,6 +90,10 @@ export class WorkspacesController {
     description: 'The workspace has been successfully retrieved',
     type: WorkspaceDto,
   })
+  @ApiBadRequestResponse({
+    description: 'The provided workspace id was not valid',
+    type: ExceptionDto,
+  })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description: 'The workspace with the given id was not found',
@@ -116,7 +120,7 @@ export class WorkspacesController {
     type: WorkspaceDto,
   })
   @ApiBadRequestResponse({
-    description: 'The provided workspace was not valid',
+    description: 'The provided workspace or workspace id was not valid',
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
@@ -146,6 +150,10 @@ export class WorkspacesController {
   @ApiOperation({ summary: 'Delete a workspace' })
   @ApiOkResponse({
     description: 'The workspace has been successfully deleted',
+  })
+  @ApiBadRequestResponse({
+    description: 'The provided workspace id was not valid',
+    type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({

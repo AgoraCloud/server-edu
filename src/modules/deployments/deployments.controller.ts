@@ -60,7 +60,7 @@ export class DeploymentsController {
     type: DeploymentDto,
   })
   @ApiBadRequestResponse({
-    description: 'The provided deployment was not valid',
+    description: 'The provided deployment or workspace id was not valid',
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
@@ -86,6 +86,10 @@ export class DeploymentsController {
     description: 'The deployment images have been successfully retrieved',
     type: DeploymentImageDto,
   })
+  @ApiBadRequestResponse({
+    description: 'The provided workspace id was not valid',
+    type: ExceptionDto,
+  })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description: 'The workspace with the given id was not found',
@@ -106,6 +110,10 @@ export class DeploymentsController {
   @ApiOkResponse({
     description: 'The deployments have been successfully retrieved',
     type: [DeploymentDto],
+  })
+  @ApiBadRequestResponse({
+    description: 'The provided workspace id was not valid',
+    type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
@@ -132,6 +140,10 @@ export class DeploymentsController {
   @ApiOkResponse({
     description: 'The deployment has been successfully retrieved',
     type: DeploymentDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'The provided workspace id or deployment id was not valid',
+    type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
@@ -162,7 +174,8 @@ export class DeploymentsController {
     type: DeploymentDto,
   })
   @ApiBadRequestResponse({
-    description: 'The provided deployment was not valid',
+    description:
+      'The provided deployment, workspace id or deployment id was not valid',
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
@@ -196,6 +209,10 @@ export class DeploymentsController {
   @ApiOperation({ summary: 'Delete a deployment' })
   @ApiOkResponse({
     description: 'The deployment has been successfully deleted',
+  })
+  @ApiBadRequestResponse({
+    description: 'The provided workspace id or deployment id was not valid',
+    type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
