@@ -6,6 +6,7 @@ import {
   ApiNotFoundResponse,
   ApiUnauthorizedResponse,
   ApiOkResponse,
+  ApiParam,
 } from '@nestjs/swagger';
 import { DeploymentDto, DeploymentImageDto } from './dto/deployment.dto';
 import { TransformInterceptor } from './../../interceptors/transform.interceptor';
@@ -50,12 +51,13 @@ export class DeploymentsController {
    * @param createDeploymentDto the deployment to create
    */
   @Post()
+  @ApiParam({ name: 'workspaceId' })
   @ApiCreatedResponse({
     description: 'The deployment has been successfully created',
     type: DeploymentDto,
   })
   @ApiBadRequestResponse({
-    description: 'The provided deployment is not valid',
+    description: 'The provided deployment was not valid',
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiNotFoundResponse({
@@ -73,6 +75,7 @@ export class DeploymentsController {
    * Get all allowed deployment images
    */
   @Get('images')
+  @ApiParam({ name: 'workspaceId' })
   @ApiOkResponse({
     description: 'The deployment images have been successfully retrieved',
     type: DeploymentImageDto,
@@ -91,6 +94,7 @@ export class DeploymentsController {
    * @param workspaceId the workspace id
    */
   @Get()
+  @ApiParam({ name: 'workspaceId' })
   @ApiOkResponse({
     description: 'The deployments have been successfully retrieved',
     type: [DeploymentDto],
@@ -113,6 +117,8 @@ export class DeploymentsController {
    * @param deploymentId the deployment id
    */
   @Get(':id')
+  @ApiParam({ name: 'workspaceId' })
+  @ApiParam({ name: 'id' })
   @ApiOkResponse({
     description: 'The deployment has been successfully retrieved',
     type: DeploymentDto,
@@ -137,12 +143,14 @@ export class DeploymentsController {
    * @param updateDeploymentDto the updated deployment
    */
   @Put(':id')
+  @ApiParam({ name: 'workspaceId' })
+  @ApiParam({ name: 'id' })
   @ApiOkResponse({
     description: 'The deployment has been successfully updated',
     type: DeploymentDto,
   })
   @ApiBadRequestResponse({
-    description: 'The provided deployment is not valid',
+    description: 'The provided deployment was not valid',
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiNotFoundResponse({
@@ -169,6 +177,8 @@ export class DeploymentsController {
    * @param deploymentId the deployment id
    */
   @Delete(':id')
+  @ApiParam({ name: 'workspaceId' })
+  @ApiParam({ name: 'id' })
   @ApiOkResponse({
     description: 'The deployment has been successfully deleted',
   })

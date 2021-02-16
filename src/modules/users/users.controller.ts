@@ -55,7 +55,7 @@ export class UsersController {
     type: UserDto,
   })
   @ApiBadRequestResponse({
-    description: 'The provided user is not valid',
+    description: 'The provided user was not valid',
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   update(

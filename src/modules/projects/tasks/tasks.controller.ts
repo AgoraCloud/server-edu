@@ -6,6 +6,7 @@ import {
   ApiUnauthorizedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiParam,
 } from '@nestjs/swagger';
 import { FindOneParams } from './../../../utils/find-one-params';
 import { ProjectLaneDocument } from './../lanes/schemas/lane.schema';
@@ -62,12 +63,15 @@ export class ProjectTasksController {
    * @param createProjectTaskDto the project task to create
    */
   @Post()
+  @ApiParam({ name: 'workspaceId' })
+  @ApiParam({ name: 'projectId' })
+  @ApiParam({ name: 'laneId' })
   @ApiCreatedResponse({
     description: 'The project task has been successfully created',
     type: ProjectTaskDto,
   })
   @ApiBadRequestResponse({
-    description: 'The provided project task is not valid',
+    description: 'The provided project task was not valid',
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiNotFoundResponse({
@@ -98,6 +102,9 @@ export class ProjectTasksController {
    * @param projectLaneId the project lane id
    */
   @Get()
+  @ApiParam({ name: 'workspaceId' })
+  @ApiParam({ name: 'projectId' })
+  @ApiParam({ name: 'laneId' })
   @ApiOkResponse({
     description: 'The project tasks have been successfully retrieved',
     type: [ProjectTaskDto],
@@ -130,6 +137,10 @@ export class ProjectTasksController {
    * @param projectTaskId the project task id
    */
   @Get(':id')
+  @ApiParam({ name: 'workspaceId' })
+  @ApiParam({ name: 'projectId' })
+  @ApiParam({ name: 'laneId' })
+  @ApiParam({ name: 'id' })
   @ApiOkResponse({
     description: 'The project task has been successfully retrieved',
     type: ProjectTaskDto,
@@ -165,12 +176,16 @@ export class ProjectTasksController {
    * @param updateProjectTaskDto the updated project task
    */
   @Put(':id')
+  @ApiParam({ name: 'workspaceId' })
+  @ApiParam({ name: 'projectId' })
+  @ApiParam({ name: 'laneId' })
+  @ApiParam({ name: 'id' })
   @ApiOkResponse({
     description: 'The project task has been successfully updated',
     type: ProjectTaskDto,
   })
   @ApiBadRequestResponse({
-    description: 'The provided project task is not valid',
+    description: 'The provided project task was not valid',
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiNotFoundResponse({
@@ -204,6 +219,10 @@ export class ProjectTasksController {
    * @param projectTaskId the project task id
    */
   @Delete(':id')
+  @ApiParam({ name: 'workspaceId' })
+  @ApiParam({ name: 'projectId' })
+  @ApiParam({ name: 'laneId' })
+  @ApiParam({ name: 'id' })
   @ApiOkResponse({
     description: 'The project task has been successfully deleted',
   })

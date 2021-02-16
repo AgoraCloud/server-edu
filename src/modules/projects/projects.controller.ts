@@ -6,6 +6,7 @@ import {
   ApiUnauthorizedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiParam,
 } from '@nestjs/swagger';
 import { FindOneParams } from './../../utils/find-one-params';
 import { WorkspaceDocument } from './../workspaces/schemas/workspace.schema';
@@ -47,12 +48,13 @@ export class ProjectsController {
    * @param createProjectDto the project to create
    */
   @Post()
+  @ApiParam({ name: 'workspaceId' })
   @ApiCreatedResponse({
     description: 'The project has been successfully created',
     type: ProjectDto,
   })
   @ApiBadRequestResponse({
-    description: 'The provided project is not valid',
+    description: 'The provided project was not valid',
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiNotFoundResponse({
@@ -72,6 +74,7 @@ export class ProjectsController {
    * @param workspaceId the workspace id
    */
   @Get()
+  @ApiParam({ name: 'workspaceId' })
   @ApiOkResponse({
     description: 'The projects have been successfully retrieved',
     type: [ProjectDto],
@@ -94,6 +97,8 @@ export class ProjectsController {
    * @param projectId the project id
    */
   @Get(':id')
+  @ApiParam({ name: 'workspaceId' })
+  @ApiParam({ name: 'id' })
   @ApiOkResponse({
     description: 'The project has been successfully retrieved',
     type: ProjectDto,
@@ -118,12 +123,14 @@ export class ProjectsController {
    * @param updateProjectDto the updated project
    */
   @Put(':id')
+  @ApiParam({ name: 'workspaceId' })
+  @ApiParam({ name: 'id' })
   @ApiOkResponse({
     description: 'The project has been successfully updated',
     type: ProjectDto,
   })
   @ApiBadRequestResponse({
-    description: 'The provided project is not valid',
+    description: 'The provided project was not valid',
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiNotFoundResponse({
@@ -150,6 +157,8 @@ export class ProjectsController {
    * @param projectId the project id
    */
   @Delete(':id')
+  @ApiParam({ name: 'workspaceId' })
+  @ApiParam({ name: 'id' })
   @ApiOkResponse({
     description: 'The project has been successfully deleted',
   })

@@ -6,6 +6,7 @@ import {
   ApiUnauthorizedResponse,
   ApiOkResponse,
   ApiNotFoundResponse,
+  ApiParam,
 } from '@nestjs/swagger';
 import { WorkspaceDto } from './dto/workspace.dto';
 import { TransformInterceptor } from './../../interceptors/transform.interceptor';
@@ -48,7 +49,7 @@ export class WorkspacesController {
     type: WorkspaceDto,
   })
   @ApiBadRequestResponse({
-    description: 'The provided workspace is not valid',
+    description: 'The provided workspace was not valid',
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   create(
@@ -78,6 +79,7 @@ export class WorkspacesController {
    * @param workspaceId the workspace id
    */
   @Get(':id')
+  @ApiParam({ name: 'id' })
   @ApiOkResponse({
     description: 'The workspace has been successfully retrieved',
     type: WorkspaceDto,
@@ -100,12 +102,13 @@ export class WorkspacesController {
    * @param updateWorkspaceDto the updated workspace
    */
   @Put(':id')
+  @ApiParam({ name: 'id' })
   @ApiOkResponse({
     description: 'The workspace has been successfully updated',
     type: WorkspaceDto,
   })
   @ApiBadRequestResponse({
-    description: 'The provided workspace is not valid',
+    description: 'The provided workspace was not valid',
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiNotFoundResponse({
@@ -129,6 +132,7 @@ export class WorkspacesController {
    * @param workspaceId the workspace id
    */
   @Delete(':id')
+  @ApiParam({ name: 'id' })
   @ApiOkResponse({
     description: 'The workspace has been successfully deleted',
   })

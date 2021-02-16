@@ -6,6 +6,7 @@ import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
   ApiOkResponse,
+  ApiParam,
 } from '@nestjs/swagger';
 import { WorkspaceDocument } from './../../workspaces/schemas/workspace.schema';
 import { FindOneParams } from './../../../utils/find-one-params';
@@ -47,12 +48,13 @@ export class WikiSectionsController {
    * @param createWikiSectionDto the wiki section to create
    */
   @Post()
+  @ApiParam({ name: 'workspaceId' })
   @ApiCreatedResponse({
     description: 'The wiki section has been successfully created',
     type: WikiSectionDto,
   })
   @ApiBadRequestResponse({
-    description: 'The provided wiki section is not valid',
+    description: 'The provided wiki section was not valid',
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiNotFoundResponse({
@@ -76,6 +78,7 @@ export class WikiSectionsController {
    * @param workspaceId the workspace id
    */
   @Get()
+  @ApiParam({ name: 'workspaceId' })
   @ApiOkResponse({
     description: 'The wiki sections have been successfully retrieved',
     type: [WikiSectionDto],
@@ -98,6 +101,8 @@ export class WikiSectionsController {
    * @param wikiSectionId the wiki section id
    */
   @Get(':id')
+  @ApiParam({ name: 'workspaceId' })
+  @ApiParam({ name: 'id' })
   @ApiOkResponse({
     description: 'The wiki section has been successfully retrieved',
     type: WikiSectionDto,
@@ -123,12 +128,14 @@ export class WikiSectionsController {
    * @param updateWikiSectionDto the updated wiki section
    */
   @Put(':id')
+  @ApiParam({ name: 'workspaceId' })
+  @ApiParam({ name: 'id' })
   @ApiOkResponse({
     description: 'The wiki section has been successfully updated',
     type: WikiSectionDto,
   })
   @ApiBadRequestResponse({
-    description: 'The provided wiki section is not valid',
+    description: 'The provided wiki section was not valid',
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiNotFoundResponse({
@@ -156,6 +163,8 @@ export class WikiSectionsController {
    * @param wikiSectionId the wiki section id
    */
   @Delete(':id')
+  @ApiParam({ name: 'workspaceId' })
+  @ApiParam({ name: 'id' })
   @ApiOkResponse({
     description: 'The wiki section has been successfully deleted',
   })

@@ -6,6 +6,7 @@ import {
   ApiBadRequestResponse,
   ApiOkResponse,
   ApiNotFoundResponse,
+  ApiParam,
 } from '@nestjs/swagger';
 import { FindOneParams } from './../../../utils/find-one-params';
 import { ProjectDocument } from './../schemas/project.schema';
@@ -55,12 +56,14 @@ export class ProjectLanesController {
    * @param createProjectLaneDto the project lane to create
    */
   @Post()
+  @ApiParam({ name: 'workspaceId' })
+  @ApiParam({ name: 'projectId' })
   @ApiCreatedResponse({
     description: 'The project lane has been successfully created',
     type: ProjectLaneDto,
   })
   @ApiBadRequestResponse({
-    description: 'The provided project lane is not valid',
+    description: 'The provided project lane was not valid',
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiNotFoundResponse({
@@ -87,6 +90,8 @@ export class ProjectLanesController {
    * @param projectId the project id
    */
   @Get()
+  @ApiParam({ name: 'workspaceId' })
+  @ApiParam({ name: 'projectId' })
   @ApiOkResponse({
     description: 'The project lanes have been successfully retrieved',
     type: [ProjectLaneDto],
@@ -111,6 +116,9 @@ export class ProjectLanesController {
    * @param projectLaneId the project lane id
    */
   @Get(':id')
+  @ApiParam({ name: 'workspaceId' })
+  @ApiParam({ name: 'projectId' })
+  @ApiParam({ name: 'id' })
   @ApiOkResponse({
     description: 'The project lane has been successfully retrieved',
     type: ProjectLaneDto,
@@ -143,12 +151,15 @@ export class ProjectLanesController {
    * @param updateProjectLaneDto the updated project lane
    */
   @Put(':id')
+  @ApiParam({ name: 'workspaceId' })
+  @ApiParam({ name: 'projectId' })
+  @ApiParam({ name: 'id' })
   @ApiOkResponse({
     description: 'The project lane has been successfully updated',
     type: ProjectLaneDto,
   })
   @ApiBadRequestResponse({
-    description: 'The provided project lane is not valid',
+    description: 'The provided project lane was not valid',
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiNotFoundResponse({
@@ -179,6 +190,9 @@ export class ProjectLanesController {
    * @param projectLaneId the project lane id
    */
   @Delete(':id')
+  @ApiParam({ name: 'workspaceId' })
+  @ApiParam({ name: 'projectId' })
+  @ApiParam({ name: 'id' })
   @ApiOkResponse({
     description: 'The project lane has been successfully deleted',
   })

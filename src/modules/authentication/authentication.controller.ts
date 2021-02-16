@@ -1,3 +1,4 @@
+import { SignInDto } from './dto/sign-in.dto';
 import { UserDto } from './../users/dto/user.dto';
 import { TransformInterceptor } from './../../interceptors/transform.interceptor';
 import { MongoExceptionFilter } from './../../filters/mongo-exception.filter';
@@ -25,6 +26,7 @@ import { User } from '../../decorators/user.decorator';
 import JwtRefreshGuard from './guards/jwt-refresh-authentication.guard';
 import {
   ApiBadRequestResponse,
+  ApiBody,
   ApiCookieAuth,
   ApiCreatedResponse,
   ApiForbiddenResponse,
@@ -75,6 +77,7 @@ export class AuthenticationController {
     description: 'The user with the given email was not found',
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBody({ type: SignInDto })
   async logIn(
     @Request() request: Req,
     @User() user: UserDocument,

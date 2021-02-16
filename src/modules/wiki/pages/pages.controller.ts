@@ -6,6 +6,7 @@ import {
   ApiUnauthorizedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiParam,
 } from '@nestjs/swagger';
 import { FindOneParams } from './../../../utils/find-one-params';
 import { WikiSectionDocument } from '../../wiki/sections/schemas/section.schema';
@@ -55,12 +56,14 @@ export class WikiPagesController {
    * @param createWikiPageDto the wiki page to create
    */
   @Post()
+  @ApiParam({ name: 'workspaceId' })
+  @ApiParam({ name: 'sectionId' })
   @ApiCreatedResponse({
     description: 'The wiki page has been successfully created',
     type: WikiPageDto,
   })
   @ApiBadRequestResponse({
-    description: 'The provided wiki page is not valid',
+    description: 'The provided wiki page was not valid',
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiNotFoundResponse({
@@ -88,6 +91,8 @@ export class WikiPagesController {
    * @param wikiSectionId the wiki section id
    */
   @Get()
+  @ApiParam({ name: 'workspaceId' })
+  @ApiParam({ name: 'sectionId' })
   @ApiOkResponse({
     description: 'The wiki pages have been successfully retrieved',
     type: [WikiPageDto],
@@ -113,6 +118,9 @@ export class WikiPagesController {
    * @param wikiPageId the wiki page id
    */
   @Get(':id')
+  @ApiParam({ name: 'workspaceId' })
+  @ApiParam({ name: 'sectionId' })
+  @ApiParam({ name: 'id' })
   @ApiOkResponse({
     description: 'The wiki page has been successfully retrieved',
     type: WikiPageDto,
@@ -145,12 +153,15 @@ export class WikiPagesController {
    * @param updateWikiPageDto the updated wiki page
    */
   @Put(':id')
+  @ApiParam({ name: 'workspaceId' })
+  @ApiParam({ name: 'sectionId' })
+  @ApiParam({ name: 'id' })
   @ApiOkResponse({
     description: 'The wiki page has been successfully updated',
     type: WikiPageDto,
   })
   @ApiBadRequestResponse({
-    description: 'The provided wiki page is not valid',
+    description: 'The provided wiki page was not valid',
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiNotFoundResponse({
@@ -181,6 +192,9 @@ export class WikiPagesController {
    * @param wikiPageId the wiki page id
    */
   @Delete(':id')
+  @ApiParam({ name: 'workspaceId' })
+  @ApiParam({ name: 'sectionId' })
+  @ApiParam({ name: 'id' })
   @ApiOkResponse({
     description: 'The wiki page has been successfully deleted',
   })
