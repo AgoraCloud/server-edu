@@ -1,3 +1,4 @@
+import { ExceptionDto } from './../../utils/base.dto';
 import {
   ApiTags,
   ApiCookieAuth,
@@ -50,8 +51,9 @@ export class WorkspacesController {
   })
   @ApiBadRequestResponse({
     description: 'The provided workspace was not valid',
+    type: ExceptionDto,
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   create(
     @User() user: UserDocument,
     @Body() createWorkspaceDto: CreateWorkspaceDto,
@@ -68,7 +70,7 @@ export class WorkspacesController {
     description: 'The workspaces have been successfully retrieved',
     type: [WorkspaceDto],
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   findAll(@User('_id') userId: string): Promise<WorkspaceDocument[]> {
     return this.workspacesService.findAll(userId);
   }
@@ -84,9 +86,10 @@ export class WorkspacesController {
     description: 'The workspace has been successfully retrieved',
     type: WorkspaceDto,
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description: 'The workspace with the given id was not found',
+    type: ExceptionDto,
   })
   findOne(
     @User('_id') userId: string,
@@ -109,10 +112,12 @@ export class WorkspacesController {
   })
   @ApiBadRequestResponse({
     description: 'The provided workspace was not valid',
+    type: ExceptionDto,
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description: 'The workspace with the given id was not found',
+    type: ExceptionDto,
   })
   update(
     @User('_id') userId: string,
@@ -136,9 +141,10 @@ export class WorkspacesController {
   @ApiOkResponse({
     description: 'The workspace has been successfully deleted',
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description: 'The workspace with the given id was not found',
+    type: ExceptionDto,
   })
   remove(
     @User('_id') userId: string,

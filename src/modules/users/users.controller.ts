@@ -1,3 +1,4 @@
+import { ExceptionDto } from './../../utils/base.dto';
 import {
   ApiTags,
   ApiCookieAuth,
@@ -39,7 +40,7 @@ export class UsersController {
     description: 'The user has been successfully retrieved',
     type: UserDto,
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   find(@User() user: UserDocument): UserDocument {
     return user;
   }
@@ -56,8 +57,9 @@ export class UsersController {
   })
   @ApiBadRequestResponse({
     description: 'The provided user was not valid',
+    type: ExceptionDto,
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   update(
     @User('_id') userId: string,
     @Body() updateUserDto: UpdateUserDto,
@@ -71,7 +73,7 @@ export class UsersController {
    */
   @Delete()
   @ApiOkResponse({ description: 'The user has been successfully deleted' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   async remove(@User('_id') userId: string): Promise<void> {
     return this.usersService.remove(userId);
   }

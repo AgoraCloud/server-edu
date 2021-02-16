@@ -1,3 +1,4 @@
+import { ExceptionDto } from './../../../utils/base.dto';
 import {
   ApiTags,
   ApiCookieAuth,
@@ -72,11 +73,13 @@ export class ProjectTasksController {
   })
   @ApiBadRequestResponse({
     description: 'The provided project task was not valid',
+    type: ExceptionDto,
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description:
       'The workspace, project or project lane with the given id was not found',
+    type: ExceptionDto,
   })
   create(
     @User() user: UserDocument,
@@ -109,10 +112,11 @@ export class ProjectTasksController {
     description: 'The project tasks have been successfully retrieved',
     type: [ProjectTaskDto],
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description:
       'The workspace, project or project lane with the given id was not found',
+    type: ExceptionDto,
   })
   findAll(
     @User('_id') userId: string,
@@ -145,10 +149,11 @@ export class ProjectTasksController {
     description: 'The project task has been successfully retrieved',
     type: ProjectTaskDto,
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description:
       'The workspace, project, project lane or project task with the given id was not found',
+    type: ExceptionDto,
   })
   findOne(
     @User('_id') userId: string,
@@ -186,11 +191,13 @@ export class ProjectTasksController {
   })
   @ApiBadRequestResponse({
     description: 'The provided project task was not valid',
+    type: ExceptionDto,
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description:
       'The workspace, project, project lane or project task with the given id was not found',
+    type: ExceptionDto,
   })
   update(
     @User('_id') userId: string,
@@ -226,10 +233,11 @@ export class ProjectTasksController {
   @ApiOkResponse({
     description: 'The project task has been successfully deleted',
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description:
       'The workspace, project, project lane or project task with the given id was not found',
+    type: ExceptionDto,
   })
   remove(
     @User('_id') userId: string,

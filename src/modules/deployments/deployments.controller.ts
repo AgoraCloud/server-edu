@@ -1,3 +1,4 @@
+import { ExceptionDto } from './../../utils/base.dto';
 import {
   ApiTags,
   ApiCookieAuth,
@@ -58,10 +59,12 @@ export class DeploymentsController {
   })
   @ApiBadRequestResponse({
     description: 'The provided deployment was not valid',
+    type: ExceptionDto,
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description: 'The workspace with the given id was not found',
+    type: ExceptionDto,
   })
   create(
     @User() user: UserDocument,
@@ -80,9 +83,10 @@ export class DeploymentsController {
     description: 'The deployment images have been successfully retrieved',
     type: DeploymentImageDto,
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description: 'The workspace with the given id was not found',
+    type: ExceptionDto,
   })
   findAllImages(): DeploymentImage[] {
     return this.deploymentsService.findAllImages();
@@ -99,9 +103,10 @@ export class DeploymentsController {
     description: 'The deployments have been successfully retrieved',
     type: [DeploymentDto],
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description: 'The workspace with the given id was not found',
+    type: ExceptionDto,
   })
   findAll(
     @User('_id') userId: string,
@@ -123,9 +128,10 @@ export class DeploymentsController {
     description: 'The deployment has been successfully retrieved',
     type: DeploymentDto,
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description: 'The workspace or deployment with the given id was not found',
+    type: ExceptionDto,
   })
   findOne(
     @User('_id') userId: string,
@@ -151,10 +157,12 @@ export class DeploymentsController {
   })
   @ApiBadRequestResponse({
     description: 'The provided deployment was not valid',
+    type: ExceptionDto,
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description: 'The workspace or deployment with the given id was not found',
+    type: ExceptionDto,
   })
   update(
     @User('_id') userId: string,
@@ -182,9 +190,10 @@ export class DeploymentsController {
   @ApiOkResponse({
     description: 'The deployment has been successfully deleted',
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description: 'The workspace or deployment with the given id was not found',
+    type: ExceptionDto,
   })
   remove(
     @User('_id') userId: string,

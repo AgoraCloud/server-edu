@@ -1,3 +1,4 @@
+import { ExceptionDto } from './../../utils/base.dto';
 import {
   ApiTags,
   ApiCookieAuth,
@@ -34,9 +35,10 @@ export class ProxyController {
    * @param res the response
    */
   @All()
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiInternalServerErrorResponse({
     description: 'An error occurred when the api request was being proxied',
+    type: ExceptionDto,
   })
   proxy(
     @Deployment() deployment: DeploymentDocument,

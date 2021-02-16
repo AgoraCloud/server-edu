@@ -1,3 +1,4 @@
+import { ExceptionDto } from './../../utils/base.dto';
 import { SignInDto } from './dto/sign-in.dto';
 import { UserDto } from './../users/dto/user.dto';
 import { TransformInterceptor } from './../../interceptors/transform.interceptor';
@@ -50,7 +51,10 @@ export class AuthenticationController {
   @ApiCreatedResponse({
     description: 'The users account has been successfully created',
   })
-  @ApiBadRequestResponse({ description: 'The supplied email was in use' })
+  @ApiBadRequestResponse({
+    description: 'The supplied email was in use',
+    type: ExceptionDto,
+  })
   register(@Body() createUserDto: CreateUserDto): Promise<void> {
     return this.authenticationService.register(createUserDto);
   }
@@ -69,14 +73,17 @@ export class AuthenticationController {
   })
   @ApiBadRequestResponse({
     description: 'The supplied email and/or password were invalid',
+    type: ExceptionDto,
   })
   @ApiForbiddenResponse({
     description: 'The user with the given email was disabled or not verified',
+    type: ExceptionDto,
   })
   @ApiNotFoundResponse({
     description: 'The user with the given email was not found',
+    type: ExceptionDto,
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiBody({ type: SignInDto })
   async logIn(
     @Request() request: Req,
@@ -111,7 +118,7 @@ export class AuthenticationController {
   @ApiCookieAuth()
   @UseGuards(JwtAuthenticationGuard)
   @ApiOkResponse({ description: 'The user has been successfully logged out' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   async logOut(
     @Request() request: Req,
     @User() user: UserDocument,
@@ -139,7 +146,7 @@ export class AuthenticationController {
     description:
       'The new access and refresh tokens were successfully refreshed',
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   async refreshToken(
     @Request() request: Req,
     @User() user: UserDocument,
@@ -165,9 +172,11 @@ export class AuthenticationController {
   })
   @ApiForbiddenResponse({
     description: 'The user with the given email was disabled or not verified',
+    type: ExceptionDto,
   })
   @ApiNotFoundResponse({
     description: 'The user with the given email was not found',
+    type: ExceptionDto,
   })
   async forgotPassword(
     @Body() forgotPasswordDto: ForgotPasswordDto,
@@ -187,9 +196,11 @@ export class AuthenticationController {
   @ApiBadRequestResponse({
     description:
       'The change password token was expired or the provided change password information was not valid',
+    type: ExceptionDto,
   })
   @ApiNotFoundResponse({
     description: 'The change password token with the given id was not found',
+    type: ExceptionDto,
   })
   async changePassword(
     @Body() changePasswordDto: ChangePasswordDto,
@@ -209,10 +220,12 @@ export class AuthenticationController {
   @ApiBadRequestResponse({
     description:
       'The account verification token was expired or the provided account verification information was not valid',
+    type: ExceptionDto,
   })
   @ApiNotFoundResponse({
     description:
       'The account verification token with the given id was not found',
+    type: ExceptionDto,
   })
   async verifyAccount(
     @Body() verifyAccountDto: VerifyAccountDto,

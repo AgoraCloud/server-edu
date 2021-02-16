@@ -1,3 +1,4 @@
+import { ExceptionDto } from './../../../utils/base.dto';
 import {
   ApiTags,
   ApiCookieAuth,
@@ -64,10 +65,12 @@ export class ProjectLanesController {
   })
   @ApiBadRequestResponse({
     description: 'The provided project lane was not valid',
+    type: ExceptionDto,
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description: 'The workspace or project with the given id was not found',
+    type: ExceptionDto,
   })
   create(
     @User() user: UserDocument,
@@ -96,9 +99,10 @@ export class ProjectLanesController {
     description: 'The project lanes have been successfully retrieved',
     type: [ProjectLaneDto],
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description: 'The workspace or project with the given id was not found',
+    type: ExceptionDto,
   })
   findAll(
     @User('_id') userId: string,
@@ -123,10 +127,11 @@ export class ProjectLanesController {
     description: 'The project lane has been successfully retrieved',
     type: ProjectLaneDto,
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description:
       'The workspace, project or project lane with the given id was not found',
+    type: ExceptionDto,
   })
   findOne(
     @User('_id') userId: string,
@@ -160,11 +165,13 @@ export class ProjectLanesController {
   })
   @ApiBadRequestResponse({
     description: 'The provided project lane was not valid',
+    type: ExceptionDto,
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description:
       'The workspace, project or project lane with the given id was not found',
+    type: ExceptionDto,
   })
   update(
     @User('_id') userId: string,
@@ -196,10 +203,11 @@ export class ProjectLanesController {
   @ApiOkResponse({
     description: 'The project lane has been successfully deleted',
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description:
       'The workspace, project or project lane with the given id was not found',
+    type: ExceptionDto,
   })
   remove(
     @User('_id') userId: string,

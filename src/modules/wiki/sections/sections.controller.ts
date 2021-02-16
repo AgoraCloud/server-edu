@@ -1,3 +1,4 @@
+import { ExceptionDto } from './../../../utils/base.dto';
 import {
   ApiTags,
   ApiCookieAuth,
@@ -55,10 +56,12 @@ export class WikiSectionsController {
   })
   @ApiBadRequestResponse({
     description: 'The provided wiki section was not valid',
+    type: ExceptionDto,
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description: 'The workspace with the given id was not found',
+    type: ExceptionDto,
   })
   create(
     @User() user: UserDocument,
@@ -83,9 +86,10 @@ export class WikiSectionsController {
     description: 'The wiki sections have been successfully retrieved',
     type: [WikiSectionDto],
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description: 'The workspace with the given id was not found',
+    type: ExceptionDto,
   })
   findAll(
     @User('_id') userId: string,
@@ -107,10 +111,11 @@ export class WikiSectionsController {
     description: 'The wiki section has been successfully retrieved',
     type: WikiSectionDto,
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description:
       'The workspace or wiki section with the given id was not found',
+    type: ExceptionDto,
   })
   findOne(
     @User('_id') userId: string,
@@ -136,11 +141,13 @@ export class WikiSectionsController {
   })
   @ApiBadRequestResponse({
     description: 'The provided wiki section was not valid',
+    type: ExceptionDto,
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description:
       'The workspace or wiki section with the given id was not found',
+    type: ExceptionDto,
   })
   update(
     @User('_id') userId: string,
@@ -168,10 +175,11 @@ export class WikiSectionsController {
   @ApiOkResponse({
     description: 'The wiki section has been successfully deleted',
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description:
       'The workspace or wiki section with the given id was not found',
+    type: ExceptionDto,
   })
   remove(
     @User('_id') userId: string,

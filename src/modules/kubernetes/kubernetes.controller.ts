@@ -1,3 +1,4 @@
+import { ExceptionDto } from './../../utils/base.dto';
 import {
   ApiTags,
   ApiCookieAuth,
@@ -38,12 +39,14 @@ export class KubernetesController {
     description: 'The deployment logs have been successfully retrieved',
     type: 'string',
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description: 'The workspace or deployment with the given id was not found',
+    type: ExceptionDto,
   })
   @ApiInternalServerErrorResponse({
     description: 'Kubernetes pod for the given deployment did not exist',
+    type: ExceptionDto,
   })
   findOneLogs(
     @Param('workspaceId') workspaceId: string,
@@ -65,13 +68,16 @@ export class KubernetesController {
   @ApiBadRequestResponse({
     description:
       'Kubernetes pod metrics for the given deployment were not available',
+    type: ExceptionDto,
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiNotFoundResponse({
     description: 'The workspace or deployment with the given id was not found',
+    type: ExceptionDto,
   })
   @ApiInternalServerErrorResponse({
     description: 'Kubernetes pod for the given deployment did not exist',
+    type: ExceptionDto,
   })
   findOneMetrics(
     @Param('workspaceId') workspaceId: string,
