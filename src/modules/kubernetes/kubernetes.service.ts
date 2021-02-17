@@ -877,9 +877,9 @@ export class KubernetesService implements OnModuleInit {
       workspace.properties?.resources;
     if (
       !workspaceResources ||
-      !workspaceResources.cpuCount ||
-      !workspaceResources.memoryCount ||
-      !workspaceResources.storageCount
+      (!workspaceResources.cpuCount &&
+        !workspaceResources.memoryCount &&
+        !workspaceResources.storageCount)
     ) {
       throw new WorkspaceMetricsNotAvailableException(workspaceId);
     }
