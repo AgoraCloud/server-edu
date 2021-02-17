@@ -1,3 +1,4 @@
+import { KubernetesPodsService } from './kubernetes-pods.service';
 import { WorkspaceDocument } from './../workspaces/schemas/workspace.schema';
 import { ExceptionDto } from './../../utils/base.dto';
 import {
@@ -23,14 +24,17 @@ import {
   Get,
   Param,
 } from '@nestjs/common';
-import { Workspace } from 'src/decorators/workspace.decorator';
+import { Workspace } from '../../decorators/workspace.decorator';
 
 @ApiCookieAuth()
 @UseGuards(JwtAuthenticationGuard)
 @UseInterceptors(WorkspaceInterceptor)
 @Controller('api/workspaces/:workspaceId')
 export class KubernetesController {
-  constructor(private readonly kubernetesService: KubernetesService) {}
+  constructor(
+    private readonly kubernetesService: KubernetesService,
+    private readonly kubernetesPodsService: KubernetesPodsService,
+  ) {}
 
   /**
    * Get a deployments logs
@@ -64,7 +68,7 @@ export class KubernetesController {
     @Param('workspaceId') workspaceId: string,
     @Param('deploymentId') deploymentId: string,
   ): Promise<string> {
-    return this.kubernetesService.getPodLogs(workspaceId, deploymentId);
+    return this.kubernetesPodsService.getPodLogs(workspaceId, deploymentId);
   }
 
   /**
@@ -100,7 +104,7 @@ export class KubernetesController {
     @Param('workspaceId') workspaceId: string,
     @Param('deploymentId') deploymentId: string,
   ): Promise<MetricsDto> {
-    return this.kubernetesService.getPodMetrics(workspaceId, deploymentId);
+    return this.kubernetesPodsService.getPodMetrics(workspaceId, deploymentId);
   }
 
   /**
