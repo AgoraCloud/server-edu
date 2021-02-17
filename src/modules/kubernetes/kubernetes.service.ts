@@ -335,7 +335,7 @@ export class KubernetesService implements OnModuleInit {
       undefined,
       {
         headers: {
-          'Content-type': k8s.PatchUtils.PATCH_FORMAT_STRATEGIC_MERGE_PATCH,
+          'Content-type': k8s.PatchUtils.PATCH_FORMAT_JSON_PATCH,
         },
       },
     );
