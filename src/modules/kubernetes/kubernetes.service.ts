@@ -325,20 +325,20 @@ export class KubernetesService implements OnModuleInit {
     if (workspaceResources.storageCount) {
       hardQuotas['requests.storage'] = `${workspaceResources.storageCount}Gi`;
     }
-    return this.k8sCoreV1Api.patchNamespacedResourceQuota(
-      this.generateResourceName(workspaceId),
-      namespace,
-      { spec: { hard: hardQuotas } },
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      {
-        headers: {
-          'Content-type': k8s.PatchUtils.PATCH_FORMAT_JSON_PATCH,
+    const name: string = this.generateResourceName(workspaceId);
+    return this.k8sCoreV1Api.replaceNamespacedResourceQuota(name, namespace, {
+      apiVersion: 'v1',
+      kind: 'ResourceQuota',
+      metadata: {
+        name: name,
+        labels: {
+          app: this.resourcePrefix,
         },
       },
-    );
+      spec: {
+        hard: hardQuotas,
+      },
+    });
   }
 
   /**
