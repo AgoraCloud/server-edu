@@ -73,7 +73,7 @@ describe('DeploymentsService', () => {
   });
 
   describe('create', () => {
-    it('create a deployment', async () => {
+    it('should create a deployment', async () => {
       const createDeploymentDto: CreateDeploymentDto = {
         name: 'Test Deployment',
         properties: {
