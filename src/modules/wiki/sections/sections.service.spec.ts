@@ -36,7 +36,7 @@ const workspace: WorkspaceDocument = {
 
 let wikiSectionId: string;
 
-describe('SectionsService', () => {
+describe('WikiSectionsService', () => {
   let service: WikiSectionsService;
   let connection: Connection;
   let eventEmitter: EventEmitter2;
