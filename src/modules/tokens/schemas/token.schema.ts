@@ -1,4 +1,4 @@
-import { UserDocument } from '../../users/schemas/user.schema';
+import { User, UserDocument } from '../../users/schemas/user.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 
@@ -21,7 +21,11 @@ export class Token {
   @Prop({ required: true })
   expiresAt: Date;
 
-  @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'User' })
+  @Prop({
+    required: true,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: User.name,
+  })
   user: UserDocument;
 
   constructor(partial: Partial<Token>) {

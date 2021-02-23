@@ -270,7 +270,7 @@ export class DeploymentsService {
    * @param payload the workspace.user.removed event payload
    */
   @OnEvent(Event.WorkspaceUserRemoved)
-  private async handleWorkspaceUserRemoved(
+  private async handleWorkspaceUserRemovedEvent(
     payload: WorkspaceUserRemovedEvent,
   ): Promise<void> {
     await this.removeAll(payload.workspaceId, payload.userId, true);

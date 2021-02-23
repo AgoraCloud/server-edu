@@ -1,3 +1,5 @@
+import { ProjectTasksModule } from './modules/projects/tasks/tasks.module';
+import { ProjectLanesModule } from './modules/projects/lanes/lanes.module';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { LogLevel } from './config/configuration.interface';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
@@ -20,6 +22,9 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { HealthModule } from './modules/health/health.module';
 import { LoggerModule } from './modules/logger/logger.module';
 import { commaDelimitedLogLevel } from './utils/regex.patterns';
+import { WikiSectionsModule } from './modules/wiki/sections/sections.module';
+import { WikiPagesModule } from './modules/wiki/pages/pages.module';
+import { ProjectsModule } from './modules/projects/projects.module';
 
 @Module({
   imports: [
@@ -96,6 +101,11 @@ import { commaDelimitedLogLevel } from './utils/regex.patterns';
     ProxyModule,
     HealthModule,
     LoggerModule,
+    WikiSectionsModule,
+    WikiPagesModule,
+    ProjectsModule,
+    ProjectLanesModule,
+    ProjectTasksModule,
   ],
 })
 export class AppModule implements NestModule {

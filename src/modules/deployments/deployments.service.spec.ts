@@ -10,6 +10,7 @@ import {
   DeploymentImage,
   DeploymentDocument,
   DeploymentStatus,
+  Deployment,
 } from './schemas/deployment.schema';
 import { MongooseModule, getConnectionToken } from '@nestjs/mongoose';
 import {
@@ -51,7 +52,7 @@ describe('DeploymentsService', () => {
           connectionName: (new Date().getTime() * Math.random()).toString(16),
         }),
         MongooseModule.forFeature([
-          { name: 'Deployment', schema: DeploymentSchema },
+          { name: Deployment.name, schema: DeploymentSchema },
         ]),
       ],
       providers: [DeploymentsService, EventEmitter2],
@@ -72,7 +73,7 @@ describe('DeploymentsService', () => {
   });
 
   describe('create', () => {
-    it('create a deployment', async () => {
+    it('should create a deployment', async () => {
       const createDeploymentDto: CreateDeploymentDto = {
         name: 'Test Deployment',
         properties: {

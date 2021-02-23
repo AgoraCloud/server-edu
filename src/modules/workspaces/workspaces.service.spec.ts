@@ -6,7 +6,11 @@ import {
   MongooseMockModule,
   closeMongooseConnection,
 } from '../../../test/utils/mongoose-mock-module';
-import { WorkspaceDocument, WorkspaceSchema } from './schemas/workspace.schema';
+import {
+  Workspace,
+  WorkspaceDocument,
+  WorkspaceSchema,
+} from './schemas/workspace.schema';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { getConnectionToken, MongooseModule } from '@nestjs/mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -37,7 +41,7 @@ describe('WorkspacesService', () => {
           connectionName: (new Date().getTime() * Math.random()).toString(16),
         }),
         MongooseModule.forFeature([
-          { name: 'Workspace', schema: WorkspaceSchema },
+          { name: Workspace.name, schema: WorkspaceSchema },
         ]),
       ],
       providers: [WorkspacesService, EventEmitter2],

@@ -1,3 +1,4 @@
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Controller, Get } from '@nestjs/common';
 import {
   HealthCheck,
@@ -8,6 +9,7 @@ import {
 } from '@nestjs/terminus';
 
 @Controller('api/health')
+@ApiTags('Health')
 export class HealthController {
   constructor(
     private readonly healthCheckService: HealthCheckService,
@@ -15,9 +17,30 @@ export class HealthController {
     private readonly memoryHealthIndicator: MemoryHealthIndicator,
   ) {}
 
+  /**
+   * Get the readiness state of the server
+   */
   @HealthCheck()
-  @Get(['readiness', 'liveness'])
-  healthCheck(): Promise<HealthCheckResult> {
+  @Get('readiness')
+  @ApiOperation({ summary: 'Get the readiness state of the server' })
+  readinessCheck(): Promise<HealthCheckResult> {
+    return this.healthCheck();
+  }
+
+  /**
+   * Get the liveness state of the server
+   */
+  @HealthCheck()
+  @Get('liveness')
+  @ApiOperation({ summary: 'Get the liveness state of the server' })
+  livenessCheck(): Promise<HealthCheckResult> {
+    return this.healthCheck();
+  }
+
+  /**
+   * Checks if the server is healthy
+   */
+  private async healthCheck(): Promise<HealthCheckResult> {
     return this.healthCheckService.check([
       async () => this.mongooseHealthIndicator.pingCheck('mongodb'),
       async () =>

@@ -2,9 +2,9 @@ import { AccountNotVerifiedException } from './../../exceptions/account-not-veri
 import { AccountDisabledException } from './../../exceptions/account-disabled.exception';
 import { UserNotFoundException } from '../../exceptions/user-not-found.exception';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UserDocument } from './../users/schemas/user.schema';
+import { User, UserDocument } from './../users/schemas/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
-import { TokenSchema } from './../tokens/schemas/token.schema';
+import { Token, TokenSchema } from './../tokens/schemas/token.schema';
 import { TokensService } from './../tokens/tokens.service';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -36,8 +36,8 @@ describe('UsersService', () => {
         MongooseMockModule({
           connectionName: (new Date().getTime() * Math.random()).toString(16),
         }),
-        MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]),
-        MongooseModule.forFeature([{ name: 'Token', schema: TokenSchema }]),
+        MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+        MongooseModule.forFeature([{ name: Token.name, schema: TokenSchema }]),
       ],
       providers: [UsersService, EventEmitter2, ConfigService, TokensService],
     }).compile();
