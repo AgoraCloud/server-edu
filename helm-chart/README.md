@@ -22,7 +22,7 @@ cd server/helm-chart
 nano values.yaml
 ```
 
-4. Create and Label the AgoraCloud namespace
+4. Create and label the AgoraCloud namespace
 ```bash
 kubectl create namespace agoracloud && kubectl label namespace agoracl
 oud app=agoracloud
