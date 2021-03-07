@@ -7,7 +7,7 @@ import { InvalidMongoIdException } from './../exceptions/invalid-mongo-id.except
 import { WorkspaceDocument } from './../modules/workspaces/schemas/workspace.schema';
 import { UserDocument } from './../modules/users/schemas/user.schema';
 import { isMongoId } from 'class-validator';
-import { RequestWithWorkspaceDeploymentAndUser } from './../utils/requests.interface';
+import { RequestWithWorkspaceDeploymentUserAndIsAdmin } from './../utils/requests.interface';
 import { DeploymentsService } from './../modules/deployments/deployments.service';
 import {
   CallHandler,
@@ -25,7 +25,7 @@ export class DeploymentInterceptor implements NestInterceptor {
     context: ExecutionContext,
     next: CallHandler,
   ): Promise<Observable<any>> {
-    const request: RequestWithWorkspaceDeploymentAndUser = context
+    const request: RequestWithWorkspaceDeploymentUserAndIsAdmin = context
       .switchToHttp()
       .getRequest();
     const deploymentId: string = request.params.deploymentId;
@@ -35,10 +35,11 @@ export class DeploymentInterceptor implements NestInterceptor {
 
     const user: UserDocument = request.user;
     const workspace: WorkspaceDocument = request.workspace;
+    const isAdmin = request.isAdmin;
     const deployment: DeploymentDocument = await this.deploymentsService.findOne(
       deploymentId,
-      user._id,
-      workspace?._id,
+      isAdmin ? undefined : user._id,
+      workspace._id,
     );
     if (deployment.status !== DeploymentStatus.Running) {
       throw new DeploymentNotRunningException(deploymentId);

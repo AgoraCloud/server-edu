@@ -13,11 +13,10 @@ import {
 import * as HttpProxy from 'http-proxy';
 import { Server } from 'http';
 import { Socket } from 'net';
+import { resourcePrefix } from '../kubernetes/helpers';
 
 @Injectable()
 export class ProxyService implements OnModuleInit {
-  private readonly resourcePrefix: string = 'agoracloud';
-
   constructor(
     @Inject(HttpProxy) private readonly httpProxy: HttpProxy,
     private readonly httpAdapterHost: HttpAdapterHost,
@@ -96,7 +95,7 @@ export class ProxyService implements OnModuleInit {
     deploymentId: string,
   ): HttpProxy.ServerOptions {
     return {
-      target: `http://${this.resourcePrefix}-${deploymentId}.${this.resourcePrefix}-${workspaceId}.svc.cluster.local`,
+      target: `http://${resourcePrefix}-${deploymentId}.${resourcePrefix}-${workspaceId}.svc.cluster.local`,
       changeOrigin: true,
     };
   }

@@ -25,6 +25,7 @@ import { commaDelimitedLogLevel } from './utils/regex.patterns';
 import { WikiSectionsModule } from './modules/wiki/sections/sections.module';
 import { WikiPagesModule } from './modules/wiki/pages/pages.module';
 import { ProjectsModule } from './modules/projects/projects.module';
+import { AuthorizationModule } from './modules/authorization/authorization.module';
 
 @Module({
   imports: [
@@ -106,6 +107,7 @@ import { ProjectsModule } from './modules/projects/projects.module';
     ProjectsModule,
     ProjectLanesModule,
     ProjectTasksModule,
+    AuthorizationModule,
   ],
 })
 export class AppModule implements NestModule {

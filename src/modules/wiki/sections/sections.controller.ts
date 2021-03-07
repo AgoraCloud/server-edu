@@ -1,3 +1,7 @@
+import { IsAdmin } from '../../../decorators/is-admin.decorator';
+import { Permissions } from './../../../decorators/permissions.decorator';
+import { Action } from './../../authorization/schemas/permission.schema';
+import { Auth } from '../../../decorators/auth.decorator';
 import { ExceptionDto } from './../../../utils/base.dto';
 import {
   ApiTags,
@@ -9,13 +13,13 @@ import {
   ApiOkResponse,
   ApiParam,
   ApiOperation,
+  ApiForbiddenResponse,
 } from '@nestjs/swagger';
 import { WorkspaceDocument } from './../../workspaces/schemas/workspace.schema';
 import { FindOneParams } from './../../../utils/find-one-params';
 import { UserDocument } from './../../users/schemas/user.schema';
 import { WikiSectionDto } from './dto/section.dto';
 import { TransformInterceptor } from './../../../interceptors/transform.interceptor';
-import { JwtAuthenticationGuard } from './../../authentication/guards/jwt-authentication.guard';
 import {
   Controller,
   Get,
@@ -24,7 +28,6 @@ import {
   Put,
   Param,
   Delete,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { WikiSectionsService } from './sections.service';
@@ -37,7 +40,7 @@ import { WikiSectionDocument } from './schemas/section.schema';
 
 @ApiCookieAuth()
 @ApiTags('Wiki Sections')
-@UseGuards(JwtAuthenticationGuard)
+@Auth(Action.ReadWorkspace)
 @Controller('api/workspaces/:workspaceId/sections')
 @UseInterceptors(WorkspaceInterceptor, new TransformInterceptor(WikiSectionDto))
 export class WikiSectionsController {
@@ -50,6 +53,7 @@ export class WikiSectionsController {
    * @param createWikiSectionDto the wiki section to create
    */
   @Post()
+  @Permissions(Action.CreateWikiSection)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiOperation({ summary: 'Create a wiki section' })
   @ApiCreatedResponse({
@@ -61,6 +65,7 @@ export class WikiSectionsController {
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
   @ApiNotFoundResponse({
     description: 'The workspace with the given id was not found',
     type: ExceptionDto,
@@ -83,6 +88,7 @@ export class WikiSectionsController {
    * @param workspaceId the workspace id
    */
   @Get()
+  @Permissions(Action.ReadWikiSection)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiOperation({ summary: 'Get all wiki sections' })
   @ApiOkResponse({
@@ -94,14 +100,19 @@ export class WikiSectionsController {
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
   @ApiNotFoundResponse({
     description: 'The workspace with the given id was not found',
     type: ExceptionDto,
   })
   findAll(
     @User('_id') userId: string,
+    @IsAdmin() isAdmin: boolean,
     @Workspace('_id') workspaceId: string,
   ): Promise<WikiSectionDocument[]> {
+    if (isAdmin) {
+      return this.wikiSectionsService.findAll(workspaceId);
+    }
     return this.wikiSectionsService.findAll(workspaceId, userId);
   }
 
@@ -112,6 +123,7 @@ export class WikiSectionsController {
    * @param wikiSectionId the wiki section id
    */
   @Get(':id')
+  @Permissions(Action.ReadWikiSection)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'id', description: 'The section id' })
   @ApiOperation({ summary: 'Get a wiki section' })
@@ -124,6 +136,7 @@ export class WikiSectionsController {
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
   @ApiNotFoundResponse({
     description:
       'The workspace or wiki section with the given id was not found',
@@ -131,10 +144,14 @@ export class WikiSectionsController {
   })
   findOne(
     @User('_id') userId: string,
+    @IsAdmin() isAdmin: boolean,
     @Workspace('_id') workspaceId: string,
     @Param() { id: wikiSectionId }: FindOneParams,
   ): Promise<WikiSectionDocument> {
-    return this.wikiSectionsService.findOne(userId, workspaceId, wikiSectionId);
+    if (isAdmin) {
+      return this.wikiSectionsService.findOne(workspaceId, wikiSectionId);
+    }
+    return this.wikiSectionsService.findOne(workspaceId, wikiSectionId, userId);
   }
 
   /**
@@ -145,6 +162,7 @@ export class WikiSectionsController {
    * @param updateWikiSectionDto the updated wiki section
    */
   @Put(':id')
+  @Permissions(Action.UpdateWikiSection)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'id', description: 'The section id' })
   @ApiOperation({ summary: 'Update a wiki section' })
@@ -158,6 +176,7 @@ export class WikiSectionsController {
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
   @ApiNotFoundResponse({
     description:
       'The workspace or wiki section with the given id was not found',
@@ -165,15 +184,23 @@ export class WikiSectionsController {
   })
   update(
     @User('_id') userId: string,
+    @IsAdmin() isAdmin: boolean,
     @Workspace('_id') workspaceId: string,
     @Param() { id: wikiSectionId }: FindOneParams,
     @Body() updateWikiSectionDto: UpdateWikiSectionDto,
   ): Promise<WikiSectionDocument> {
+    if (isAdmin) {
+      return this.wikiSectionsService.update(
+        workspaceId,
+        wikiSectionId,
+        updateWikiSectionDto,
+      );
+    }
     return this.wikiSectionsService.update(
-      userId,
       workspaceId,
       wikiSectionId,
       updateWikiSectionDto,
+      userId,
     );
   }
 
@@ -184,6 +211,7 @@ export class WikiSectionsController {
    * @param wikiSectionId the wiki section id
    */
   @Delete(':id')
+  @Permissions(Action.DeleteWikiSection)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'id', description: 'The section id' })
   @ApiOperation({ summary: 'Delete a wiki section' })
@@ -195,6 +223,7 @@ export class WikiSectionsController {
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
   @ApiNotFoundResponse({
     description:
       'The workspace or wiki section with the given id was not found',
@@ -202,9 +231,13 @@ export class WikiSectionsController {
   })
   remove(
     @User('_id') userId: string,
+    @IsAdmin() isAdmin: boolean,
     @Workspace('_id') workspaceId: string,
     @Param() { id: wikiSectionId }: FindOneParams,
   ): Promise<void> {
-    return this.wikiSectionsService.remove(userId, workspaceId, wikiSectionId);
+    if (isAdmin) {
+      return this.wikiSectionsService.remove(workspaceId, wikiSectionId);
+    }
+    return this.wikiSectionsService.remove(workspaceId, wikiSectionId, userId);
   }
 }

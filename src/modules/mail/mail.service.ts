@@ -6,6 +6,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ISendMailOptions, MailerService } from '@nestjs-modules/mailer';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Event } from '../../events/events.enum';
+import { Role } from '../authorization/schemas/permission.schema';
 
 @Injectable()
 export class MailService {
@@ -86,7 +87,7 @@ export class MailService {
    */
   @OnEvent(Event.UserCreated)
   private handleUserCreatedEvent(payload: UserCreatedEvent): void {
-    this.sendAccountVerificationEmail(payload);
+    if (payload.role === Role.User) this.sendAccountVerificationEmail(payload);
   }
 
   /**

@@ -63,38 +63,39 @@ export class WorkspacesService {
 
   /**
    * Find a workspace
-   * @param userId the users id
    * @param workspaceId the workspace id
+   * @param userId the users id
    */
   async findOne(
-    userId: string,
     workspaceId: string,
+    userId?: string,
   ): Promise<WorkspaceDocument> {
-    const workspace: WorkspaceDocument = await this.workspaceModel
-      .findOne()
-      .where('_id')
-      .equals(workspaceId)
-      .where('users')
-      .in([userId])
-      .exec();
+    let workspaceQuery: Query<
+      WorkspaceDocument,
+      WorkspaceDocument
+    > = this.workspaceModel.findOne().where('_id').equals(workspaceId);
+    if (userId) {
+      workspaceQuery = workspaceQuery.where('users').in([userId]);
+    }
+    const workspace: WorkspaceDocument = await workspaceQuery.exec();
     if (!workspace) throw new WorkspaceNotFoundException(workspaceId);
     return workspace;
   }
 
   /**
    * Update a workspace
-   * @param userId the users id
    * @param workspaceId the workspace id
    * @param updateWorkspaceDto the updated workspace
+   * @param userId the users id
    */
   async update(
-    userId: string,
     workspaceId: string,
     updateWorkspaceDto: UpdateWorkspaceDto,
+    userId?: string,
   ): Promise<WorkspaceDocument> {
     const workspace: WorkspaceDocument = await this.findOne(
-      userId,
       workspaceId,
+      userId,
     );
 
     // Change the updated fields only
@@ -128,13 +129,19 @@ export class WorkspacesService {
         updateWorkspaceResourcesDto?.storageCount ||
         workspace.properties.resources.storageCount;
     }
-    await this.workspaceModel
+
+    let workspaceQuery: Query<
+      { ok: number; n: number; nModified: number },
+      WorkspaceDocument
+    > = this.workspaceModel
       .updateOne(null, workspace)
       .where('_id')
-      .equals(workspaceId)
-      .where('users')
-      .in([userId])
-      .exec();
+      .equals(workspaceId);
+    if (userId) {
+      workspaceQuery = workspaceQuery.where('users').in([userId]);
+    }
+    await workspaceQuery.exec();
+
     /**
      * Checks if a number is defined
      * @param num the number to check
@@ -161,17 +168,18 @@ export class WorkspacesService {
 
   /**
    * Delete a workspace
-   * @param userId the users id
    * @param workspaceId the workspace id
+   * @param userId the users id
    */
-  async remove(userId: string, workspaceId: string): Promise<void> {
-    const workspace = await this.workspaceModel
-      .findOneAndDelete()
-      .where('_id')
-      .equals(workspaceId)
-      .where('users')
-      .in([userId])
-      .exec();
+  async remove(workspaceId: string, userId?: string): Promise<void> {
+    let workspaceQuery: Query<
+      WorkspaceDocument,
+      WorkspaceDocument
+    > = this.workspaceModel.findOneAndDelete().where('_id').equals(workspaceId);
+    if (userId) {
+      workspaceQuery = workspaceQuery.where('users').in([userId]);
+    }
+    const workspace = await workspaceQuery.exec();
     if (!workspace) throw new WorkspaceNotFoundException(workspaceId);
     this.eventEmitter.emit(
       Event.WorkspaceDeleted,
@@ -193,7 +201,7 @@ export class WorkspacesService {
       const workspaceId: string = workspace._id;
       // The user is the only user in the workspace, delete the workspace
       if (workspace.users.length === 1) {
-        await this.remove(userId, workspaceId);
+        await this.remove(workspaceId, userId);
       } else {
         // Remove the user from the workspace users
         workspace.users = workspace.users.filter((u) => u._id !== userId);

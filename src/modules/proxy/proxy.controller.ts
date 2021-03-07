@@ -1,3 +1,4 @@
+import { Auth } from '../../decorators/auth.decorator';
 import { ExceptionDto } from './../../utils/base.dto';
 import {
   ApiTags,
@@ -5,27 +6,20 @@ import {
   ApiUnauthorizedResponse,
   ApiInternalServerErrorResponse,
   ApiOperation,
+  ApiForbiddenResponse,
 } from '@nestjs/swagger';
 import { DeploymentDocument } from './../deployments/schemas/deployment.schema';
 import { ProxyService } from './proxy.service';
-import { DeploymentInterceptor } from './../../interceptors/deployment.interceptor';
-import { JwtAuthenticationGuard } from '../authentication/guards/jwt-authentication.guard';
-import {
-  All,
-  Controller,
-  Req,
-  Res,
-  UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
+import { All, Controller, Req, Res, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { Deployment } from '../../decorators/deployment.decorator';
+import { ProxyAuthorizationGuard } from '../authorization/guards/proxy-authorization.guard';
 
 @ApiCookieAuth()
 @ApiTags('Proxy')
+@Auth()
 @Controller('proxy/:deploymentId')
-@UseGuards(JwtAuthenticationGuard)
-@UseInterceptors(DeploymentInterceptor)
+@UseGuards(ProxyAuthorizationGuard)
 export class ProxyController {
   constructor(private readonly proxyService: ProxyService) {}
 
@@ -38,6 +32,7 @@ export class ProxyController {
   @All()
   @ApiOperation({ summary: 'Proxy a deployment API request' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
   @ApiInternalServerErrorResponse({
     description: 'An error occurred when the api request was being proxied',
     type: ExceptionDto,

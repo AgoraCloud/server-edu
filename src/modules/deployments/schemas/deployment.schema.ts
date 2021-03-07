@@ -45,10 +45,10 @@ export class DeploymentImage {
 }
 
 export class DeploymentProperties {
-  @Prop({ required: true })
+  @Prop({ required: true, type: DeploymentImage })
   image: DeploymentImage;
 
-  @Prop({ required: true })
+  @Prop({ required: true, type: DeploymentResources })
   resources: DeploymentResources;
 
   constructor(partial: Partial<DeploymentProperties>) {
@@ -75,12 +75,12 @@ export class Deployment {
     ],
     default: DeploymentStatus.Pending,
   })
-  status: string;
+  status: DeploymentStatus;
 
   @Prop()
   failureReason?: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, type: DeploymentProperties })
   properties: DeploymentProperties;
 
   @Prop({

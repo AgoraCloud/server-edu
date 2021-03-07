@@ -11,7 +11,7 @@ import {
   ExecutionContext,
   CallHandler,
 } from '@nestjs/common';
-import { RequestWithWorkspaceUserAndProject } from '../utils/requests.interface';
+import { RequestWithWorkspaceUserProjectAndIsAdmin } from '../utils/requests.interface';
 
 @Injectable()
 export class ProjectInterceptor implements NestInterceptor {
@@ -21,7 +21,7 @@ export class ProjectInterceptor implements NestInterceptor {
     context: ExecutionContext,
     next: CallHandler,
   ): Promise<Observable<any>> {
-    const request: RequestWithWorkspaceUserAndProject = context
+    const request: RequestWithWorkspaceUserProjectAndIsAdmin = context
       .switchToHttp()
       .getRequest();
     const projectId: string = request.params.projectId;
@@ -31,10 +31,11 @@ export class ProjectInterceptor implements NestInterceptor {
 
     const user: UserDocument = request.user;
     const workspace: WorkspaceDocument = request.workspace;
+    const isAdmin: boolean = request.isAdmin;
     const project: ProjectDocument = await this.projectsService.findOne(
-      user._id,
       workspace._id,
       projectId,
+      isAdmin ? undefined : user._id,
     );
     request.project = project;
     return next.handle();

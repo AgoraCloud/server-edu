@@ -68,74 +68,86 @@ export class ProjectsService {
 
   /**
    * Find a project
-   * @param userId the users id
    * @param workspaceId the workspace id
    * @param projectId the project id
+   * @param userId the users id
    */
   async findOne(
-    userId: string,
     workspaceId: string,
     projectId: string,
+    userId?: string,
   ): Promise<ProjectDocument> {
-    const project: ProjectDocument = await this.projectModel
+    let projectQuery: Query<
+      ProjectDocument,
+      ProjectDocument
+    > = this.projectModel
       .findOne()
       .where('_id')
       .equals(projectId)
-      .where('user')
-      .equals(userId)
       .where('workspace')
-      .equals(workspaceId)
-      .exec();
+      .equals(workspaceId);
+    if (userId) {
+      projectQuery = projectQuery.where('user').equals(userId);
+    }
+    const project: ProjectDocument = await projectQuery.exec();
     if (!project) throw new ProjectNotFoundException(projectId);
     return project;
   }
 
   /**
    * Update a project
-   * @param userId the users id
    * @param workspaceId the workspace id
    * @param projectId the project id
    * @param updateProjectDto the updated project
+   * @param userId the users id
    */
   async update(
-    userId: string,
     workspaceId: string,
     projectId: string,
     updateProjectDto: UpdateProjectDto,
+    userId?: string,
   ): Promise<ProjectDocument> {
-    const project: ProjectDocument = await this.projectModel
+    let projectQuery: Query<
+      ProjectDocument,
+      ProjectDocument
+    > = this.projectModel
       .findOneAndUpdate(null, updateProjectDto, { new: true })
       .where('_id')
       .equals(projectId)
-      .where('user')
-      .equals(userId)
       .where('workspace')
-      .equals(workspaceId)
-      .exec();
+      .equals(workspaceId);
+    if (userId) {
+      projectQuery = projectQuery.where('user').equals(userId);
+    }
+    const project: ProjectDocument = await projectQuery.exec();
     if (!project) throw new ProjectNotFoundException(projectId);
     return project;
   }
 
   /**
    * Delete a project
-   * @param userId the users id
    * @param workspaceId the workspace id
    * @param projectId the project id
+   * @param userId the users id
    */
   async remove(
-    userId: string,
     workspaceId: string,
     projectId: string,
+    userId?: string,
   ): Promise<void> {
-    const project: ProjectDocument = await this.projectModel
+    let projectQuery: Query<
+      ProjectDocument,
+      ProjectDocument
+    > = this.projectModel
       .findOneAndDelete()
       .where('_id')
       .equals(projectId)
-      .where('user')
-      .equals(userId)
       .where('workspace')
-      .equals(workspaceId)
-      .exec();
+      .equals(workspaceId);
+    if (userId) {
+      projectQuery = projectQuery.where('user').equals(userId);
+    }
+    const project: ProjectDocument = await projectQuery.exec();
     if (!project) throw new ProjectNotFoundException(projectId);
     this.eventEmitter.emit(
       Event.ProjectDeleted,

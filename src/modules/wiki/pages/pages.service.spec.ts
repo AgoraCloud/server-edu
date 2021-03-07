@@ -25,7 +25,6 @@ const user: UserDocument = {
   password: '',
   isEnabled: true,
   isVerified: true,
-  isAdmin: false,
 } as UserDocument;
 
 const workspace: WorkspaceDocument = {
@@ -94,9 +93,9 @@ describe('WikiPagesService', () => {
   describe('findAll', () => {
     it('should find all wiki pages in the given workspace and wiki section for the given user', async () => {
       const retrievedWikiPages: WikiPageDocument[] = await service.findAll(
-        user._id,
         workspace._id,
         wikiSection._id,
+        user._id,
       );
       expect(retrievedWikiPages).toBeTruthy();
       expect(retrievedWikiPages[0].user._id).toEqual(user._id);
@@ -113,10 +112,10 @@ describe('WikiPagesService', () => {
       ).message;
       try {
         await service.findOne(
-          user._id,
           workspace._id,
           wikiSection._id,
           wikiPageId,
+          user._id,
         );
         fail('It should throw an error');
       } catch (err) {
@@ -126,10 +125,10 @@ describe('WikiPagesService', () => {
 
     it('should find the wiki page in the given workspace and wiki section for the given user', async () => {
       const retrievedWikiPage: WikiPageDocument = await service.findOne(
-        user._id,
         workspace._id,
         wikiSection._id,
         wikiPageId,
+        user._id,
       );
       expect(retrievedWikiPage._id).toEqual(wikiPageId);
       expect(retrievedWikiPage.user._id).toEqual(user._id);
@@ -150,11 +149,11 @@ describe('WikiPagesService', () => {
       ).message;
       try {
         await service.update(
-          user._id,
           workspace._id,
           wikiSection._id,
           wikiPageId,
           updateWikiPageDto,
+          user._id,
         );
         fail('It should throw an error');
       } catch (err) {
@@ -164,11 +163,11 @@ describe('WikiPagesService', () => {
 
     it('should update the wiki page', async () => {
       const updatedWikiPage: WikiPageDocument = await service.update(
-        user._id,
         workspace._id,
         wikiSection._id,
         wikiPageId,
         updateWikiPageDto,
+        user._id,
       );
       expect(updatedWikiPage._id).toEqual(wikiPageId);
       expect(updatedWikiPage.title).toBe(updateWikiPageDto.title);
@@ -184,10 +183,10 @@ describe('WikiPagesService', () => {
       ).message;
       try {
         await service.remove(
-          user._id,
           workspace._id,
           wikiSection._id,
           wikiPageId,
+          user._id,
         );
         fail('It should throw an error');
       } catch (err) {
@@ -197,16 +196,16 @@ describe('WikiPagesService', () => {
 
     it('should delete the wiki page', async () => {
       await service.remove(
-        user._id,
         workspace._id,
         wikiSection._id,
         wikiPageId,
+        user._id,
       );
       // Make sure that the wiki page has been deleted
       const retrievedWikiPages: WikiPageDocument[] = await service.findAll(
-        user._id,
         workspace._id,
         wikiSection._id,
+        user._id,
       );
       expect(retrievedWikiPages.length).toBe(0);
     });

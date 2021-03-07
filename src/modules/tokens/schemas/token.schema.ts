@@ -16,7 +16,7 @@ export class Token {
     enum: [TokenType.ChangePassword, TokenType.VerifyAccount],
     index: true,
   })
-  type: string;
+  type: TokenType;
 
   @Prop({ required: true })
   expiresAt: Date;

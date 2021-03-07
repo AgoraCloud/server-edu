@@ -1,3 +1,5 @@
+import { Action } from './../authorization/schemas/permission.schema';
+import { Auth } from '../../decorators/auth.decorator';
 import { ExceptionDto } from './../../utils/base.dto';
 import {
   ApiTags,
@@ -9,6 +11,7 @@ import {
   ApiOkResponse,
   ApiParam,
   ApiOperation,
+  ApiForbiddenResponse,
 } from '@nestjs/swagger';
 import { FindOneParams } from './../../utils/find-one-params';
 import { WorkspaceDocument } from './../workspaces/schemas/workspace.schema';
@@ -16,7 +19,6 @@ import { UserDocument } from './../users/schemas/user.schema';
 import { ProjectDto } from './dto/project.dto';
 import { TransformInterceptor } from './../../interceptors/transform.interceptor';
 import { WorkspaceInterceptor } from './../../interceptors/workspace.interceptor';
-import { JwtAuthenticationGuard } from './../authentication/guards/jwt-authentication.guard';
 import {
   Controller,
   Get,
@@ -25,7 +27,6 @@ import {
   Put,
   Param,
   Delete,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ProjectsService } from './projects.service';
@@ -34,10 +35,12 @@ import { UpdateProjectDto } from './dto/update-project.dto';
 import { User } from '../../decorators/user.decorator';
 import { Workspace } from '../../decorators/workspace.decorator';
 import { ProjectDocument } from './schemas/project.schema';
+import { Permissions } from '../../decorators/permissions.decorator';
+import { IsAdmin } from '../../decorators/is-admin.decorator';
 
 @ApiCookieAuth()
 @ApiTags('Projects')
-@UseGuards(JwtAuthenticationGuard)
+@Auth(Action.ReadWorkspace)
 @Controller('api/workspaces/:workspaceId/projects')
 @UseInterceptors(WorkspaceInterceptor, new TransformInterceptor(ProjectDto))
 export class ProjectsController {
@@ -50,6 +53,7 @@ export class ProjectsController {
    * @param createProjectDto the project to create
    */
   @Post()
+  @Permissions(Action.CreateProject)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiOperation({ summary: 'Create a new project' })
   @ApiCreatedResponse({
@@ -61,6 +65,7 @@ export class ProjectsController {
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
   @ApiNotFoundResponse({
     description: 'The workspace with the given id was not found',
     type: ExceptionDto,
@@ -79,6 +84,7 @@ export class ProjectsController {
    * @param workspaceId the workspace id
    */
   @Get()
+  @Permissions(Action.ReadProject)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiOperation({ summary: 'Get all projects' })
   @ApiOkResponse({
@@ -90,14 +96,19 @@ export class ProjectsController {
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
   @ApiNotFoundResponse({
     description: 'The workspace with the given id was not found',
     type: ExceptionDto,
   })
   findAll(
     @User('_id') userId: string,
+    @IsAdmin() isAdmin: boolean,
     @Workspace('_id') workspaceId: string,
   ): Promise<ProjectDocument[]> {
+    if (isAdmin) {
+      return this.projectsService.findAll(workspaceId);
+    }
     return this.projectsService.findAll(workspaceId, userId);
   }
 
@@ -108,6 +119,7 @@ export class ProjectsController {
    * @param projectId the project id
    */
   @Get(':id')
+  @Permissions(Action.ReadProject)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'id', description: 'The project id' })
   @ApiOperation({ summary: 'Get a project' })
@@ -120,16 +132,21 @@ export class ProjectsController {
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
   @ApiNotFoundResponse({
     description: 'The workspace or project with the given id was not found',
     type: ExceptionDto,
   })
   findOne(
     @User('_id') userId: string,
+    @IsAdmin() isAdmin: boolean,
     @Workspace('_id') workspaceId: string,
-    @Param() { id: deploymentId }: FindOneParams,
+    @Param() { id: projectId }: FindOneParams,
   ): Promise<ProjectDocument> {
-    return this.projectsService.findOne(userId, workspaceId, deploymentId);
+    if (isAdmin) {
+      return this.projectsService.findOne(workspaceId, projectId);
+    }
+    return this.projectsService.findOne(workspaceId, projectId, userId);
   }
 
   /**
@@ -140,6 +157,7 @@ export class ProjectsController {
    * @param updateProjectDto the updated project
    */
   @Put(':id')
+  @Permissions(Action.UpdateProject)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'id', description: 'The project id' })
   @ApiOperation({ summary: 'Update a project' })
@@ -153,21 +171,30 @@ export class ProjectsController {
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
   @ApiNotFoundResponse({
     description: 'The workspace or project with the given id was not found',
     type: ExceptionDto,
   })
   update(
     @User('_id') userId: string,
+    @IsAdmin() isAdmin: boolean,
     @Workspace('_id') workspaceId: string,
-    @Param() { id: deploymentId }: FindOneParams,
+    @Param() { id: projectId }: FindOneParams,
     @Body() updateProjectDto: UpdateProjectDto,
   ): Promise<ProjectDocument> {
+    if (isAdmin) {
+      return this.projectsService.update(
+        workspaceId,
+        projectId,
+        updateProjectDto,
+      );
+    }
     return this.projectsService.update(
-      userId,
       workspaceId,
-      deploymentId,
+      projectId,
       updateProjectDto,
+      userId,
     );
   }
 
@@ -178,6 +205,7 @@ export class ProjectsController {
    * @param projectId the project id
    */
   @Delete(':id')
+  @Permissions(Action.DeleteProject)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'id', description: 'The project id' })
   @ApiOperation({ summary: 'Delete a project' })
@@ -189,15 +217,20 @@ export class ProjectsController {
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
   @ApiNotFoundResponse({
     description: 'The workspace or project with the given id was not found',
     type: ExceptionDto,
   })
   remove(
     @User('_id') userId: string,
+    @IsAdmin() isAdmin: boolean,
     @Workspace('_id') workspaceId: string,
-    @Param() { id: deploymentId }: FindOneParams,
+    @Param() { id: projectId }: FindOneParams,
   ): Promise<void> {
-    return this.projectsService.remove(userId, workspaceId, deploymentId);
+    if (isAdmin) {
+      return this.projectsService.remove(workspaceId, projectId);
+    }
+    return this.projectsService.remove(workspaceId, projectId, userId);
   }
 }

@@ -74,86 +74,98 @@ export class ProjectLanesService {
 
   /**
    * Find a project lane
-   * @param userId the users id
    * @param workspaceId the workspace id
    * @param projectId the project id
    * @param projectLaneId the project lane id
+   * @param userId the users id
    */
   async findOne(
-    userId: string,
     workspaceId: string,
     projectId: string,
     projectLaneId: string,
+    userId?: string,
   ): Promise<ProjectLaneDocument> {
-    const projectLane: ProjectLaneDocument = await this.projectLaneModel
+    let projectLaneQuery: Query<
+      ProjectLaneDocument,
+      ProjectLaneDocument
+    > = this.projectLaneModel
       .findOne()
       .where('_id')
       .equals(projectLaneId)
-      .where('user')
-      .equals(userId)
       .where('workspace')
       .equals(workspaceId)
       .where('project')
-      .equals(projectId)
-      .exec();
+      .equals(projectId);
+    if (userId) {
+      projectLaneQuery = projectLaneQuery.where('user').equals(userId);
+    }
+    const projectLane: ProjectLaneDocument = await projectLaneQuery.exec();
     if (!projectLane) throw new ProjectLaneNotFoundException(projectLaneId);
     return projectLane;
   }
 
   /**
    * Update a project lane
-   * @param userId the users id
    * @param workspaceId the workspace id
    * @param projectId the project id
    * @param projectLaneId the project lane id
    * @param updateProjectLaneDto the updated project lane
+   * @param userId the users id
    */
   async update(
-    userId: string,
     workspaceId: string,
     projectId: string,
     projectLaneId: string,
     updateProjectLaneDto: UpdateProjectLaneDto,
+    userId?: string,
   ): Promise<ProjectLaneDocument> {
-    const projectLane: ProjectLaneDocument = await this.projectLaneModel
+    let projectLaneQuery: Query<
+      ProjectLaneDocument,
+      ProjectLaneDocument
+    > = this.projectLaneModel
       .findOneAndUpdate(null, updateProjectLaneDto, { new: true })
       .where('_id')
       .equals(projectLaneId)
-      .where('user')
-      .equals(userId)
       .where('workspace')
       .equals(workspaceId)
       .where('project')
-      .equals(projectId)
-      .exec();
+      .equals(projectId);
+    if (userId) {
+      projectLaneQuery = projectLaneQuery.where('user').equals(userId);
+    }
+    const projectLane: ProjectLaneDocument = await projectLaneQuery.exec();
     if (!projectLane) throw new ProjectLaneNotFoundException(projectLaneId);
     return projectLane;
   }
 
   /**
    * Delete a project lane
-   * @param userId the users id
    * @param workspaceId the workspace id
    * @param projectId the project id
    * @param projectLaneId the project lane id
+   * @param userId the users id
    */
   async remove(
-    userId: string,
     workspaceId: string,
     projectId: string,
     projectLaneId: string,
+    userId?: string,
   ): Promise<void> {
-    const projectLane: ProjectLaneDocument = await this.projectLaneModel
+    let projectLaneQuery: Query<
+      ProjectLaneDocument,
+      ProjectLaneDocument
+    > = this.projectLaneModel
       .findOneAndDelete()
       .where('_id')
       .equals(projectLaneId)
-      .where('user')
-      .equals(userId)
       .where('workspace')
       .equals(workspaceId)
       .where('project')
-      .equals(projectId)
-      .exec();
+      .equals(projectId);
+    if (userId) {
+      projectLaneQuery = projectLaneQuery.where('user').equals(userId);
+    }
+    const projectLane: ProjectLaneDocument = await projectLaneQuery.exec();
     if (!projectLane) throw new ProjectLaneNotFoundException(projectLaneId);
     this.eventEmitter.emit(
       Event.ProjectLaneDeleted,

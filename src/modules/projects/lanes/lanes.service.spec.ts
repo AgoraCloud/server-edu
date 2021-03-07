@@ -26,7 +26,6 @@ const user: UserDocument = {
   password: '',
   isEnabled: true,
   isVerified: true,
-  isAdmin: false,
 } as UserDocument;
 
 const workspace: WorkspaceDocument = {
@@ -133,10 +132,10 @@ describe('ProjectLanesService', () => {
       ).message;
       try {
         await service.findOne(
-          user._id,
           workspace._id,
           project._id,
           projectLaneId,
+          user._id,
         );
         fail('It should throw an error');
       } catch (err) {
@@ -146,10 +145,10 @@ describe('ProjectLanesService', () => {
 
     it('should find the project lane in the given workspace and project for the given user', async () => {
       const retrievedProjectLane: ProjectLaneDocument = await service.findOne(
-        user._id,
         workspace._id,
         project._id,
         projectLaneId,
+        user._id,
       );
       expect(retrievedProjectLane._id).toEqual(projectLaneId);
       expect(retrievedProjectLane.user._id).toEqual(user._id);
@@ -169,11 +168,11 @@ describe('ProjectLanesService', () => {
       ).message;
       try {
         await service.update(
-          user._id,
           workspace._id,
           project._id,
           projectLaneId,
           updateProjectLaneDto,
+          user._id,
         );
         fail('It should throw an error');
       } catch (err) {
@@ -183,11 +182,11 @@ describe('ProjectLanesService', () => {
 
     it('should update the project lane', async () => {
       const updatedProjectLane: ProjectLaneDocument = await service.update(
-        user._id,
         workspace._id,
         project._id,
         projectLaneId,
         updateProjectLaneDto,
+        user._id,
       );
       expect(updatedProjectLane._id).toEqual(projectLaneId);
       expect(updatedProjectLane.name).toEqual(updateProjectLaneDto.name);
@@ -202,10 +201,10 @@ describe('ProjectLanesService', () => {
       ).message;
       try {
         await service.remove(
-          user._id,
           workspace._id,
           project._id,
           projectLaneId,
+          user._id,
         );
         fail('It should throw an error');
       } catch (err) {
@@ -218,7 +217,7 @@ describe('ProjectLanesService', () => {
         eventEmitter,
         'emit',
       );
-      await service.remove(user._id, workspace._id, project._id, projectLaneId);
+      await service.remove(workspace._id, project._id, projectLaneId, user._id);
       expect(eventEmitterSpy).toHaveBeenCalledTimes(1);
     });
   });

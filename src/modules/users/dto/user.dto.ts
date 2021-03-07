@@ -8,7 +8,4 @@ export class UserDto extends BaseDto {
 
   @Expose()
   readonly email: string;
-
-  @Expose()
-  readonly isAdmin: boolean;
 }

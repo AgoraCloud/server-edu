@@ -120,16 +120,16 @@ export class DeploymentsService {
 
   /**
    * Update a deployment
-   * @param userId the users id
    * @param workspaceId the workspace id
    * @param deploymentId the deployment id
    * @param updateDeploymentDto the updated deployment
+   * @param userId the users id
    */
   async update(
-    userId: string,
     workspaceId: string,
     deploymentId: string,
     updateDeploymentDto: UpdateDeploymentDto,
+    userId?: string,
   ): Promise<DeploymentDocument> {
     const deployment: DeploymentDocument = await this.findOne(
       deploymentId,
@@ -150,15 +150,20 @@ export class DeploymentsService {
     deployment.properties.resources.memoryCount =
       updateDeploymentResourcesDto?.memoryCount ||
       deployment.properties.resources.memoryCount;
-    await this.deploymentModel
+
+    let deploymentQuery: Query<
+      { ok: number; n: number; nModified: number },
+      DeploymentDocument
+    > = this.deploymentModel
       .updateOne(null, deployment)
       .where('_id')
       .equals(deploymentId)
-      .where('user')
-      .equals(userId)
       .where('workspace')
-      .equals(workspaceId)
-      .exec();
+      .equals(workspaceId);
+    if (userId) {
+      deploymentQuery = deploymentQuery.where('user').equals(userId);
+    }
+    await deploymentQuery.exec();
 
     /**
      * Send the deployment.updated event only if cpuCount and/or
@@ -198,24 +203,28 @@ export class DeploymentsService {
 
   /**
    * Delete a deployment
-   * @param userId the users id
    * @param workspaceId the workspace id
    * @param deploymentId the deployment id
+   * @param userId the users id
    */
   async remove(
-    userId: string,
     workspaceId: string,
     deploymentId: string,
+    userId?: string,
   ): Promise<void> {
-    const deployment: DeploymentDocument = await this.deploymentModel
+    let deploymentQuery: Query<
+      DeploymentDocument,
+      DeploymentDocument
+    > = this.deploymentModel
       .findOneAndDelete()
       .where('_id')
       .equals(deploymentId)
-      .where('user')
-      .equals(userId)
       .where('workspace')
-      .equals(workspaceId)
-      .exec();
+      .equals(workspaceId);
+    if (userId) {
+      deploymentQuery = deploymentQuery.where('user').equals(userId);
+    }
+    const deployment: DeploymentDocument = await deploymentQuery.exec();
     if (!deployment) throw new DeploymentNotFoundException(deploymentId);
     this.eventEmitter.emit(
       Event.DeploymentDeleted,

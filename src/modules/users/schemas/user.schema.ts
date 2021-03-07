@@ -20,9 +20,6 @@ export class User {
   @Prop({ required: true, default: false })
   isVerified: boolean;
 
-  @Prop({ required: true, default: false })
-  isAdmin: boolean;
-
   @Prop({ index: true })
   latestRefreshToken?: string;
 
