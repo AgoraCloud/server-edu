@@ -6,6 +6,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ISendMailOptions, MailerService } from '@nestjs-modules/mailer';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Event } from '../../events/events.enum';
+import { Role } from '../authorization/schemas/permission.schema';
 
 @Injectable()
 export class MailService {
@@ -42,7 +43,7 @@ export class MailService {
       subject: 'Verify Your AgoraCloud Account',
       template: 'verify-account',
       context: {
-        user: payload.user,
+        fullName: payload.user.fullName,
         link: `${this.baseDomain}/verify-account?token=${payload.token}`,
       },
     });
@@ -58,7 +59,7 @@ export class MailService {
       subject: 'Change Your AgoraCloud Account Password',
       template: 'forgot-password',
       context: {
-        user: payload.user,
+        fullName: payload.user.fullName,
         link: `${this.baseDomain}/change-password?token=${payload.token}`,
       },
     });
@@ -74,7 +75,7 @@ export class MailService {
       subject: 'AgoraCloud Account Password Changed',
       template: 'password-changed',
       context: {
-        user: payload.user,
+        fullName: payload.user.fullName,
         link: `${this.baseDomain}/sign-in`,
       },
     });
@@ -86,7 +87,7 @@ export class MailService {
    */
   @OnEvent(Event.UserCreated)
   private handleUserCreatedEvent(payload: UserCreatedEvent): void {
-    this.sendAccountVerificationEmail(payload);
+    if (payload.role === Role.User) this.sendAccountVerificationEmail(payload);
   }
 
   /**

@@ -30,8 +30,25 @@ interface RequestWithProjectLane extends Request {
   projectLane: ProjectLaneDocument;
 }
 
+interface RequestWithIsAdmin extends Request {
+  isAdmin: boolean;
+}
+
+interface RequestWithUserAndIsAdmin extends RequestWithUser {
+  isAdmin: boolean;
+}
+
+interface RequestWithDeploymentAndUser extends RequestWithUser {
+  deployment: DeploymentDocument;
+}
+
 interface RequestWithWorkspaceAndUser extends RequestWithUser {
   workspace: WorkspaceDocument;
+}
+
+interface RequestWithWorkspaceUserAndIsAdmin
+  extends RequestWithWorkspaceAndUser {
+  isAdmin: boolean;
 }
 
 interface RequestWithWorkspaceDeploymentAndUser
@@ -39,9 +56,19 @@ interface RequestWithWorkspaceDeploymentAndUser
   deployment: DeploymentDocument;
 }
 
+interface RequestWithWorkspaceDeploymentUserAndIsAdmin
+  extends RequestWithWorkspaceDeploymentAndUser {
+  isAdmin: boolean;
+}
+
 interface RequestWithWorkspaceUserAndWikiSection
   extends RequestWithWorkspaceAndUser {
   wikiSection: WikiSectionDocument;
+}
+
+interface RequestWithWorkspaceUserWikiSectionAndIsAdmin
+  extends RequestWithWorkspaceUserAndWikiSection {
+  isAdmin: boolean;
 }
 
 interface RequestWithWorkspaceUserAndProject
@@ -49,9 +76,19 @@ interface RequestWithWorkspaceUserAndProject
   project: ProjectDocument;
 }
 
+interface RequestWithWorkspaceUserProjectAndIsAdmin
+  extends RequestWithWorkspaceUserAndProject {
+  isAdmin: boolean;
+}
+
 interface RequestWithWorkspaceUserProjectAndProjectLane
   extends RequestWithWorkspaceUserAndProject {
   projectLane: ProjectLaneDocument;
+}
+
+interface RequestWithWorkspaceUserProjectProjectLaneAndIsAdmin
+  extends RequestWithWorkspaceUserProjectAndProjectLane {
+  isAdmin: boolean;
 }
 
 export {
@@ -61,9 +98,12 @@ export {
   RequestWithWikiSection,
   RequestWithProject,
   RequestWithProjectLane,
-  RequestWithWorkspaceAndUser,
-  RequestWithWorkspaceDeploymentAndUser,
-  RequestWithWorkspaceUserAndWikiSection,
-  RequestWithWorkspaceUserAndProject,
-  RequestWithWorkspaceUserProjectAndProjectLane,
+  RequestWithIsAdmin,
+  RequestWithUserAndIsAdmin,
+  RequestWithDeploymentAndUser,
+  RequestWithWorkspaceUserAndIsAdmin,
+  RequestWithWorkspaceDeploymentUserAndIsAdmin,
+  RequestWithWorkspaceUserWikiSectionAndIsAdmin,
+  RequestWithWorkspaceUserProjectAndIsAdmin,
+  RequestWithWorkspaceUserProjectProjectLaneAndIsAdmin,
 };

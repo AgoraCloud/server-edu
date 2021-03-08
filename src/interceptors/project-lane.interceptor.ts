@@ -12,7 +12,7 @@ import {
   ExecutionContext,
   CallHandler,
 } from '@nestjs/common';
-import { RequestWithWorkspaceUserProjectAndProjectLane } from '../utils/requests.interface';
+import { RequestWithWorkspaceUserProjectProjectLaneAndIsAdmin } from '../utils/requests.interface';
 
 @Injectable()
 export class ProjectLaneInterceptor implements NestInterceptor {
@@ -22,7 +22,7 @@ export class ProjectLaneInterceptor implements NestInterceptor {
     context: ExecutionContext,
     next: CallHandler,
   ): Promise<Observable<any>> {
-    const request: RequestWithWorkspaceUserProjectAndProjectLane = context
+    const request: RequestWithWorkspaceUserProjectProjectLaneAndIsAdmin = context
       .switchToHttp()
       .getRequest();
     const projectLaneId: string = request.params.laneId;
@@ -33,11 +33,12 @@ export class ProjectLaneInterceptor implements NestInterceptor {
     const user: UserDocument = request.user;
     const workspace: WorkspaceDocument = request.workspace;
     const project: ProjectDocument = request.project;
+    const isAdmin: boolean = request.isAdmin;
     const projectLane: ProjectLaneDocument = await this.projectLanesService.findOne(
-      user._id,
       workspace._id,
       project._id,
       projectLaneId,
+      isAdmin ? undefined : user._id,
     );
     request.projectLane = projectLane;
     return next.handle();

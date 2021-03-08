@@ -1,3 +1,4 @@
+import { UserWithIdNotFoundException } from './../../exceptions/user-not-found.exception';
 import { AccountNotVerifiedException } from './../../exceptions/account-not-verified.exception';
 import { AccountDisabledException } from './../../exceptions/account-disabled.exception';
 import { UserNotFoundException } from '../../exceptions/user-not-found.exception';
@@ -73,23 +74,8 @@ describe('UsersService', () => {
       expect(createdUser.email).toBe(createUserDto.email);
       expect(createdUser.isEnabled).toBe(true);
       expect(createdUser.isVerified).toBe(false);
-      expect(createdUser.isAdmin).toBe(false);
       expect(eventEmitterSpy).toHaveBeenCalledTimes(1);
       user = createdUser;
-    });
-  });
-
-  describe('update', () => {
-    it('should update the user', async () => {
-      const updateUserDto: UpdateUserDto = {
-        fullName: 'New Test User',
-      };
-      const updatedUser: UserDocument = await service.update(
-        user._id,
-        updateUserDto,
-      );
-      expect(updatedUser._id).toEqual(user._id);
-      expect(updatedUser.fullName).toBe(updateUserDto.fullName);
     });
   });
 
@@ -164,6 +150,35 @@ describe('UsersService', () => {
       expect(retrievedUser).toBeTruthy();
       expect(retrievedUser.email).toBe(user.email);
       user = retrievedUser;
+    });
+  });
+
+  describe('doesExist', () => {
+    it('should throw an error if the user does not exist', async () => {
+      const userId: string = Types.ObjectId().toHexString();
+      const expectedErrorMessage: string = new UserWithIdNotFoundException(
+        userId,
+      ).message;
+      try {
+        await service.doesExist(userId);
+        fail('It should throw an error');
+      } catch (err) {
+        expect(err.message).toBe(expectedErrorMessage);
+      }
+    });
+  });
+
+  describe('update', () => {
+    it('should update the user', async () => {
+      const updateUserDto: UpdateUserDto = {
+        fullName: 'New Test User',
+      };
+      const updatedUser: UserDocument = await service.update(
+        user._id,
+        updateUserDto,
+      );
+      expect(updatedUser._id).toEqual(user._id);
+      expect(updatedUser.fullName).toBe(updateUserDto.fullName);
     });
   });
 

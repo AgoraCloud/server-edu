@@ -11,7 +11,7 @@ import {
   CallHandler,
 } from '@nestjs/common';
 import { WikiSectionDocument } from './../modules/wiki/sections/schemas/section.schema';
-import { RequestWithWorkspaceUserAndWikiSection } from '../utils/requests.interface';
+import { RequestWithWorkspaceUserWikiSectionAndIsAdmin } from '../utils/requests.interface';
 
 @Injectable()
 export class WikiSectionInterceptor implements NestInterceptor {
@@ -21,7 +21,7 @@ export class WikiSectionInterceptor implements NestInterceptor {
     context: ExecutionContext,
     next: CallHandler,
   ): Promise<Observable<any>> {
-    const request: RequestWithWorkspaceUserAndWikiSection = context
+    const request: RequestWithWorkspaceUserWikiSectionAndIsAdmin = context
       .switchToHttp()
       .getRequest();
     const wikiSectionId: string = request.params.sectionId;
@@ -31,10 +31,11 @@ export class WikiSectionInterceptor implements NestInterceptor {
 
     const user: UserDocument = request.user;
     const workspace: WorkspaceDocument = request.workspace;
+    const isAdmin: boolean = request.isAdmin;
     const wikiSection: WikiSectionDocument = await this.wikiSectionsService.findOne(
-      user._id,
       workspace._id,
       wikiSectionId,
+      isAdmin ? undefined : user._id,
     );
     request.wikiSection = wikiSection;
     return next.handle();

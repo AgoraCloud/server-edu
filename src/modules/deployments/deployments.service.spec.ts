@@ -29,7 +29,6 @@ const user: UserDocument = {
   password: '',
   isEnabled: true,
   isVerified: true,
-  isAdmin: false,
 } as UserDocument;
 
 const workspace: WorkspaceDocument = {
@@ -196,10 +195,10 @@ describe('DeploymentsService', () => {
       ).message;
       try {
         await service.update(
-          user._id,
           workspace._id,
           deploymentId,
           updateDeploymentDto,
+          user._id,
         );
         fail('It should throw an error');
       } catch (err) {
@@ -213,10 +212,10 @@ describe('DeploymentsService', () => {
       ).message;
       try {
         await service.update(
-          user._id,
           workspace._id,
           deploymentId,
           updateDeploymentDto,
+          user._id,
         );
         fail('It should throw an error');
       } catch (err) {
@@ -232,10 +231,10 @@ describe('DeploymentsService', () => {
         'emit',
       );
       const updatedDeployment: DeploymentDocument = await service.update(
-        user._id,
         workspace._id,
         deploymentId,
         updateDeploymentDto,
+        user._id,
       );
       expect(updatedDeployment._id).toEqual(deploymentId);
       expect(updatedDeployment.user._id).toEqual(user._id);
@@ -260,10 +259,10 @@ describe('DeploymentsService', () => {
         name: 'New Test Deployment',
       };
       await service.update(
-        user._id,
         workspace._id,
         deploymentId,
         updateDeploymentDto,
+        user._id,
       );
       expect(eventEmitterSpy).not.toHaveBeenCalled();
     });
@@ -289,7 +288,7 @@ describe('DeploymentsService', () => {
         deploymentId,
       ).message;
       try {
-        await service.remove(user._id, workspace._id, deploymentId);
+        await service.remove(workspace._id, deploymentId, user._id);
         fail('It should throw an error');
       } catch (err) {
         expect(err.message).toBe(expectedErrorMessage);
@@ -302,7 +301,7 @@ describe('DeploymentsService', () => {
         'emit',
       );
       eventEmitterSpy.mockClear();
-      await service.remove(user._id, workspace._id, deploymentId);
+      await service.remove(workspace._id, deploymentId, user._id);
       expect(eventEmitterSpy).toHaveBeenCalledTimes(1);
     });
   });

@@ -9,35 +9,34 @@ import {
 } from '@nestjs/swagger';
 import { UserDto } from './dto/user.dto';
 import { TransformInterceptor } from './../../interceptors/transform.interceptor';
-import { JwtAuthenticationGuard } from '../authentication/guards/jwt-authentication.guard';
 import {
   Controller,
   Get,
   Body,
   Put,
   Delete,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from '../../decorators/user.decorator';
 import { UserDocument } from '../users/schemas/user.schema';
+import { Auth } from '../../decorators/auth.decorator';
 
 @ApiCookieAuth()
 @ApiTags('Users')
+@Auth()
 @Controller('api/user')
-@UseGuards(JwtAuthenticationGuard)
 @UseInterceptors(new TransformInterceptor(UserDto))
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   /**
-   * Get a user
+   * Get the logged in user
    * @param user the user
    */
   @Get()
-  @ApiOperation({ summary: 'Get a user' })
+  @ApiOperation({ summary: 'Get the logged in user' })
   @ApiOkResponse({
     description: 'The user has been successfully retrieved',
     type: UserDto,
@@ -48,12 +47,12 @@ export class UsersController {
   }
 
   /**
-   * Update a user
+   * Update the logged in user
    * @param userId the users id
    * @param updateUserDto the updated user
    */
   @Put()
-  @ApiOperation({ summary: 'Update a user' })
+  @ApiOperation({ summary: 'Update the logged in user' })
   @ApiOkResponse({
     description: 'The user has been successfully updated',
     type: UserDto,
@@ -71,11 +70,11 @@ export class UsersController {
   }
 
   /**
-   * Delete a user
+   * Delete the logged in user
    * @param userId the users id
    */
   @Delete()
-  @ApiOperation({ summary: 'Delete a user' })
+  @ApiOperation({ summary: 'Delete the logged in user' })
   @ApiOkResponse({ description: 'The user has been successfully deleted' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   async remove(@User('_id') userId: string): Promise<void> {

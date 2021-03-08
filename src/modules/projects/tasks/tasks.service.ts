@@ -80,98 +80,110 @@ export class ProjectTasksService {
 
   /**
    * Find a project task
-   * @param userId the users id
    * @param workspaceId the workspace id
    * @param projectId the project id
    * @param projectLaneId the project lane id
    * @param projectTaskId the project task id
+   * @param userId the users id
    */
   async findOne(
-    userId: string,
     workspaceId: string,
     projectId: string,
     projectLaneId: string,
     projectTaskId: string,
+    userId?: string,
   ): Promise<ProjectTaskDocument> {
-    const projectTask: ProjectTaskDocument = await this.projectTasksModel
+    let projectTaskQuery: Query<
+      ProjectTaskDocument,
+      ProjectTaskDocument
+    > = this.projectTasksModel
       .findOne()
       .where('_id')
       .equals(projectTaskId)
-      .where('user')
-      .equals(userId)
       .where('workspace')
       .equals(workspaceId)
       .where('project')
       .equals(projectId)
       .where('lane')
-      .equals(projectLaneId)
-      .exec();
+      .equals(projectLaneId);
+    if (userId) {
+      projectTaskQuery = projectTaskQuery.where('user').equals(userId);
+    }
+    const projectTask: ProjectTaskDocument = await projectTaskQuery.exec();
     if (!projectTask) throw new ProjectTaskNotFoundException(projectTaskId);
     return projectTask;
   }
 
   /**
    * Update a project task
-   * @param userId the users id
    * @param workspaceId the workspace id
    * @param projectId the project id
    * @param projectLaneId the project lane id
    * @param projectTaskId the project task id
    * @param updateProjectTaskDto the updated project task
+   * @param userId the users id
    */
   async update(
-    userId: string,
     workspaceId: string,
     projectId: string,
     projectLaneId: string,
     projectTaskId: string,
     updateProjectTaskDto: UpdateProjectTaskDto,
+    userId?: string,
   ): Promise<ProjectTaskDocument> {
-    const projectTask: ProjectTaskDocument = await this.projectTasksModel
+    let projectTaskQuery: Query<
+      ProjectTaskDocument,
+      ProjectTaskDocument
+    > = this.projectTasksModel
       .findOneAndUpdate(null, updateProjectTaskDto, { new: true })
       .where('_id')
       .equals(projectTaskId)
-      .where('user')
-      .equals(userId)
       .where('workspace')
       .equals(workspaceId)
       .where('project')
       .equals(projectId)
       .where('lane')
-      .equals(projectLaneId)
-      .exec();
+      .equals(projectLaneId);
+    if (userId) {
+      projectTaskQuery = projectTaskQuery.where('user').equals(userId);
+    }
+    const projectTask: ProjectTaskDocument = await projectTaskQuery.exec();
     if (!projectTask) throw new ProjectTaskNotFoundException(projectTaskId);
     return projectTask;
   }
 
   /**
    * Delete a project task
-   * @param userId the users id
    * @param workspaceId the workspace id
    * @param projectId the project id
    * @param projectLaneId the project lane id
    * @param projectTaskId the project task id
+   * @param userId the users id
    */
   async remove(
-    userId: string,
     workspaceId: string,
     projectId: string,
     projectLaneId: string,
     projectTaskId: string,
+    userId?: string,
   ): Promise<void> {
-    const projectTask: ProjectTaskDocument = await this.projectTasksModel
+    let projectTaskQuery: Query<
+      ProjectTaskDocument,
+      ProjectTaskDocument
+    > = this.projectTasksModel
       .findOneAndDelete()
       .where('_id')
       .equals(projectTaskId)
-      .where('user')
-      .equals(userId)
       .where('workspace')
       .equals(workspaceId)
       .where('project')
       .equals(projectId)
       .where('lane')
-      .equals(projectLaneId)
-      .exec();
+      .equals(projectLaneId);
+    if (userId) {
+      projectTaskQuery = projectTaskQuery.where('user').equals(userId);
+    }
+    const projectTask: ProjectTaskDocument = await projectTaskQuery.exec();
     if (!projectTask) throw new ProjectTaskNotFoundException(projectTaskId);
   }
 

@@ -25,7 +25,6 @@ const user: UserDocument = {
   password: '',
   isEnabled: true,
   isVerified: true,
-  isAdmin: false,
 } as UserDocument;
 
 const workspace: WorkspaceDocument = {
@@ -112,7 +111,7 @@ describe('ProjectsService', () => {
         projectId,
       ).message;
       try {
-        await service.findOne(user._id, workspace._id, projectId);
+        await service.findOne(workspace._id, projectId, user._id);
         fail('It should throw an error');
       } catch (err) {
         expect(err.message).toBe(expectedErrorMessage);
@@ -121,9 +120,9 @@ describe('ProjectsService', () => {
 
     it('should find the project in the given workspace for the given user', async () => {
       const retrievedProject: ProjectDocument = await service.findOne(
-        user._id,
         workspace._id,
         projectId,
+        user._id,
       );
       expect(retrievedProject._id).toEqual(projectId);
       expect(retrievedProject.user._id).toEqual(user._id);
@@ -143,10 +142,10 @@ describe('ProjectsService', () => {
       ).message;
       try {
         await service.update(
-          user._id,
           workspace._id,
           projectId,
           updateProjectDto,
+          user._id,
         );
         fail('It should throw an error');
       } catch (err) {
@@ -156,10 +155,10 @@ describe('ProjectsService', () => {
 
     it('should update the project', async () => {
       const updatedProject: ProjectDocument = await service.update(
-        user._id,
         workspace._id,
         projectId,
         updateProjectDto,
+        user._id,
       );
       expect(updatedProject._id).toEqual(projectId);
       expect(updatedProject.name).toBe(updateProjectDto.name);
@@ -174,7 +173,7 @@ describe('ProjectsService', () => {
         projectId,
       ).message;
       try {
-        await service.remove(user._id, workspace._id, projectId);
+        await service.remove(workspace._id, projectId, user._id);
         fail('It should throw an error');
       } catch (err) {
         expect(err.message).toBe(expectedErrorMessage);
@@ -186,7 +185,7 @@ describe('ProjectsService', () => {
         eventEmitter,
         'emit',
       );
-      await service.remove(user._id, workspace._id, projectId);
+      await service.remove(workspace._id, projectId, user._id);
       expect(eventEmitterSpy).toHaveBeenCalledTimes(1);
     });
   });

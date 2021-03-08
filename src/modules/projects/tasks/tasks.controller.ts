@@ -1,3 +1,7 @@
+import { IsAdmin } from '../../../decorators/is-admin.decorator';
+import { Permissions } from './../../../decorators/permissions.decorator';
+import { Auth } from '../../../decorators/auth.decorator';
+import { Action } from './../../authorization/schemas/permission.schema';
 import { ExceptionDto } from './../../../utils/base.dto';
 import {
   ApiTags,
@@ -9,6 +13,7 @@ import {
   ApiOkResponse,
   ApiParam,
   ApiOperation,
+  ApiForbiddenResponse,
 } from '@nestjs/swagger';
 import { FindOneParams } from './../../../utils/find-one-params';
 import { ProjectLaneDocument } from './../lanes/schemas/lane.schema';
@@ -21,7 +26,6 @@ import { ProjectTaskDto } from './dto/task.dto';
 import { ProjectLaneInterceptor } from './../../../interceptors/project-lane.interceptor';
 import { ProjectInterceptor } from './../../../interceptors/project.interceptor';
 import { WorkspaceInterceptor } from './../../../interceptors/workspace.interceptor';
-import { JwtAuthenticationGuard } from './../../authentication/guards/jwt-authentication.guard';
 import {
   Controller,
   Get,
@@ -30,7 +34,6 @@ import {
   Put,
   Param,
   Delete,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ProjectTasksService } from './tasks.service';
@@ -43,7 +46,7 @@ import { ProjectLane } from '../../../decorators/project-lane.decorator';
 
 @ApiCookieAuth()
 @ApiTags('Project Tasks')
-@UseGuards(JwtAuthenticationGuard)
+@Auth(Action.ReadWorkspace, Action.ReadProject, Action.ReadProjectLane)
 @Controller(
   'api/workspaces/:workspaceId/projects/:projectId/lanes/:laneId/tasks',
 )
@@ -65,6 +68,7 @@ export class ProjectTasksController {
    * @param createProjectTaskDto the project task to create
    */
   @Post()
+  @Permissions(Action.CreateProjectTask)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'projectId', description: 'The project id' })
   @ApiParam({ name: 'laneId', description: 'The project lane id' })
@@ -79,6 +83,7 @@ export class ProjectTasksController {
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
   @ApiNotFoundResponse({
     description:
       'The workspace, project or project lane with the given id was not found',
@@ -108,6 +113,7 @@ export class ProjectTasksController {
    * @param projectLaneId the project lane id
    */
   @Get()
+  @Permissions(Action.ReadProjectTask)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'projectId', description: 'The project id' })
   @ApiParam({ name: 'laneId', description: 'The project lane id' })
@@ -122,6 +128,7 @@ export class ProjectTasksController {
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
   @ApiNotFoundResponse({
     description:
       'The workspace, project or project lane with the given id was not found',
@@ -129,10 +136,19 @@ export class ProjectTasksController {
   })
   findAll(
     @User('_id') userId: string,
+    @IsAdmin() isAdmin: boolean,
     @Workspace('_id') workspaceId: string,
     @Project('_id') projectId: string,
     @ProjectLane('_id') projectLaneId: string,
   ): Promise<ProjectTaskDocument[]> {
+    if (isAdmin) {
+      return this.projectTasksService.findAll(
+        projectLaneId,
+        undefined,
+        workspaceId,
+        projectId,
+      );
+    }
     return this.projectTasksService.findAll(
       projectLaneId,
       userId,
@@ -150,6 +166,7 @@ export class ProjectTasksController {
    * @param projectTaskId the project task id
    */
   @Get(':id')
+  @Permissions(Action.ReadProjectTask)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'projectId', description: 'The project id' })
   @ApiParam({ name: 'laneId', description: 'The project lane id' })
@@ -165,6 +182,7 @@ export class ProjectTasksController {
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
   @ApiNotFoundResponse({
     description:
       'The workspace, project, project lane or project task with the given id was not found',
@@ -172,17 +190,26 @@ export class ProjectTasksController {
   })
   findOne(
     @User('_id') userId: string,
+    @IsAdmin() isAdmin: boolean,
     @Workspace('_id') workspaceId: string,
     @Project('_id') projectId: string,
     @ProjectLane('_id') projectLaneId: string,
     @Param() { id: projectTaskId }: FindOneParams,
   ): Promise<ProjectTaskDocument> {
+    if (isAdmin) {
+      return this.projectTasksService.findOne(
+        workspaceId,
+        projectId,
+        projectLaneId,
+        projectTaskId,
+      );
+    }
     return this.projectTasksService.findOne(
-      userId,
       workspaceId,
       projectId,
       projectLaneId,
       projectTaskId,
+      userId,
     );
   }
 
@@ -196,6 +223,7 @@ export class ProjectTasksController {
    * @param updateProjectTaskDto the updated project task
    */
   @Put(':id')
+  @Permissions(Action.UpdateProjectTask)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'projectId', description: 'The project id' })
   @ApiParam({ name: 'laneId', description: 'The project lane id' })
@@ -211,6 +239,7 @@ export class ProjectTasksController {
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
   @ApiNotFoundResponse({
     description:
       'The workspace, project, project lane or project task with the given id was not found',
@@ -218,19 +247,29 @@ export class ProjectTasksController {
   })
   update(
     @User('_id') userId: string,
+    @IsAdmin() isAdmin: boolean,
     @Workspace('_id') workspaceId: string,
     @Project('_id') projectId: string,
     @ProjectLane('_id') projectLaneId: string,
     @Param() { id: projectTaskId }: FindOneParams,
     @Body() updateProjectTaskDto: UpdateProjectTaskDto,
   ): Promise<ProjectTaskDocument> {
+    if (isAdmin) {
+      return this.projectTasksService.update(
+        workspaceId,
+        projectId,
+        projectLaneId,
+        projectTaskId,
+        updateProjectTaskDto,
+      );
+    }
     return this.projectTasksService.update(
-      userId,
       workspaceId,
       projectId,
       projectLaneId,
       projectTaskId,
       updateProjectTaskDto,
+      userId,
     );
   }
 
@@ -243,6 +282,7 @@ export class ProjectTasksController {
    * @param projectTaskId the project task id
    */
   @Delete(':id')
+  @Permissions(Action.DeleteProjectTask)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'projectId', description: 'The project id' })
   @ApiParam({ name: 'laneId', description: 'The project lane id' })
@@ -257,6 +297,7 @@ export class ProjectTasksController {
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
   @ApiNotFoundResponse({
     description:
       'The workspace, project, project lane or project task with the given id was not found',
@@ -264,17 +305,26 @@ export class ProjectTasksController {
   })
   remove(
     @User('_id') userId: string,
+    @IsAdmin() isAdmin: boolean,
     @Workspace('_id') workspaceId: string,
     @Project('_id') projectId: string,
     @ProjectLane('_id') projectLaneId: string,
     @Param() { id: projectTaskId }: FindOneParams,
   ): Promise<void> {
+    if (isAdmin) {
+      return this.projectTasksService.remove(
+        workspaceId,
+        projectId,
+        projectLaneId,
+        projectTaskId,
+      );
+    }
     return this.projectTasksService.remove(
-      userId,
       workspaceId,
       projectId,
       projectLaneId,
       projectTaskId,
+      userId,
     );
   }
 }

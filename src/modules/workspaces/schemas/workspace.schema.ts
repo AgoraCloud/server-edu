@@ -21,7 +21,7 @@ export class WorkspaceResources {
 }
 
 export class WorkspaceProperties {
-  @Prop()
+  @Prop({ type: WorkspaceResources })
   resources?: WorkspaceResources;
 
   constructor(partial: Partial<WorkspaceProperties>) {
@@ -34,7 +34,7 @@ export class Workspace {
   @Prop({ required: true, minlength: 4 })
   name: string;
 
-  @Prop()
+  @Prop({ type: WorkspaceProperties })
   properties?: WorkspaceProperties;
 
   @Prop({

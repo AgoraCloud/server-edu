@@ -63,74 +63,86 @@ export class WikiSectionsService {
 
   /**
    * Find a wiki section
-   * @param userId the users id
    * @param workspaceId the workspace id
    * @param wikiSectionId the wiki section id
+   * @param userId the users id
    */
   async findOne(
-    userId: string,
     workspaceId: string,
     wikiSectionId: string,
+    userId?: string,
   ): Promise<WikiSectionDocument> {
-    const wikiSection: WikiSectionDocument = await this.wikiSectionModel
+    let wikiSectionQuery: Query<
+      WikiSectionDocument,
+      WikiSectionDocument
+    > = this.wikiSectionModel
       .findOne()
       .where('_id')
       .equals(wikiSectionId)
       .where('workspace')
-      .equals(workspaceId)
-      .where('user')
-      .equals(userId)
-      .exec();
+      .equals(workspaceId);
+    if (userId) {
+      wikiSectionQuery = wikiSectionQuery.where('user').equals(userId);
+    }
+    const wikiSection: WikiSectionDocument = await wikiSectionQuery.exec();
     if (!wikiSection) throw new WikiSectionNotFoundException(wikiSectionId);
     return wikiSection;
   }
 
   /**
    * Update a wiki section
-   * @param userId the users id
    * @param workspaceId the workspace id
    * @param wikiSectionId the wiki section id
    * @param updateWikiSectionDto the updated wiki section
+   * @param userId the users id
    */
   async update(
-    userId: string,
     workspaceId: string,
     wikiSectionId: string,
     updateWikiSectionDto: UpdateWikiSectionDto,
+    userId?: string,
   ): Promise<WikiSectionDocument> {
-    const wikiSection: WikiSectionDocument = await this.wikiSectionModel
+    let wikiSectionQuery: Query<
+      WikiSectionDocument,
+      WikiSectionDocument
+    > = this.wikiSectionModel
       .findOneAndUpdate(null, updateWikiSectionDto, { new: true })
       .where('_id')
       .equals(wikiSectionId)
       .where('workspace')
-      .equals(workspaceId)
-      .where('user')
-      .equals(userId)
-      .exec();
+      .equals(workspaceId);
+    if (userId) {
+      wikiSectionQuery = wikiSectionQuery.where('user').equals(userId);
+    }
+    const wikiSection: WikiSectionDocument = await wikiSectionQuery.exec();
     if (!wikiSection) throw new WikiSectionNotFoundException(wikiSectionId);
     return wikiSection;
   }
 
   /**
    * Delete a wiki section
-   * @param userId the users id
    * @param workspaceId the workspace id
    * @param wikiSectionId the wiki section id
+   * @param userId the users id
    */
   async remove(
-    userId: string,
     workspaceId: string,
     wikiSectionId: string,
+    userId?: string,
   ): Promise<void> {
-    const wikiSection: WikiSectionDocument = await this.wikiSectionModel
+    let wikiSectionQuery: Query<
+      WikiSectionDocument,
+      WikiSectionDocument
+    > = this.wikiSectionModel
       .findOneAndDelete()
       .where('_id')
       .equals(wikiSectionId)
       .where('workspace')
-      .equals(workspaceId)
-      .where('user')
-      .equals(userId)
-      .exec();
+      .equals(workspaceId);
+    if (userId) {
+      wikiSectionQuery = wikiSectionQuery.where('user').equals(userId);
+    }
+    const wikiSection: WikiSectionDocument = await wikiSectionQuery.exec();
     if (!wikiSection) throw new WikiSectionNotFoundException(wikiSectionId);
     this.eventEmitter.emit(
       Event.WikiSectionDeleted,

@@ -24,7 +24,6 @@ const user: UserDocument = {
   password: '',
   isEnabled: true,
   isVerified: true,
-  isAdmin: false,
 } as UserDocument;
 
 let workspaceId: string;
@@ -93,7 +92,7 @@ describe('WorkspacesService', () => {
         workspaceId,
       ).message;
       try {
-        await service.findOne(user._id, workspaceId);
+        await service.findOne(workspaceId, user._id);
         fail('It should throw an error');
       } catch (err) {
         expect(err.message).toBe(expectedErrorMessage);
@@ -102,8 +101,8 @@ describe('WorkspacesService', () => {
 
     it('should find the users workspace with the given id', async () => {
       const retrievedWorkspace: WorkspaceDocument = await service.findOne(
-        user._id,
         workspaceId,
+        user._id,
       );
       expect(retrievedWorkspace._id).toEqual(workspaceId);
       expect(retrievedWorkspace.users[0]._id).toEqual(user._id);
@@ -120,7 +119,7 @@ describe('WorkspacesService', () => {
         workspaceId,
       ).message;
       try {
-        await service.update(user._id, workspaceId, updateWorkspaceDto);
+        await service.update(workspaceId, updateWorkspaceDto, user._id);
         fail('It should throw an error');
       } catch (err) {
         expect(err.message).toBe(expectedErrorMessage);
@@ -139,9 +138,9 @@ describe('WorkspacesService', () => {
         },
       };
       const updatedWorkspace: WorkspaceDocument = await service.update(
-        user._id,
         workspaceId,
         updateWorkspaceDto,
+        user._id,
       );
       expect(updatedWorkspace._id).toEqual(workspaceId);
       expect(updatedWorkspace.users[0]._id).toEqual(user._id);
@@ -165,7 +164,7 @@ describe('WorkspacesService', () => {
         workspaceId,
       ).message;
       try {
-        await service.remove(user._id, workspaceId);
+        await service.remove(workspaceId, user._id);
         fail('It should throw an error');
       } catch (err) {
         expect(err.message).toBe(expectedErrorMessage);
@@ -177,7 +176,7 @@ describe('WorkspacesService', () => {
         eventEmitter,
         'emit',
       );
-      await service.remove(user._id, workspaceId);
+      await service.remove(workspaceId, user._id);
       expect(eventEmitterSpy).toHaveBeenCalledTimes(1);
     });
   });

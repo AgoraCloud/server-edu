@@ -9,7 +9,6 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { accessTokenConstants, refreshTokenConstants } from './constants';
 import { UserDocument } from '../users/schemas/user.schema';
 import { LocalAuthenticationGuard } from './guards/local-authentication.guard';
-import { JwtAuthenticationGuard } from './guards/jwt-authentication.guard';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import {
   Controller,
@@ -37,6 +36,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { Auth } from '../../decorators/auth.decorator';
 
 @Controller('api/auth')
 @ApiTags('Authentication')
@@ -119,7 +119,7 @@ export class AuthenticationController {
   @HttpCode(200)
   @Post('logout')
   @ApiCookieAuth()
-  @UseGuards(JwtAuthenticationGuard)
+  @Auth()
   @ApiOperation({ summary: 'Sign out' })
   @ApiOkResponse({ description: 'The user has been successfully logged out' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })

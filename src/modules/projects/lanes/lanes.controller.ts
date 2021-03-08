@@ -1,3 +1,7 @@
+import { IsAdmin } from '../../../decorators/is-admin.decorator';
+import { Permissions } from '../../../decorators/permissions.decorator';
+import { Action } from './../../authorization/schemas/permission.schema';
+import { Auth } from '../../../decorators/auth.decorator';
 import { ExceptionDto } from './../../../utils/base.dto';
 import {
   ApiTags,
@@ -9,6 +13,7 @@ import {
   ApiNotFoundResponse,
   ApiParam,
   ApiOperation,
+  ApiForbiddenResponse,
 } from '@nestjs/swagger';
 import { FindOneParams } from './../../../utils/find-one-params';
 import { ProjectDocument } from './../schemas/project.schema';
@@ -17,7 +22,6 @@ import { UserDocument } from './../../users/schemas/user.schema';
 import { TransformInterceptor } from './../../../interceptors/transform.interceptor';
 import { ProjectInterceptor } from './../../../interceptors/project.interceptor';
 import { WorkspaceInterceptor } from './../../../interceptors/workspace.interceptor';
-import { JwtAuthenticationGuard } from './../../authentication/guards/jwt-authentication.guard';
 import {
   Controller,
   Get,
@@ -26,7 +30,6 @@ import {
   Put,
   Param,
   Delete,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ProjectLanesService } from './lanes.service';
@@ -40,7 +43,7 @@ import { ProjectLaneDocument } from './schemas/lane.schema';
 
 @ApiCookieAuth()
 @ApiTags('Project Lanes')
-@UseGuards(JwtAuthenticationGuard)
+@Auth(Action.ReadWorkspace, Action.ReadProject)
 @Controller('api/workspaces/:workspaceId/projects/:projectId/lanes')
 @UseInterceptors(
   WorkspaceInterceptor,
@@ -58,6 +61,7 @@ export class ProjectLanesController {
    * @param createProjectLaneDto the project lane to create
    */
   @Post()
+  @Permissions(Action.CreateProjectLane)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'projectId', description: 'The project id' })
   @ApiOperation({ summary: 'Create a project lane' })
@@ -71,6 +75,7 @@ export class ProjectLanesController {
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
   @ApiNotFoundResponse({
     description: 'The workspace or project with the given id was not found',
     type: ExceptionDto,
@@ -96,6 +101,7 @@ export class ProjectLanesController {
    * @param projectId the project id
    */
   @Get()
+  @Permissions(Action.ReadProjectLane)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'projectId', description: 'The project id' })
   @ApiOperation({ summary: 'Get all project lanes' })
@@ -108,15 +114,24 @@ export class ProjectLanesController {
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
   @ApiNotFoundResponse({
     description: 'The workspace or project with the given id was not found',
     type: ExceptionDto,
   })
   findAll(
     @User('_id') userId: string,
+    @IsAdmin() isAdmin: boolean,
     @Workspace('_id') workspaceId: string,
     @Project('_id') projectId: string,
   ): Promise<ProjectLaneDocument[]> {
+    if (isAdmin) {
+      return this.projectLanesService.findAll(
+        projectId,
+        undefined,
+        workspaceId,
+      );
+    }
     return this.projectLanesService.findAll(projectId, userId, workspaceId);
   }
 
@@ -128,6 +143,7 @@ export class ProjectLanesController {
    * @param projectLaneId the project lane id
    */
   @Get(':id')
+  @Permissions(Action.ReadProjectLane)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'projectId', description: 'The project id' })
   @ApiParam({ name: 'id', description: 'The project lane id' })
@@ -142,6 +158,7 @@ export class ProjectLanesController {
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
   @ApiNotFoundResponse({
     description:
       'The workspace, project or project lane with the given id was not found',
@@ -149,15 +166,23 @@ export class ProjectLanesController {
   })
   findOne(
     @User('_id') userId: string,
+    @IsAdmin() isAdmin: boolean,
     @Workspace('_id') workspaceId: string,
     @Project('_id') projectId: string,
     @Param() { id: projectLaneId }: FindOneParams,
   ): Promise<ProjectLaneDocument> {
+    if (isAdmin) {
+      return this.projectLanesService.findOne(
+        workspaceId,
+        projectId,
+        projectLaneId,
+      );
+    }
     return this.projectLanesService.findOne(
-      userId,
       workspaceId,
       projectId,
       projectLaneId,
+      userId,
     );
   }
 
@@ -170,6 +195,7 @@ export class ProjectLanesController {
    * @param updateProjectLaneDto the updated project lane
    */
   @Put(':id')
+  @Permissions(Action.UpdateProjectLane)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'projectId', description: 'The project id' })
   @ApiParam({ name: 'id', description: 'The project lane id' })
@@ -184,6 +210,7 @@ export class ProjectLanesController {
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
   @ApiNotFoundResponse({
     description:
       'The workspace, project or project lane with the given id was not found',
@@ -191,17 +218,26 @@ export class ProjectLanesController {
   })
   update(
     @User('_id') userId: string,
+    @IsAdmin() isAdmin: boolean,
     @Workspace('_id') workspaceId: string,
     @Project('_id') projectId: string,
     @Param() { id: projectLaneId }: FindOneParams,
     @Body() updateProjectLaneDto: UpdateProjectLaneDto,
   ): Promise<ProjectLaneDocument> {
+    if (isAdmin) {
+      return this.projectLanesService.update(
+        workspaceId,
+        projectId,
+        projectLaneId,
+        updateProjectLaneDto,
+      );
+    }
     return this.projectLanesService.update(
-      userId,
       workspaceId,
       projectId,
       projectLaneId,
       updateProjectLaneDto,
+      userId,
     );
   }
 
@@ -213,6 +249,7 @@ export class ProjectLanesController {
    * @param projectLaneId the project lane id
    */
   @Delete(':id')
+  @Permissions(Action.DeleteProjectLane)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'projectId', description: 'The project id' })
   @ApiParam({ name: 'id', description: 'The project lane id' })
@@ -226,6 +263,7 @@ export class ProjectLanesController {
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
   @ApiNotFoundResponse({
     description:
       'The workspace, project or project lane with the given id was not found',
@@ -233,15 +271,23 @@ export class ProjectLanesController {
   })
   remove(
     @User('_id') userId: string,
+    @IsAdmin() isAdmin: boolean,
     @Workspace('_id') workspaceId: string,
     @Project('_id') projectId: string,
     @Param() { id: projectLaneId }: FindOneParams,
   ): Promise<void> {
+    if (isAdmin) {
+      return this.projectLanesService.remove(
+        workspaceId,
+        projectId,
+        projectLaneId,
+      );
+    }
     return this.projectLanesService.remove(
-      userId,
       workspaceId,
       projectId,
       projectLaneId,
+      userId,
     );
   }
 }
