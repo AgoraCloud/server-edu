@@ -1,4 +1,4 @@
-import { Auth } from '../../decorators/auth.decorator';
+import { JwtAuthenticationGuard } from './../authentication/guards/jwt-authentication.guard';
 import { ExceptionDto } from './../../utils/base.dto';
 import {
   ApiTags,
@@ -17,9 +17,8 @@ import { ProxyAuthorizationGuard } from '../authorization/guards/proxy-authoriza
 
 @ApiCookieAuth()
 @ApiTags('Proxy')
-@Auth()
 @Controller('proxy/:deploymentId')
-@UseGuards(ProxyAuthorizationGuard)
+@UseGuards(JwtAuthenticationGuard, ProxyAuthorizationGuard)
 export class ProxyController {
   constructor(private readonly proxyService: ProxyService) {}
 
