@@ -19,3 +19,11 @@ export class IsArrayLength implements ValidatorConstraintInterface {
     return `array must be of length ${requiredLength}`;
   }
 }
+
+/**
+ * Checks if the given field is defined
+ * @param field the field to check
+ */
+export const isDefined = (field: any): boolean => {
+  return field !== undefined && field !== null;
+};

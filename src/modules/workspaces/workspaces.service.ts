@@ -1,3 +1,4 @@
+import { isDefined } from './../../utils/dto-validators';
 import { WorkspaceCreatedEvent } from './../../events/workspace-created.event';
 import { WorkspaceUserRemovedEvent } from './../../events/workspace-user-removed.event';
 import { UserDeletedEvent } from './../../events/user-deleted.event';
@@ -142,13 +143,6 @@ export class WorkspacesService {
     }
     await workspaceQuery.exec();
 
-    /**
-     * Checks if a number is defined
-     * @param num the number to check
-     */
-    const isDefined = (num: number): boolean => {
-      return num !== undefined;
-    };
     /**
      * Send the workspace.updated event only if cpuCount, memoryCount
      *  and/or storageCount have been updated

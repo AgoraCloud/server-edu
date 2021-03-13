@@ -2,7 +2,7 @@ import { UserWithIdNotFoundException } from './../../exceptions/user-not-found.e
 import { AccountNotVerifiedException } from './../../exceptions/account-not-verified.exception';
 import { AccountDisabledException } from './../../exceptions/account-disabled.exception';
 import { UserNotFoundException } from '../../exceptions/user-not-found.exception';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateUserDto, AdminUpdateUserDto } from './dto/update-user.dto';
 import { User, UserDocument } from './../users/schemas/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Token, TokenSchema } from './../tokens/schemas/token.schema';
@@ -187,6 +187,39 @@ describe('UsersService', () => {
       );
       expect(updatedUser._id).toEqual(user._id);
       expect(updatedUser.fullName).toBe(updateUserDto.fullName);
+    });
+  });
+
+  describe('adminUpdate', () => {
+    it('should throw an error if the user with the given id was not found', async () => {
+      const userId: string = Types.ObjectId().toHexString();
+      const expectedErrorMessage: string = new UserWithIdNotFoundException(
+        userId,
+      ).message;
+      try {
+        await service.adminUpdate(userId, {});
+        fail('It should throw an error');
+      } catch (err) {
+        expect(err.message).toBe(expectedErrorMessage);
+      }
+    });
+
+    it('should update the user', async () => {
+      const adminUpdateUserDto: AdminUpdateUserDto = {
+        fullName: 'Test User',
+        password: 'NewPassword',
+        isEnabled: true,
+        isVerified: true,
+      };
+      const updatedUser: UserDocument = await service.adminUpdate(
+        user._id,
+        adminUpdateUserDto,
+      );
+      expect(updatedUser._id).toEqual(user._id);
+      expect(updatedUser.fullName).toBe(adminUpdateUserDto.fullName);
+      expect(updatedUser.password).not.toEqual(user.password);
+      expect(updatedUser.isEnabled).toBe(adminUpdateUserDto.isEnabled);
+      expect(updatedUser.isVerified).toBe(adminUpdateUserDto.isVerified);
     });
   });
 

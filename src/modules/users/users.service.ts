@@ -1,4 +1,8 @@
-import { UserWithIdNotFoundException } from './../../exceptions/user-not-found.exception';
+import { isDefined } from './../../utils/dto-validators';
+import {
+  UserWithIdNotFoundException,
+  UserNotFoundException,
+} from './../../exceptions/user-not-found.exception';
 import { UserDeletedEvent } from './../../events/user-deleted.event';
 import { UserCreatedEvent } from '../../events/user-created.event';
 import { Event } from './../../events/events.enum';
@@ -16,9 +20,8 @@ import { User, UserDocument } from './schemas/user.schema';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { UserNotFoundException } from '../../exceptions/user-not-found.exception';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateUserDto, AdminUpdateUserDto } from './dto/update-user.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import * as bcrypt from 'bcryptjs';
 import { Cron, CronExpression } from '@nestjs/schedule';
@@ -154,6 +157,34 @@ export class UsersService implements OnModuleInit {
     const user: UserDocument = await this.userModel
       .findOneAndUpdate({ _id: userId }, updateUserDto, { new: true })
       .exec();
+    return user;
+  }
+
+  /**
+   * Update a user, accessible by super admins only
+   * @param userId the users id
+   * @param adminUpdateUserDto the updated user
+   */
+  async adminUpdate(
+    userId: string,
+    adminUpdateUserDto: AdminUpdateUserDto,
+  ): Promise<UserDocument> {
+    const user: UserDocument = await this.userModel
+      .findOne({ _id: userId })
+      .exec();
+    if (!user) throw new UserWithIdNotFoundException(userId);
+
+    user.fullName = adminUpdateUserDto.fullName || user.fullName;
+    if (adminUpdateUserDto.password) {
+      user.password = await bcrypt.hash(adminUpdateUserDto.password, 10);
+    }
+    if (isDefined(adminUpdateUserDto.isEnabled)) {
+      user.isEnabled = adminUpdateUserDto.isEnabled;
+    }
+    if (isDefined(adminUpdateUserDto.isVerified)) {
+      user.isVerified = adminUpdateUserDto.isVerified;
+    }
+    await this.userModel.updateOne({ _id: userId }, user).exec();
     return user;
   }
 

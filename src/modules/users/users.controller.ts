@@ -119,14 +119,34 @@ export class AdminUsersController {
     return this.usersService.findAll();
   }
 
-  // TODO: add comments and tags
+  /**
+   * Update a user, accessible by super admins only
+   * @param userId the users id
+   * @param adminUpdateUserDto the updated user
+   */
   @Put(':userId')
   @UseInterceptors(UserInterceptor)
+  @ApiParam({ name: 'userId', description: 'The users id' })
+  @ApiOperation({ summary: 'Update a user' })
+  @ApiOkResponse({
+    description: 'The user has been successfully updated',
+    type: AdminUserDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'The provided user or user id were not valid',
+    type: ExceptionDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
+  @ApiNotFoundResponse({
+    description: 'The user with the given id was not found',
+    type: ExceptionDto,
+  })
   update(
     @Param('userId') userId: string,
     @Body() adminUpdateUserDto: AdminUpdateUserDto,
   ): Promise<UserDocument> {
-    return;
+    return this.usersService.adminUpdate(userId, adminUpdateUserDto);
   }
 
   /**

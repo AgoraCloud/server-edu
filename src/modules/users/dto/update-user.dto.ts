@@ -13,17 +13,24 @@ export class UpdateUserDto {
   readonly fullName: string;
 }
 
-export class AdminUpdateUserDto extends UpdateUserDto {
+export class AdminUpdateUserDto {
+  @IsString()
   @IsOptional()
-  readonly fullName: string;
+  @IsNotEmpty()
+  @MinLength(4)
+  readonly fullName?: string;
 
   @IsString()
   @IsOptional()
   @IsNotEmpty()
   @MinLength(8)
-  readonly password: string;
+  readonly password?: string;
 
   @IsBoolean()
   @IsOptional()
-  readonly isEnabled: boolean;
+  readonly isEnabled?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  readonly isVerified?: boolean;
 }
