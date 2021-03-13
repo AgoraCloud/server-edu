@@ -7,7 +7,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Event } from '../../events/events.enum';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { removeDays } from 'src/utils/date';
+import { removeDays } from '../../utils/date';
 
 @Injectable()
 export class TokensService {

@@ -1,3 +1,6 @@
+import { CreateUserDto } from './dto/create-user.dto';
+import { UserInterceptor } from './../../interceptors/user.interceptor';
+import { Action } from './../authorization/schemas/permission.schema';
 import { ExceptionDto } from './../../utils/base.dto';
 import {
   ApiTags,
@@ -6,8 +9,11 @@ import {
   ApiUnauthorizedResponse,
   ApiBadRequestResponse,
   ApiOperation,
+  ApiParam,
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
 } from '@nestjs/swagger';
-import { UserDto } from './dto/user.dto';
+import { UserDto, AdminUserDto } from './dto/user.dto';
 import { TransformInterceptor } from './../../interceptors/transform.interceptor';
 import {
   Controller,
@@ -16,9 +22,11 @@ import {
   Put,
   Delete,
   UseInterceptors,
+  Post,
+  Param,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateUserDto, AdminUpdateUserDto } from './dto/update-user.dto';
 import { User } from '../../decorators/user.decorator';
 import { UserDocument } from '../users/schemas/user.schema';
 import { Auth } from '../../decorators/auth.decorator';
@@ -78,6 +86,71 @@ export class UsersController {
   @ApiOkResponse({ description: 'The user has been successfully deleted' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   async remove(@User('_id') userId: string): Promise<void> {
+    return this.usersService.remove(userId);
+  }
+}
+
+@ApiCookieAuth()
+@ApiTags('Users')
+@Auth(Action.ManageUser)
+@Controller('api/users')
+@UseInterceptors(new TransformInterceptor(AdminUserDto))
+export class AdminUsersController {
+  constructor(private readonly usersService: UsersService) {}
+
+  // TODO: add comments and tags
+  @Post()
+  create(@Body() createUserDto: CreateUserDto): Promise<void> {
+    return;
+  }
+
+  /**
+   * Get all users, accessible by super admins only
+   */
+  @Get()
+  @ApiOperation({ summary: 'Get all users' })
+  @ApiOkResponse({
+    description: 'The users have been successfully retrieved',
+    type: [AdminUserDto],
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
+  findAll(): Promise<UserDocument[]> {
+    return this.usersService.findAll();
+  }
+
+  // TODO: add comments and tags
+  @Put(':userId')
+  @UseInterceptors(UserInterceptor)
+  update(
+    @Param('userId') userId: string,
+    @Body() adminUpdateUserDto: AdminUpdateUserDto,
+  ): Promise<UserDocument> {
+    return;
+  }
+
+  /**
+   * Delete a user, accessible by super admins only
+   * @param userId the users id
+   */
+  @Delete(':userId')
+  @ApiParam({ name: 'userId', description: 'The users id' })
+  @ApiOperation({ summary: 'Delete a user' })
+  @ApiOkResponse({
+    description: 'The user has been successfully deleted',
+  })
+  @ApiBadRequestResponse({
+    description: 'The provided user id was not valid',
+    type: ExceptionDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
+  @ApiNotFoundResponse({
+    description: 'The user with the given id was not found',
+    type: ExceptionDto,
+  })
+  @UseInterceptors(UserInterceptor)
+  remove(@Param('userId') userId: string): Promise<void> {
     return this.usersService.remove(userId);
   }
 }

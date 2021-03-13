@@ -34,7 +34,7 @@ export class ProxyService implements OnModuleInit {
   private onProxyError(): void {
     this.httpProxy.on('error', (err: Error, req: Request, res: Response) => {
       const exception: InternalServerErrorException = new InternalServerErrorException(
-        `Error proxying`,
+        `Proxy Error`,
       );
       res.status(exception.getStatus()).json(exception.getResponse());
     });

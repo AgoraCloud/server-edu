@@ -9,3 +9,12 @@ export class UserDto extends BaseDto {
   @Expose()
   readonly email: string;
 }
+
+@Exclude()
+export class AdminUserDto extends UserDto {
+  @Expose()
+  readonly isEnabled: boolean;
+
+  @Expose()
+  readonly isVerified: boolean;
+}

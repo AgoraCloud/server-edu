@@ -96,6 +96,14 @@ export class UsersService implements OnModuleInit {
   }
 
   /**
+   * Find all users
+   */
+  async findAll(): Promise<UserDocument[]> {
+    const users: UserDocument[] = await this.userModel.find().exec();
+    return users;
+  }
+
+  /**
    * Find a user by email
    * @param email the users email
    */

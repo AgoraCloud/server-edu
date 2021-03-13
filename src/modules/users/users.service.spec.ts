@@ -79,6 +79,14 @@ describe('UsersService', () => {
     });
   });
 
+  describe('findAll', () => {
+    it('should find all users', async () => {
+      const users: UserDocument[] = await service.findAll();
+      expect(users).toBeTruthy();
+      expect(users.length).toBe(1);
+    });
+  });
+
   describe('findByEmail', () => {
     it('should throw an error if the user was not found', async () => {
       const email = 'random@test.com';
