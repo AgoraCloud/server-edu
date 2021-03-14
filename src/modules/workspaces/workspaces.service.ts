@@ -61,7 +61,7 @@ export class WorkspacesService {
     let workspacesQuery: Query<
       WorkspaceDocument[],
       WorkspaceDocument
-    > = this.workspaceModel.find();
+    > = this.workspaceModel.find().populate('users');
     if (userId) {
       workspacesQuery = workspacesQuery.where('users').in([userId]);
     }
@@ -80,7 +80,11 @@ export class WorkspacesService {
     let workspaceQuery: Query<
       WorkspaceDocument,
       WorkspaceDocument
-    > = this.workspaceModel.findOne().where('_id').equals(workspaceId);
+    > = this.workspaceModel
+      .findOne()
+      .where('_id')
+      .equals(workspaceId)
+      .populate('users');
     if (userId) {
       workspaceQuery = workspaceQuery.where('users').in([userId]);
     }

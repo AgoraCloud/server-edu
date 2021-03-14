@@ -13,6 +13,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import {
   Action,
+  InWorkspaceActions,
   Permission,
   PermissionDocument,
   Role,
@@ -225,7 +226,10 @@ export class AuthorizationService {
     if (permission.roles[0] === Role.SuperAdmin) return;
     permission.workspaces.set(
       payload.workspaceId,
-      new WorkspaceRolesAndPermissions({}),
+      new WorkspaceRolesAndPermissions({
+        roles: [Role.User],
+        permissions: InWorkspaceActions,
+      }),
     );
     await this.update(permission);
   }
