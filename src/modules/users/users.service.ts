@@ -56,44 +56,47 @@ export class UsersService implements OnModuleInit {
       await this.findByEmail(adminConfig.email);
     } catch (err) {
       // Admin user has not been created yet, create it
-      const createdUser: UserDocument = await this.userModel.create({
+      const createUserDto: CreateUserDto = {
         email: adminConfig.email,
         fullName: 'Admin',
-        password: await bcrypt.hash(adminConfig.password, 10),
-        isVerified: true,
-      });
+        password: adminConfig.password,
+      };
       // Add an artificial delay, the event emitter does not emit any events on initialization
-      setTimeout(
-        () =>
-          this.eventEmitter.emit(
-            Event.UserCreated,
-            new UserCreatedEvent(createdUser, undefined, Role.SuperAdmin),
-          ),
-        2000,
-      );
+      setTimeout(() => this.create(createUserDto, Role.SuperAdmin), 2000);
     }
   }
 
   /**
    * Create a user
    * @param createUserDto the user to create
+   * @param role the users role
+   * @param verify verify the user
    */
-  async create(createUserDto: CreateUserDto): Promise<UserDocument> {
+  async create(
+    createUserDto: CreateUserDto,
+    role: Role.User | Role.SuperAdmin = Role.User,
+    verify = false,
+  ): Promise<UserDocument> {
     const user: User = new User({
       email: createUserDto.email,
       fullName: createUserDto.fullName,
-      password: await bcrypt.hash(createUserDto.password, 10),
+      password: await this.hash(createUserDto.password),
     });
-    if (this.environment === EnvironmentConfig.Development) {
+    if (
+      this.environment === EnvironmentConfig.Development ||
+      role === Role.SuperAdmin ||
+      verify
+    ) {
       user.isVerified = true;
     }
     const createdUser: UserDocument = await this.userModel.create(user);
-    const verifyAccountToken: TokenDocument = await this.createVerifyAccountToken(
-      createdUser,
-    );
+    let verifyAccountToken: TokenDocument;
+    if (!createdUser.isVerified) {
+      verifyAccountToken = await this.createVerifyAccountToken(createdUser);
+    }
     this.eventEmitter.emit(
       Event.UserCreated,
-      new UserCreatedEvent(createdUser, verifyAccountToken._id),
+      new UserCreatedEvent(createdUser, verifyAccountToken?._id, role),
     );
     return createdUser;
   }
@@ -176,7 +179,7 @@ export class UsersService implements OnModuleInit {
 
     user.fullName = adminUpdateUserDto.fullName || user.fullName;
     if (adminUpdateUserDto.password) {
-      user.password = await bcrypt.hash(adminUpdateUserDto.password, 10);
+      user.password = await this.hash(adminUpdateUserDto.password);
     }
     if (isDefined(adminUpdateUserDto.isEnabled)) {
       user.isEnabled = adminUpdateUserDto.isEnabled;
@@ -206,10 +209,7 @@ export class UsersService implements OnModuleInit {
     email: string,
     latestRefreshToken: string,
   ): Promise<void> {
-    const hashedRefreshToken: string = await bcrypt.hash(
-      latestRefreshToken,
-      10,
-    );
+    const hashedRefreshToken: string = await this.hash(latestRefreshToken);
     await this.userModel
       .updateOne({ email }, { latestRefreshToken: hashedRefreshToken })
       .exec();
@@ -231,7 +231,7 @@ export class UsersService implements OnModuleInit {
    * @param password the users new password
    */
   async updatePassword(userId: string, password: string): Promise<void> {
-    const hashedPassword: string = await bcrypt.hash(password, 10);
+    const hashedPassword: string = await this.hash(password);
     await this.userModel
       .updateOne({ _id: userId }, { password: hashedPassword })
       .exec();
@@ -257,6 +257,14 @@ export class UsersService implements OnModuleInit {
       user,
       expiresAt: addDays(new Date()),
     });
+  }
+
+  /**
+   * Generates a hash for the given value
+   * @param value the value to hash
+   */
+  private async hash(value: string): Promise<string> {
+    return bcrypt.hash(value, 10);
   }
 
   /**

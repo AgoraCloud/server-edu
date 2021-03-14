@@ -9,7 +9,7 @@ export class UserCreatedEvent {
   constructor(
     user: UserDocument,
     token: string,
-    role: Role.SuperAdmin | Role.User = Role.User,
+    role: Role.SuperAdmin | Role.User,
   ) {
     this.user = user;
     this.token = token;

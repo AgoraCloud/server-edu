@@ -1,6 +1,6 @@
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserInterceptor } from './../../interceptors/user.interceptor';
-import { Action } from './../authorization/schemas/permission.schema';
+import { Action, Role } from './../authorization/schemas/permission.schema';
 import { ExceptionDto } from './../../utils/base.dto';
 import {
   ApiTags,
@@ -12,6 +12,7 @@ import {
   ApiParam,
   ApiForbiddenResponse,
   ApiNotFoundResponse,
+  ApiCreatedResponse,
 } from '@nestjs/swagger';
 import { UserDto, AdminUserDto } from './dto/user.dto';
 import { TransformInterceptor } from './../../interceptors/transform.interceptor';
@@ -98,10 +99,25 @@ export class UsersController {
 export class AdminUsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  // TODO: add comments and tags
+  /**
+   * Create a user, accessible by super admins only
+   * @param createUserDto the user to create
+   */
   @Post()
-  create(@Body() createUserDto: CreateUserDto): Promise<void> {
-    return;
+  @ApiOperation({ summary: 'Create a user' })
+  @ApiCreatedResponse({
+    description: 'The user has been successfully created',
+    type: AdminUserDto,
+  })
+  @ApiBadRequestResponse({
+    description:
+      'The provided user was not valid or the provided email was in use',
+    type: ExceptionDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
+  create(@Body() createUserDto: CreateUserDto): Promise<UserDocument> {
+    return this.usersService.create(createUserDto, Role.User, true);
   }
 
   /**
