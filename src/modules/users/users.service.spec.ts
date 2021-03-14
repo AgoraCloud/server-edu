@@ -87,6 +87,27 @@ describe('UsersService', () => {
     });
   });
 
+  describe('find', () => {
+    it('should throw an error if the user with the given id was not found', async () => {
+      const userId: string = Types.ObjectId().toHexString();
+      const expectedErrorMessage: string = new UserWithIdNotFoundException(
+        userId,
+      ).message;
+      try {
+        await service.findOne(userId);
+        fail('It should throw an error');
+      } catch (err) {
+        expect(err.message).toBe(expectedErrorMessage);
+      }
+    });
+
+    it('should find the user by id', async () => {
+      const retrievedUser: UserDocument = await service.findOne(user._id);
+      expect(retrievedUser).toBeTruthy();
+      expect(retrievedUser._id).toEqual(user._id);
+    });
+  });
+
   describe('findByEmail', () => {
     it('should throw an error if the user was not found', async () => {
       const email = 'random@test.com';
@@ -191,19 +212,6 @@ describe('UsersService', () => {
   });
 
   describe('adminUpdate', () => {
-    it('should throw an error if the user with the given id was not found', async () => {
-      const userId: string = Types.ObjectId().toHexString();
-      const expectedErrorMessage: string = new UserWithIdNotFoundException(
-        userId,
-      ).message;
-      try {
-        await service.adminUpdate(userId, {});
-        fail('It should throw an error');
-      } catch (err) {
-        expect(err.message).toBe(expectedErrorMessage);
-      }
-    });
-
     it('should update the user', async () => {
       const adminUpdateUserDto: AdminUpdateUserDto = {
         fullName: 'Test User',

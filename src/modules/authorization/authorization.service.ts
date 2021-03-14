@@ -1,3 +1,4 @@
+import { WorkspaceUserAddedEvent } from './../../events/workspace-user-added.event';
 import { UserNotInWorkspaceException } from './../../exceptions/user-not-in-workspace.exception';
 import { UpdateWorkspaceUserPermissionsDto } from './dto/update-workspace-user-permissions.dto';
 import { UpdateUserPermissionsDto } from './dto/update-user-permissions.dto';
@@ -208,6 +209,22 @@ export class AuthorizationService {
         roles: [Role.WorkspaceAdmin],
         permissions: [],
       }),
+    );
+    await this.update(permission);
+  }
+
+  /**
+   * Handles the workspace.user.added event
+   * @param payload the workspace.user.added event payload
+   */
+  @OnEvent(Event.WorkspaceUserAdded)
+  private async handleWorkspaceUserAddedEvent(
+    payload: WorkspaceUserAddedEvent,
+  ): Promise<void> {
+    const permission: PermissionDocument = await this.findOne(payload.userId);
+    permission.workspaces.set(
+      payload.workspaceId,
+      new WorkspaceRolesAndPermissions({}),
     );
     await this.update(permission);
   }

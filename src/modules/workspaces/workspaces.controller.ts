@@ -1,3 +1,6 @@
+import { AddWorkspaceUserDto } from './dto/add-workspace-user.dto';
+import { UserInterceptor } from './../../interceptors/user.interceptor';
+import { WorkspaceInterceptor } from './../../interceptors/workspace.interceptor';
 import { Auth } from '../../decorators/auth.decorator';
 import { Action } from './../authorization/schemas/permission.schema';
 import { Permissions } from './../../decorators/permissions.decorator';
@@ -34,6 +37,7 @@ import { CreateWorkspaceDto } from './dto/create-workspace.dto';
 import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
 import { User } from '../../decorators/user.decorator';
 import { IsAdmin } from '../../decorators/is-admin.decorator';
+import { Workspace } from 'src/decorators/workspace.decorator';
 
 @ApiCookieAuth()
 @ApiTags('Workspaces')
@@ -196,5 +200,68 @@ export class WorkspacesController {
       return this.workspacesService.remove(workspaceId);
     }
     return this.workspacesService.remove(workspaceId, userId);
+  }
+
+  /**
+   * Add a user to a workspace, accessible by super admins and workspace admins
+   * @param workspace the workspace
+   * @param addWorkspaceUserDto the user to add
+   */
+  @Put(':workspaceId/users')
+  @Permissions(Action.ManageWorkspace)
+  @UseInterceptors(WorkspaceInterceptor)
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
+  @ApiOperation({ summary: 'Add a user to a workspace' })
+  @ApiOkResponse({
+    description: 'The user has been successfully added to the workspace',
+  })
+  @ApiBadRequestResponse({
+    description:
+      'The provided workspace or user id was not valid or the provided user was already a member of the provided workspace',
+    type: ExceptionDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
+  @ApiNotFoundResponse({
+    description: 'The workspace or user with the given id was not found',
+    type: ExceptionDto,
+  })
+  addUser(
+    @Workspace() workspace: WorkspaceDocument,
+    @Body() addWorkspaceUserDto: AddWorkspaceUserDto,
+  ): Promise<WorkspaceDocument> {
+    return this.workspacesService.addUser(workspace, addWorkspaceUserDto);
+  }
+
+  /**
+   * Remove a user from a workspace, accessible by super admins and workspace admins
+   * @param workspace the workspace
+   * @param userId the users id
+   */
+  @Delete(':workspaceId/users/:userId')
+  @Permissions(Action.ManageWorkspace)
+  @UseInterceptors(WorkspaceInterceptor, UserInterceptor)
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
+  @ApiParam({ name: 'userId', description: 'The users id' })
+  @ApiOperation({ summary: 'Remove a user from a workspace' })
+  @ApiOkResponse({
+    description: 'The user has been successfully removed from the workspace',
+  })
+  @ApiBadRequestResponse({
+    description:
+      'The provided workspace or user id was not valid, the provided user was not a member of the provided workspace or the workspace will have no members left if the user was removed',
+    type: ExceptionDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
+  @ApiNotFoundResponse({
+    description: 'The workspace or user with the given id was not found',
+    type: ExceptionDto,
+  })
+  removeUser(
+    @Workspace() workspace: WorkspaceDocument,
+    @Param('userId') userId: string,
+  ): Promise<WorkspaceDocument> {
+    return this.workspacesService.removeUser(workspace, userId);
   }
 }

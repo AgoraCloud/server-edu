@@ -110,6 +110,18 @@ export class UsersService implements OnModuleInit {
   }
 
   /**
+   * Find a user by id
+   * @param userId the users id
+   */
+  async findOne(userId: string): Promise<UserDocument> {
+    const user: UserDocument = await this.userModel
+      .findOne({ _id: userId })
+      .exec();
+    if (!user) throw new UserWithIdNotFoundException(userId);
+    return user;
+  }
+
+  /**
    * Find a user by email
    * @param email the users email
    */
@@ -172,11 +184,7 @@ export class UsersService implements OnModuleInit {
     userId: string,
     adminUpdateUserDto: AdminUpdateUserDto,
   ): Promise<UserDocument> {
-    const user: UserDocument = await this.userModel
-      .findOne({ _id: userId })
-      .exec();
-    if (!user) throw new UserWithIdNotFoundException(userId);
-
+    const user: UserDocument = await this.findOne(userId);
     user.fullName = adminUpdateUserDto.fullName || user.fullName;
     if (adminUpdateUserDto.password) {
       user.password = await this.hash(adminUpdateUserDto.password);
