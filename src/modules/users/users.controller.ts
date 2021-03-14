@@ -1,3 +1,4 @@
+import { MongoExceptionFilter } from './../../filters/mongo-exception.filter';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserInterceptor } from './../../interceptors/user.interceptor';
 import { Action, Role } from './../authorization/schemas/permission.schema';
@@ -25,6 +26,7 @@ import {
   UseInterceptors,
   Post,
   Param,
+  UseFilters,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto, AdminUpdateUserDto } from './dto/update-user.dto';
@@ -104,6 +106,7 @@ export class AdminUsersController {
    * @param createUserDto the user to create
    */
   @Post()
+  @UseFilters(new MongoExceptionFilter())
   @ApiOperation({ summary: 'Create a user' })
   @ApiCreatedResponse({
     description: 'The user has been successfully created',

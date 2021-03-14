@@ -222,6 +222,7 @@ export class AuthorizationService {
     payload: WorkspaceUserAddedEvent,
   ): Promise<void> {
     const permission: PermissionDocument = await this.findOne(payload.userId);
+    if (permission.roles[0] === Role.SuperAdmin) return;
     permission.workspaces.set(
       payload.workspaceId,
       new WorkspaceRolesAndPermissions({}),

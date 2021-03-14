@@ -37,7 +37,7 @@ import { CreateWorkspaceDto } from './dto/create-workspace.dto';
 import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
 import { User } from '../../decorators/user.decorator';
 import { IsAdmin } from '../../decorators/is-admin.decorator';
-import { Workspace } from 'src/decorators/workspace.decorator';
+import { Workspace } from '../../decorators/workspace.decorator';
 
 @ApiCookieAuth()
 @ApiTags('Workspaces')
