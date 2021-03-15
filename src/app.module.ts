@@ -63,6 +63,7 @@ import { AuthorizationModule } from './modules/authorization/authorization.modul
       useFactory: async (configService: ConfigService) => ({
         uri: configService.get<string>('databaseUri'),
         useCreateIndex: true,
+        useFindAndModify: false,
       }),
     }),
     MailerModule.forRootAsync({

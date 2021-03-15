@@ -1,3 +1,9 @@
+import { WorkspaceUserAddedEvent } from './../../events/workspace-user-added.event';
+import { MinOneUserInWorkspaceException } from './../../exceptions/min-one-user-in-workspace.exception';
+import { ExistingWorkspaceUserException } from './../../exceptions/existing-workspace-user.exception';
+import { UsersService } from './../users/users.service';
+import { AddWorkspaceUserDto } from './dto/add-workspace-user.dto';
+import { isDefined } from './../../utils/dto-validators';
 import { WorkspaceCreatedEvent } from './../../events/workspace-created.event';
 import { WorkspaceUserRemovedEvent } from './../../events/workspace-user-removed.event';
 import { UserDeletedEvent } from './../../events/user-deleted.event';
@@ -22,6 +28,7 @@ export class WorkspacesService {
   constructor(
     @InjectModel(Workspace.name)
     private readonly workspaceModel: Model<WorkspaceDocument>,
+    private readonly usersService: UsersService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -54,7 +61,7 @@ export class WorkspacesService {
     let workspacesQuery: Query<
       WorkspaceDocument[],
       WorkspaceDocument
-    > = this.workspaceModel.find();
+    > = this.workspaceModel.find().populate('users');
     if (userId) {
       workspacesQuery = workspacesQuery.where('users').in([userId]);
     }
@@ -73,7 +80,11 @@ export class WorkspacesService {
     let workspaceQuery: Query<
       WorkspaceDocument,
       WorkspaceDocument
-    > = this.workspaceModel.findOne().where('_id').equals(workspaceId);
+    > = this.workspaceModel
+      .findOne()
+      .where('_id')
+      .equals(workspaceId)
+      .populate('users');
     if (userId) {
       workspaceQuery = workspaceQuery.where('users').in([userId]);
     }
@@ -143,13 +154,6 @@ export class WorkspacesService {
     await workspaceQuery.exec();
 
     /**
-     * Checks if a number is defined
-     * @param num the number to check
-     */
-    const isDefined = (num: number): boolean => {
-      return num !== undefined;
-    };
-    /**
      * Send the workspace.updated event only if cpuCount, memoryCount
      *  and/or storageCount have been updated
      */
@@ -185,6 +189,71 @@ export class WorkspacesService {
       Event.WorkspaceDeleted,
       new WorkspaceDeletedEvent(workspaceId),
     );
+  }
+
+  /**
+   * Add a user to a workspace
+   * @param workspace the workspace
+   * @param addWorkspaceUserDto the user to add
+   */
+  async addUser(
+    workspace: WorkspaceDocument,
+    addWorkspaceUserDto: AddWorkspaceUserDto,
+  ): Promise<WorkspaceDocument> {
+    const workspaceId: string = workspace._id;
+    const userId: string = addWorkspaceUserDto.id;
+    // Check if the user is already a member
+    if (workspace.users.findIndex((u) => u._id == userId) !== -1) {
+      throw new ExistingWorkspaceUserException(workspaceId, userId);
+    }
+    const user: UserDocument = await this.usersService.findOne(userId);
+    workspace.users.push(user);
+    await this.updateUsers(workspaceId, workspace.users);
+    this.eventEmitter.emit(
+      Event.WorkspaceUserAdded,
+      new WorkspaceUserAddedEvent(workspaceId, userId),
+    );
+    return workspace;
+  }
+
+  /**
+   * Remove a user from a workspace
+   * @param workspace the workspace
+   * @param userId the id of the user to remove
+   */
+  async removeUser(
+    workspace: WorkspaceDocument,
+    userId: string,
+  ): Promise<WorkspaceDocument> {
+    const workspaceId: string = workspace._id;
+    // Remove the user from the workspace
+    workspace.users = workspace.users.filter((u) => u._id.toString() != userId);
+    // Check if the workspace has at-least one member after removing the user
+    if (workspace.users.length === 0) {
+      throw new MinOneUserInWorkspaceException(workspaceId);
+    }
+    await this.updateUsers(workspaceId, workspace.users);
+    this.eventEmitter.emit(
+      Event.WorkspaceUserRemoved,
+      new WorkspaceUserRemovedEvent(workspaceId, userId),
+    );
+    return workspace;
+  }
+
+  /**
+   * Update the users in a workspace
+   * @param workspaceId the workspace id
+   * @param users the users
+   */
+  private async updateUsers(
+    workspaceId: string,
+    users: UserDocument[],
+  ): Promise<void> {
+    await this.workspaceModel
+      .updateOne(null, { users })
+      .where('_id')
+      .equals(workspaceId)
+      .exec();
   }
 
   /**

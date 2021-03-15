@@ -6,6 +6,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Event } from '../../events/events.enum';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { removeDays } from '../../utils/date';
 
 @Injectable()
 export class TokensService {
@@ -67,5 +69,19 @@ export class TokensService {
     payload: UserDeletedEvent,
   ): Promise<void> {
     await this.removeAll(payload.id);
+  }
+
+  /**
+   * Cron job that runs every hour and deletes expired
+   * tokens (tokens expire after 24 hours)
+   */
+  @Cron(CronExpression.EVERY_HOUR)
+  private async deleteExpiredTokensJob(): Promise<void> {
+    const yesterday: Date = removeDays(new Date());
+    await this.tokenModel
+      .deleteMany()
+      .where('expiresAt')
+      .lte(yesterday.getTime())
+      .exec();
   }
 }

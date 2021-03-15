@@ -1,4 +1,8 @@
-import { UserWithIdNotFoundException } from './../../exceptions/user-not-found.exception';
+import { isDefined } from './../../utils/dto-validators';
+import {
+  UserWithIdNotFoundException,
+  UserNotFoundException,
+} from './../../exceptions/user-not-found.exception';
 import { UserDeletedEvent } from './../../events/user-deleted.event';
 import { UserCreatedEvent } from '../../events/user-created.event';
 import { Event } from './../../events/events.enum';
@@ -16,9 +20,8 @@ import { User, UserDocument } from './schemas/user.schema';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { UserNotFoundException } from '../../exceptions/user-not-found.exception';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateUserDto, AdminUpdateUserDto } from './dto/update-user.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import * as bcrypt from 'bcryptjs';
 import { Cron, CronExpression } from '@nestjs/schedule';
@@ -53,46 +56,69 @@ export class UsersService implements OnModuleInit {
       await this.findByEmail(adminConfig.email);
     } catch (err) {
       // Admin user has not been created yet, create it
-      const createdUser: UserDocument = await this.userModel.create({
+      const createUserDto: CreateUserDto = {
         email: adminConfig.email,
         fullName: 'Admin',
-        password: await bcrypt.hash(adminConfig.password, 10),
-        isVerified: true,
-      });
+        password: adminConfig.password,
+      };
       // Add an artificial delay, the event emitter does not emit any events on initialization
-      setTimeout(
-        () =>
-          this.eventEmitter.emit(
-            Event.UserCreated,
-            new UserCreatedEvent(createdUser, undefined, Role.SuperAdmin),
-          ),
-        2000,
-      );
+      setTimeout(() => this.create(createUserDto, Role.SuperAdmin), 2000);
     }
   }
 
   /**
    * Create a user
    * @param createUserDto the user to create
+   * @param role the users role
+   * @param verify verify the user
    */
-  async create(createUserDto: CreateUserDto): Promise<UserDocument> {
+  async create(
+    createUserDto: CreateUserDto,
+    role: Role.User | Role.SuperAdmin = Role.User,
+    verify = false,
+  ): Promise<UserDocument> {
     const user: User = new User({
       email: createUserDto.email,
       fullName: createUserDto.fullName,
-      password: await bcrypt.hash(createUserDto.password, 10),
+      password: await this.hash(createUserDto.password),
     });
-    if (this.environment === EnvironmentConfig.Development) {
+    if (
+      this.environment === EnvironmentConfig.Development ||
+      role === Role.SuperAdmin ||
+      verify
+    ) {
       user.isVerified = true;
     }
     const createdUser: UserDocument = await this.userModel.create(user);
-    const verifyAccountToken: TokenDocument = await this.createVerifyAccountToken(
-      createdUser,
-    );
+    let verifyAccountToken: TokenDocument;
+    if (!createdUser.isVerified) {
+      verifyAccountToken = await this.createVerifyAccountToken(createdUser);
+    }
     this.eventEmitter.emit(
       Event.UserCreated,
-      new UserCreatedEvent(createdUser, verifyAccountToken._id),
+      new UserCreatedEvent(createdUser, verifyAccountToken?._id, role),
     );
     return createdUser;
+  }
+
+  /**
+   * Find all users
+   */
+  async findAll(): Promise<UserDocument[]> {
+    const users: UserDocument[] = await this.userModel.find().exec();
+    return users;
+  }
+
+  /**
+   * Find a user by id
+   * @param userId the users id
+   */
+  async findOne(userId: string): Promise<UserDocument> {
+    const user: UserDocument = await this.userModel
+      .findOne({ _id: userId })
+      .exec();
+    if (!user) throw new UserWithIdNotFoundException(userId);
+    return user;
   }
 
   /**
@@ -150,6 +176,30 @@ export class UsersService implements OnModuleInit {
   }
 
   /**
+   * Update a user, accessible by super admins only
+   * @param userId the users id
+   * @param adminUpdateUserDto the updated user
+   */
+  async adminUpdate(
+    userId: string,
+    adminUpdateUserDto: AdminUpdateUserDto,
+  ): Promise<UserDocument> {
+    const user: UserDocument = await this.findOne(userId);
+    user.fullName = adminUpdateUserDto.fullName || user.fullName;
+    if (adminUpdateUserDto.password) {
+      user.password = await this.hash(adminUpdateUserDto.password);
+    }
+    if (isDefined(adminUpdateUserDto.isEnabled)) {
+      user.isEnabled = adminUpdateUserDto.isEnabled;
+    }
+    if (isDefined(adminUpdateUserDto.isVerified)) {
+      user.isVerified = adminUpdateUserDto.isVerified;
+    }
+    await this.userModel.updateOne({ _id: userId }, user).exec();
+    return user;
+  }
+
+  /**
    * Delete a user
    * @param userId the users id
    */
@@ -167,10 +217,7 @@ export class UsersService implements OnModuleInit {
     email: string,
     latestRefreshToken: string,
   ): Promise<void> {
-    const hashedRefreshToken: string = await bcrypt.hash(
-      latestRefreshToken,
-      10,
-    );
+    const hashedRefreshToken: string = await this.hash(latestRefreshToken);
     await this.userModel
       .updateOne({ email }, { latestRefreshToken: hashedRefreshToken })
       .exec();
@@ -192,7 +239,7 @@ export class UsersService implements OnModuleInit {
    * @param password the users new password
    */
   async updatePassword(userId: string, password: string): Promise<void> {
-    const hashedPassword: string = await bcrypt.hash(password, 10);
+    const hashedPassword: string = await this.hash(password);
     await this.userModel
       .updateOne({ _id: userId }, { password: hashedPassword })
       .exec();
@@ -218,6 +265,14 @@ export class UsersService implements OnModuleInit {
       user,
       expiresAt: addDays(new Date()),
     });
+  }
+
+  /**
+   * Generates a hash for the given value
+   * @param value the value to hash
+   */
+  private async hash(value: string): Promise<string> {
+    return bcrypt.hash(value, 10);
   }
 
   /**

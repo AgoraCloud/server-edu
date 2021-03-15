@@ -1,3 +1,4 @@
+import { WorkspaceUserAddedEvent } from './../../events/workspace-user-added.event';
 import { UserNotInWorkspaceException } from './../../exceptions/user-not-in-workspace.exception';
 import { UpdateWorkspaceUserPermissionsDto } from './dto/update-workspace-user-permissions.dto';
 import { UpdateUserPermissionsDto } from './dto/update-user-permissions.dto';
@@ -12,6 +13,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import {
   Action,
+  InWorkspaceActions,
   Permission,
   PermissionDocument,
   Role,
@@ -207,6 +209,26 @@ export class AuthorizationService {
       new WorkspaceRolesAndPermissions({
         roles: [Role.WorkspaceAdmin],
         permissions: [],
+      }),
+    );
+    await this.update(permission);
+  }
+
+  /**
+   * Handles the workspace.user.added event
+   * @param payload the workspace.user.added event payload
+   */
+  @OnEvent(Event.WorkspaceUserAdded)
+  private async handleWorkspaceUserAddedEvent(
+    payload: WorkspaceUserAddedEvent,
+  ): Promise<void> {
+    const permission: PermissionDocument = await this.findOne(payload.userId);
+    if (permission.roles[0] === Role.SuperAdmin) return;
+    permission.workspaces.set(
+      payload.workspaceId,
+      new WorkspaceRolesAndPermissions({
+        roles: [Role.User],
+        permissions: InWorkspaceActions,
       }),
     );
     await this.update(permission);
