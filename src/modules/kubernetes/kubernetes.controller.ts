@@ -23,7 +23,7 @@ import { WorkspaceInterceptor } from '../../interceptors/workspace.interceptor';
 import { Controller, UseInterceptors, Get, Param } from '@nestjs/common';
 import { Workspace } from '../../decorators/workspace.decorator';
 import { Permissions } from '../../decorators/permissions.decorator';
-import { Deployment } from 'src/decorators/deployment.decorator';
+import { Deployment } from '../../decorators/deployment.decorator';
 
 @ApiCookieAuth()
 @Auth(Action.ReadWorkspace)

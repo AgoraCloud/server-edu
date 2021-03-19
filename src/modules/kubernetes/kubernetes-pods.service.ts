@@ -81,7 +81,7 @@ export class KubernetesPodsService {
     deployment: DeploymentDocument,
   ): Promise<MetricsDto> {
     const namespace: string = generateResourceName(workspaceId);
-    const deploymentId: string = deployment._id;
+    const deploymentId: string = deployment._id.toString();
     const pod: k8s.V1Pod = await this.getPod(namespace, deploymentId);
     const opts: request.Options = {
       url: '',
