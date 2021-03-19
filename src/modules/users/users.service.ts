@@ -9,10 +9,7 @@ import { Event } from './../../events/events.enum';
 import { addDays, removeDays } from '../../utils/date';
 import { TokenType, TokenDocument } from '../tokens/schemas/token.schema';
 import { TokensService } from './../tokens/tokens.service';
-import {
-  AdminConfig,
-  EnvironmentConfig,
-} from './../../config/configuration.interface';
+import { AdminConfig } from './../../config/configuration.interface';
 import { ConfigService } from '@nestjs/config';
 import { AccountNotVerifiedException } from '../../exceptions/account-not-verified.exception';
 import { AccountDisabledException } from '../../exceptions/account-disabled.exception';
@@ -29,16 +26,12 @@ import { Role } from '../authorization/schemas/permission.schema';
 
 @Injectable()
 export class UsersService implements OnModuleInit {
-  private readonly environment: EnvironmentConfig;
-
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
     private readonly configService: ConfigService,
     private readonly tokensService: TokensService,
     private readonly eventEmitter: EventEmitter2,
-  ) {
-    this.environment = this.configService.get<EnvironmentConfig>('environment');
-  }
+  ) {}
 
   async onModuleInit(): Promise<void> {
     await this.createAdminUser();
@@ -82,11 +75,7 @@ export class UsersService implements OnModuleInit {
       fullName: createUserDto.fullName,
       password: await this.hash(createUserDto.password),
     });
-    if (
-      this.environment === EnvironmentConfig.Development ||
-      role === Role.SuperAdmin ||
-      verify
-    ) {
+    if (role === Role.SuperAdmin || verify) {
       user.isVerified = true;
     }
     const createdUser: UserDocument = await this.userModel.create(user);
