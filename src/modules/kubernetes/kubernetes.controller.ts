@@ -1,3 +1,4 @@
+import { DeploymentDocument } from './../deployments/schemas/deployment.schema';
 import { Action } from './../authorization/schemas/permission.schema';
 import { Auth } from '../../decorators/auth.decorator';
 import { KubernetesPodsService } from './kubernetes-pods.service';
@@ -22,6 +23,7 @@ import { WorkspaceInterceptor } from '../../interceptors/workspace.interceptor';
 import { Controller, UseInterceptors, Get, Param } from '@nestjs/common';
 import { Workspace } from '../../decorators/workspace.decorator';
 import { Permissions } from '../../decorators/permissions.decorator';
+import { Deployment } from 'src/decorators/deployment.decorator';
 
 @ApiCookieAuth()
 @Auth(Action.ReadWorkspace)
@@ -103,9 +105,9 @@ export class KubernetesController {
   })
   findDeploymentMetrics(
     @Param('workspaceId') workspaceId: string,
-    @Param('deploymentId') deploymentId: string,
+    @Deployment() deployment: DeploymentDocument,
   ): Promise<MetricsDto> {
-    return this.kubernetesPodsService.getPodMetrics(workspaceId, deploymentId);
+    return this.kubernetesPodsService.getPodMetrics(workspaceId, deployment);
   }
 
   /**
