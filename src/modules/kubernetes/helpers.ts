@@ -46,7 +46,7 @@ function generateResourceName(id: string): string {
  * @param val the current value
  * @param max the maximum value
  */
-function toPercentage(val: string, max: number): string {
+function toPercentage(val: string, max: number): number {
   if (!val || !isDefined(max)) return;
 
   /**
@@ -59,14 +59,14 @@ function toPercentage(val: string, max: number): string {
     endPos?: number,
     op?: '*' | '/',
     operand?: number,
-  ): string => {
+  ): number => {
     let v: number = +val.substring(0, endPos);
     if (op === '*') {
       v *= operand;
     } else if (op === '/') {
       v /= operand;
     }
-    return Math.round((v / max) * 100) + '%';
+    return Math.round((v / max) * 100);
   };
 
   if (val.includes('m')) {
