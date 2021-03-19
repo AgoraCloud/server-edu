@@ -1,4 +1,4 @@
-import { DeploymentNotRunningException } from './../../exceptions/deployment-not-running.exception';
+import { DeploymentCannotBeUpdatedException } from '../../exceptions/deployment-cannot-be-updated.exception';
 import { UpdateDeploymentDto } from './dto/update-deployment.dto';
 import { DeploymentNotFoundException } from './../../exceptions/deployment-not-found.exception';
 import { CreateDeploymentDto } from './dto/create-deployment.dto';
@@ -206,8 +206,8 @@ describe('DeploymentsService', () => {
       }
     });
 
-    it('should throw an error if the deployment status is not running', async () => {
-      const expectedErrorMessage: string = new DeploymentNotRunningException(
+    it('should throw an error if the deployment status is not running or failed', async () => {
+      const expectedErrorMessage: string = new DeploymentCannotBeUpdatedException(
         deploymentId,
       ).message;
       try {
