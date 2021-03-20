@@ -1,38 +1,66 @@
 import { InvalidMongoIdException } from './../../exceptions/invalid-mongo-id.exception';
 import { isMongoId } from 'class-validator';
-import { Audit, AuditDocument } from './schemas/audit.schema';
+import { AuditLog, AuditLogDocument } from './schemas/audit-log.schema';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Query } from 'mongoose';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { removeDays } from 'src/utils/date';
 
 @Injectable()
 export class AuditingService {
   constructor(
-    @InjectModel(Audit.name) private readonly auditModel: Model<AuditDocument>,
+    @InjectModel(AuditLog.name)
+    private readonly auditLogModel: Model<AuditLogDocument>,
   ) {}
 
-  // TODO: add comments
-  async create(auditEntry: Audit): Promise<void> {
-    await this.auditModel.create(auditEntry);
+  /**
+   * Create an audit log
+   * @param auditLog the audit log to create
+   */
+  async create(auditLog: AuditLog): Promise<AuditLogDocument> {
+    return this.auditLogModel.create(auditLog);
   }
 
-  // TODO: add comments
+  /**
+   * Find all audit logs
+   * @param userId the users id
+   * @param workspaceId the workspace id
+   */
   async findAll(
     userId?: string,
     workspaceId?: string,
-  ): Promise<AuditDocument[]> {
-    let auditQuery: Query<
-      AuditDocument[],
-      AuditDocument
-    > = this.auditModel.find().populate('user').populate('workspace');
+  ): Promise<AuditLogDocument[]> {
+    let auditLogQuery: Query<
+      AuditLogDocument[],
+      AuditLogDocument
+    > = this.auditLogModel
+      .find()
+      .populate('user')
+      .populate('workspace')
+      .sort({ createdAt: -1 });
     if (userId) {
       if (!isMongoId(userId)) throw new InvalidMongoIdException('userId');
-      auditQuery = auditQuery.where('user').equals(userId);
+      auditLogQuery = auditLogQuery.where('user').equals(userId);
     }
     if (workspaceId) {
-      auditQuery = auditQuery.where('workspace').equals(workspaceId);
+      auditLogQuery = auditLogQuery.where('workspace').equals(workspaceId);
     }
-    const auditEntries: AuditDocument[] = await auditQuery.exec();
-    return auditEntries;
+    const auditLogs: AuditLogDocument[] = await auditLogQuery.exec();
+    return auditLogs;
+  }
+
+  /**
+   * Cron job that runs every hour and deletes audit logs that have been
+   * created 28 days ago or greater
+   */
+  @Cron(CronExpression.EVERY_HOUR)
+  private async deleteExpiredAuditLogsJob(): Promise<void> {
+    const twentyEightDays: Date = removeDays(new Date(), 28);
+    await this.auditLogModel
+      .remove()
+      .where('createdAt')
+      .lte(twentyEightDays.getTime())
+      .exec();
   }
 }

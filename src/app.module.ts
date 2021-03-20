@@ -1,3 +1,5 @@
+import { AuditingInterceptor } from './interceptors/auditing.interceptor';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ProjectTasksModule } from './modules/projects/tasks/tasks.module';
 import { ProjectLanesModule } from './modules/projects/lanes/lanes.module';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
@@ -111,6 +113,12 @@ import { AuditingModule } from './modules/auditing/auditing.module';
     ProjectTasksModule,
     AuthorizationModule,
     AuditingModule,
+  ],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AuditingInterceptor,
+    },
   ],
 })
 export class AppModule implements NestModule {

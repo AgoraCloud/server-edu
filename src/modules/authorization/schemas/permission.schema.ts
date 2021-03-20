@@ -55,6 +55,11 @@ export enum Action {
   DeleteProjectTask = 'project_tasks:delete',
 }
 
+export const AdminActions: Action[] = [
+  Action.ManageUser,
+  Action.ManageWorkspace,
+];
+
 export const WorkspaceActions: Action[] = [
   Action.CreateWorkspace,
   Action.ReadWorkspace,
