@@ -33,6 +33,9 @@ import { UpdateUserDto, AdminUpdateUserDto } from './dto/update-user.dto';
 import { User } from '../../decorators/user.decorator';
 import { UserDocument } from '../users/schemas/user.schema';
 import { Auth } from '../../decorators/auth.decorator';
+import { Audit } from '../../decorators/audit.decorator';
+import { AuditAction } from '../auditing/schemas/audit-log.schema';
+import { User as UserModel } from './schemas/user.schema';
 
 @ApiCookieAuth()
 @ApiTags('Users')
@@ -47,6 +50,7 @@ export class UsersController {
    * @param user the user
    */
   @Get()
+  @Audit(AuditAction.Read, UserModel.name)
   @ApiOperation({ summary: 'Get the logged in user' })
   @ApiOkResponse({
     description: 'The user has been successfully retrieved',
@@ -63,6 +67,7 @@ export class UsersController {
    * @param updateUserDto the updated user
    */
   @Put()
+  @Audit(AuditAction.Update, UserModel.name)
   @ApiOperation({ summary: 'Update the logged in user' })
   @ApiOkResponse({
     description: 'The user has been successfully updated',
@@ -85,6 +90,7 @@ export class UsersController {
    * @param userId the users id
    */
   @Delete()
+  @Audit(AuditAction.Delete, UserModel.name)
   @ApiOperation({ summary: 'Delete the logged in user' })
   @ApiOkResponse({ description: 'The user has been successfully deleted' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
@@ -107,6 +113,7 @@ export class AdminUsersController {
    */
   @Post()
   @UseFilters(new MongoExceptionFilter())
+  @Audit(AuditAction.Create, UserModel.name)
   @ApiOperation({ summary: 'Create a user' })
   @ApiCreatedResponse({
     description: 'The user has been successfully created',
@@ -127,6 +134,7 @@ export class AdminUsersController {
    * Get all users, accessible by super admins only
    */
   @Get()
+  @Audit(AuditAction.Read, UserModel.name)
   @ApiOperation({ summary: 'Get all users' })
   @ApiOkResponse({
     description: 'The users have been successfully retrieved',
@@ -145,6 +153,7 @@ export class AdminUsersController {
    */
   @Put(':userId')
   @UseInterceptors(UserInterceptor)
+  @Audit(AuditAction.Update, UserModel.name)
   @ApiParam({ name: 'userId', description: 'The users id' })
   @ApiOperation({ summary: 'Update a user' })
   @ApiOkResponse({
@@ -173,6 +182,7 @@ export class AdminUsersController {
    * @param userId the users id
    */
   @Delete(':userId')
+  @Audit(AuditAction.Delete, UserModel.name)
   @ApiParam({ name: 'userId', description: 'The users id' })
   @ApiOperation({ summary: 'Delete a user' })
   @ApiOkResponse({

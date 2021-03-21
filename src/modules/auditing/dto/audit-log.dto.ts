@@ -1,6 +1,6 @@
+import { AuditAction } from './../schemas/audit-log.schema';
 import { WorkspaceDto } from './../../workspaces/dto/workspace.dto';
 import { UserDto } from './../../users/dto/user.dto';
-import { Action } from './../../authorization/schemas/permission.schema';
 import { Exclude, Expose, Type } from 'class-transformer';
 
 @Exclude()
@@ -9,7 +9,10 @@ export class AuditLogDto {
   isSuccessful: boolean;
 
   @Expose()
-  actions: Action[];
+  action: AuditAction;
+
+  @Expose()
+  resource: string;
 
   @Expose({ name: 'createdAt' })
   date: Date;

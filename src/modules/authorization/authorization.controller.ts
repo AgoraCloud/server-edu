@@ -3,6 +3,7 @@ import { TransformInterceptor } from './../../interceptors/transform.interceptor
 import { PermissionDto, RolesAndPermissionsDto } from './dto/permission.dto';
 import {
   Action,
+  Permission,
   PermissionDocument,
   WorkspaceRolesAndPermissions,
 } from './schemas/permission.schema';
@@ -34,6 +35,8 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 import { Permissions } from '../../decorators/permissions.decorator';
+import { Audit } from '../../decorators/audit.decorator';
+import { AuditAction } from '../auditing/schemas/audit-log.schema';
 
 @ApiCookieAuth()
 @ApiTags('Authorization')
@@ -47,6 +50,7 @@ export class AuthorizationController {
    * @param userId the users id
    */
   @Get('user/permissions')
+  @Audit(AuditAction.Read, Permission.name)
   @UseInterceptors(new TransformInterceptor(PermissionDto))
   @ApiOperation({ summary: 'Get the logged in users permissions' })
   @ApiOkResponse({
@@ -67,6 +71,7 @@ export class AuthorizationController {
    */
   @Permissions(Action.ManageUser)
   @Get('users/:userId/permissions')
+  @Audit(AuditAction.Read, Permission.name)
   @UseInterceptors(UserInterceptor, new TransformInterceptor(PermissionDto))
   @ApiParam({ name: 'userId', description: 'The users id' })
   @ApiOperation({ summary: 'Get a users permissions' })
@@ -102,6 +107,7 @@ export class AuthorizationController {
     UserInterceptor,
     new TransformInterceptor(RolesAndPermissionsDto),
   )
+  @Audit(AuditAction.Read, Permission.name)
   @Get('workspaces/:workspaceId/users/:userId/permissions')
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'userId', description: 'The users id' })
@@ -143,6 +149,7 @@ export class AuthorizationController {
     UserInterceptor,
     new TransformInterceptor(RolesAndPermissionsDto),
   )
+  @Audit(AuditAction.Update, Permission.name)
   @ApiParam({ name: 'userId', description: 'The users id' })
   @ApiOperation({ summary: 'Update a users application-wide permissions' })
   @ApiOkResponse({
@@ -183,6 +190,7 @@ export class AuthorizationController {
     UserInterceptor,
     new TransformInterceptor(RolesAndPermissionsDto),
   )
+  @Audit(AuditAction.Update, Permission.name)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'userId', description: 'The users id' })
   @ApiOperation({ summary: 'Update a users workspace-wide permissions' })

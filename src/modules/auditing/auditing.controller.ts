@@ -1,7 +1,8 @@
+import { AuditLog } from './schemas/audit-log.schema';
 import { ExceptionDto } from './../../utils/base.dto';
 import { AuditLogDto } from './dto/audit-log.dto';
 import { TransformInterceptor } from './../../interceptors/transform.interceptor';
-import { AuditLogDocument } from './schemas/audit-log.schema';
+import { AuditAction, AuditLogDocument } from './schemas/audit-log.schema';
 import { WorkspaceInterceptor } from './../../interceptors/workspace.interceptor';
 import { Controller, Get, Param, Query, UseInterceptors } from '@nestjs/common';
 import { Auth } from '../../decorators/auth.decorator';
@@ -20,6 +21,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { Audit } from '../../decorators/audit.decorator';
 
 @ApiCookieAuth()
 @ApiTags('Auditing')
@@ -35,6 +37,7 @@ export class AuditingController {
    */
   @Get('audit')
   @Permissions(Action.ManageUser)
+  @Audit(AuditAction.Read, AuditLog.name)
   @ApiQuery({ name: 'userId', description: 'The users id' })
   @ApiOperation({ summary: 'Get all audit logs' })
   @ApiOkResponse({
@@ -60,6 +63,7 @@ export class AuditingController {
   @Permissions(Action.ManageWorkspace)
   @Get('workspaces/:workspaceId/audit')
   @UseInterceptors(WorkspaceInterceptor)
+  @Audit(AuditAction.Read, AuditLog.name)
   @ApiQuery({ name: 'userId', description: 'The users id' })
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiOperation({ summary: 'Get a workspaces audit logs' })

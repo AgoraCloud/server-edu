@@ -1,9 +1,3 @@
-import {
-  Action,
-  AdminActions,
-  InWorkspaceActions,
-  WorkspaceActions,
-} from './../../authorization/schemas/permission.schema';
 import { User, UserDocument } from '../../users/schemas/user.schema';
 import {
   Workspace,
@@ -11,6 +5,21 @@ import {
 } from '../../workspaces/schemas/workspace.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
+
+export enum AuditAction {
+  Create = 'CREATE',
+  Read = 'READ',
+  ReadImages = 'READ_IMAGES',
+  ReadLogs = 'READ_LOGS',
+  ReadMetrics = 'READ_METRICS',
+  Proxy = 'PROXY',
+  Update = 'UPDATE',
+  Delete = 'DELETE',
+  LogIn = 'LOG_IN',
+  LogOut = 'LOG_OUT',
+  AddUser = 'ADD_USER',
+  RemoveUser = 'REMOVE_USER',
+}
 
 export type AuditLogDocument = AuditLog & mongoose.Document;
 
@@ -21,10 +30,25 @@ export class AuditLog {
 
   @Prop({
     required: true,
-    type: [String],
-    enum: [...AdminActions, ...WorkspaceActions, ...InWorkspaceActions],
+    enum: [
+      AuditAction.Create,
+      AuditAction.Read,
+      AuditAction.ReadImages,
+      AuditAction.ReadLogs,
+      AuditAction.ReadMetrics,
+      AuditAction.Proxy,
+      AuditAction.Update,
+      AuditAction.Delete,
+      AuditAction.LogIn,
+      AuditAction.LogOut,
+      AuditAction.AddUser,
+      AuditAction.RemoveUser,
+    ],
   })
-  actions: Action[];
+  action: AuditAction;
+
+  @Prop({ required: true })
+  resource: string;
 
   @Prop({ required: true })
   userAgent: string;

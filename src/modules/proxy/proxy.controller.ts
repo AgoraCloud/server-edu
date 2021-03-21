@@ -16,6 +16,9 @@ import { Request, Response } from 'express';
 import { Deployment } from '../../decorators/deployment.decorator';
 import { ProxyAuthorizationGuard } from '../authorization/guards/proxy-authorization.guard';
 import { Permissions } from '../../decorators/permissions.decorator';
+import { Audit } from '../../decorators/audit.decorator';
+import { AuditAction } from '../auditing/schemas/audit-log.schema';
+import { Deployment as DeploymentModel } from '../deployments/schemas/deployment.schema';
 
 @ApiCookieAuth()
 @ApiTags('Proxy')
@@ -36,6 +39,7 @@ export class ProxyController {
     Action.ReadDeployment,
     Action.ProxyDeployment,
   )
+  @Audit(AuditAction.Proxy, DeploymentModel.name)
   @ApiOperation({ summary: 'Proxy a deployment API request' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })

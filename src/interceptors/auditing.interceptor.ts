@@ -1,8 +1,11 @@
+import {
+  AUDIT_ACTION_KEY,
+  AUDIT_RESOURCE_KEY,
+} from './../decorators/audit.decorator';
+import { AuditAction } from './../modules/auditing/schemas/audit-log.schema';
 import { AuditLog } from '../modules/auditing/schemas/audit-log.schema';
 import { AuditingService } from './../modules/auditing/auditing.service';
-import { PERMISSIONS_KEY } from './../decorators/permissions.decorator';
 import { Reflector } from '@nestjs/core';
-import { Action } from './../modules/authorization/schemas/permission.schema';
 import {
   CallHandler,
   ExecutionContext,
@@ -22,11 +25,13 @@ export class AuditingInterceptor implements NestInterceptor {
   ) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    const permissions: Action[] =
-      this.reflector.getAllAndMerge<Action[]>(PERMISSIONS_KEY, [
-        context.getClass(),
-        context.getHandler(),
-      ]) || [];
+    const auditAction: AuditAction = this.reflector.get<AuditAction>(
+      AUDIT_ACTION_KEY,
+      context.getHandler(),
+    );
+    const auditResource: string = this.reflector
+      .get<string>(AUDIT_RESOURCE_KEY, context.getHandler())
+      .toUpperCase();
     const request: RequestWithWorkspaceUserAndIsAdmin = context
       .switchToHttp()
       .getRequest();
@@ -36,7 +41,8 @@ export class AuditingInterceptor implements NestInterceptor {
         const auditLog: AuditLog = new AuditLog({
           isSuccessful:
             response.statusCode >= 200 && response.statusCode <= 299,
-          actions: permissions,
+          action: auditAction,
+          resource: auditResource,
           userAgent: request.get('user-agent') || '',
           ip: request.ip,
           user: request.user,

@@ -39,7 +39,9 @@ import { ProjectLaneDto } from './dto/lane.dto';
 import { User } from '../../../decorators/user.decorator';
 import { Workspace } from '../../../decorators/workspace.decorator';
 import { Project } from '../../../decorators/project.decorator';
-import { ProjectLaneDocument } from './schemas/lane.schema';
+import { ProjectLane, ProjectLaneDocument } from './schemas/lane.schema';
+import { Audit } from '../../../decorators/audit.decorator';
+import { AuditAction } from '../../auditing/schemas/audit-log.schema';
 
 @ApiCookieAuth()
 @ApiTags('Project Lanes')
@@ -62,6 +64,7 @@ export class ProjectLanesController {
    */
   @Post()
   @Permissions(Action.CreateProjectLane)
+  @Audit(AuditAction.Create, ProjectLane.name)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'projectId', description: 'The project id' })
   @ApiOperation({ summary: 'Create a project lane' })
@@ -102,6 +105,7 @@ export class ProjectLanesController {
    */
   @Get()
   @Permissions(Action.ReadProjectLane)
+  @Audit(AuditAction.Read, ProjectLane.name)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'projectId', description: 'The project id' })
   @ApiOperation({ summary: 'Get all project lanes' })
@@ -144,6 +148,7 @@ export class ProjectLanesController {
    */
   @Get(':id')
   @Permissions(Action.ReadProjectLane)
+  @Audit(AuditAction.Read, ProjectLane.name)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'projectId', description: 'The project id' })
   @ApiParam({ name: 'id', description: 'The project lane id' })
@@ -196,6 +201,7 @@ export class ProjectLanesController {
    */
   @Put(':id')
   @Permissions(Action.UpdateProjectLane)
+  @Audit(AuditAction.Update, ProjectLane.name)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'projectId', description: 'The project id' })
   @ApiParam({ name: 'id', description: 'The project lane id' })
@@ -250,6 +256,7 @@ export class ProjectLanesController {
    */
   @Delete(':id')
   @Permissions(Action.DeleteProjectLane)
+  @Audit(AuditAction.Delete, ProjectLane.name)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'projectId', description: 'The project id' })
   @ApiParam({ name: 'id', description: 'The project lane id' })
