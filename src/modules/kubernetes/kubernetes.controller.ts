@@ -1,3 +1,4 @@
+import { DeploymentDocument } from './../deployments/schemas/deployment.schema';
 import { Action } from './../authorization/schemas/permission.schema';
 import { Auth } from '../../decorators/auth.decorator';
 import { KubernetesPodsService } from './kubernetes-pods.service';
@@ -22,6 +23,12 @@ import { WorkspaceInterceptor } from '../../interceptors/workspace.interceptor';
 import { Controller, UseInterceptors, Get, Param } from '@nestjs/common';
 import { Workspace } from '../../decorators/workspace.decorator';
 import { Permissions } from '../../decorators/permissions.decorator';
+import { Deployment } from '../../decorators/deployment.decorator';
+import { Audit } from '../../decorators/audit.decorator';
+import {
+  AuditAction,
+  AuditResource,
+} from '../auditing/schemas/audit-log.schema';
 
 @ApiCookieAuth()
 @Auth(Action.ReadWorkspace)
@@ -41,6 +48,7 @@ export class KubernetesController {
   @Get('deployments/:deploymentId/logs')
   @Permissions(Action.ReadDeployment)
   @UseInterceptors(DeploymentInterceptor)
+  @Audit(AuditAction.ReadLogs, AuditResource.Deployment)
   @ApiTags('Deployments')
   @ApiOperation({ summary: 'Get a deployments logs' })
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
@@ -78,6 +86,7 @@ export class KubernetesController {
   @Get('deployments/:deploymentId/metrics')
   @Permissions(Action.ReadDeployment)
   @UseInterceptors(DeploymentInterceptor)
+  @Audit(AuditAction.ReadMetrics, AuditResource.Deployment)
   @ApiTags('Deployments')
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'deploymentId', description: 'The deployment id' })
@@ -103,9 +112,9 @@ export class KubernetesController {
   })
   findDeploymentMetrics(
     @Param('workspaceId') workspaceId: string,
-    @Param('deploymentId') deploymentId: string,
+    @Deployment() deployment: DeploymentDocument,
   ): Promise<MetricsDto> {
-    return this.kubernetesPodsService.getPodMetrics(workspaceId, deploymentId);
+    return this.kubernetesPodsService.getPodMetrics(workspaceId, deployment);
   }
 
   /**
@@ -114,6 +123,7 @@ export class KubernetesController {
    */
   @Get('metrics')
   @ApiTags('Workspaces')
+  @Audit(AuditAction.ReadMetrics, AuditResource.Workspace)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiOperation({
     summary: 'Get a workspaces metrics (cpu, memory and storage)',

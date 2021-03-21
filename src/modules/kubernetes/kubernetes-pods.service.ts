@@ -1,3 +1,4 @@
+import { DeploymentDocument } from './../deployments/schemas/deployment.schema';
 import { MetricsDto } from './dto/metrics.dto';
 import { DeploymentPodMetricsNotAvailableException } from '../../exceptions/deployment-pod-metrics-not-available.exception';
 import { DeploymentPodNotAvailableException } from '../../exceptions/deployment-pod-not-available.exception';
@@ -5,7 +6,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import * as k8s from '@kubernetes/client-node';
 import * as http from 'http';
 import * as request from 'request';
-import { generateResourceName } from './helpers';
+import { generateResourceName, toPercentage } from './helpers';
 
 @Injectable()
 export class KubernetesPodsService {
@@ -73,13 +74,14 @@ export class KubernetesPodsService {
   /**
    * Get a Kubernetes pod metrics
    * @param workspaceId the pods workspace id
-   * @param deploymentId the pods deployment id
+   * @param deployment the pods deployment
    */
   async getPodMetrics(
     workspaceId: string,
-    deploymentId: string,
+    deployment: DeploymentDocument,
   ): Promise<MetricsDto> {
     const namespace: string = generateResourceName(workspaceId);
+    const deploymentId: string = deployment._id.toString();
     const pod: k8s.V1Pod = await this.getPod(namespace, deploymentId);
     const opts: request.Options = {
       url: '',
@@ -115,7 +117,16 @@ export class KubernetesPodsService {
     if (containerIndex === -1) {
       throw new DeploymentPodMetricsNotAvailableException(deploymentId);
     }
-    const containerMetrics: MetricsDto = containers[containerIndex].usage;
+    const containerMetrics: MetricsDto = new MetricsDto(
+      toPercentage(
+        containers[containerIndex].usage?.cpu,
+        deployment.properties.resources.cpuCount,
+      ),
+      toPercentage(
+        containers[containerIndex].usage?.memory,
+        deployment.properties.resources.memoryCount,
+      ),
+    );
     if (!containerMetrics?.cpu && !containerMetrics?.memory) {
       throw new DeploymentPodMetricsNotAvailableException(deploymentId);
     }

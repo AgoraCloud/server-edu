@@ -1,3 +1,4 @@
+import { Action } from './../authorization/schemas/permission.schema';
 import { JwtAuthenticationGuard } from './../authentication/guards/jwt-authentication.guard';
 import { ExceptionDto } from './../../utils/base.dto';
 import {
@@ -14,6 +15,12 @@ import { All, Controller, Req, Res, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { Deployment } from '../../decorators/deployment.decorator';
 import { ProxyAuthorizationGuard } from '../authorization/guards/proxy-authorization.guard';
+import { Permissions } from '../../decorators/permissions.decorator';
+import { Audit } from '../../decorators/audit.decorator';
+import {
+  AuditAction,
+  AuditResource,
+} from '../auditing/schemas/audit-log.schema';
 
 @ApiCookieAuth()
 @ApiTags('Proxy')
@@ -29,6 +36,12 @@ export class ProxyController {
    * @param res the response
    */
   @All()
+  @Permissions(
+    Action.ReadWorkspace,
+    Action.ReadDeployment,
+    Action.ProxyDeployment,
+  )
+  @Audit(AuditAction.Proxy, AuditResource.Deployment)
   @ApiOperation({ summary: 'Proxy a deployment API request' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })

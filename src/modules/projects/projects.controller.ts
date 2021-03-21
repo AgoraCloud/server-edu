@@ -37,6 +37,11 @@ import { Workspace } from '../../decorators/workspace.decorator';
 import { ProjectDocument } from './schemas/project.schema';
 import { Permissions } from '../../decorators/permissions.decorator';
 import { IsAdmin } from '../../decorators/is-admin.decorator';
+import { Audit } from '../../decorators/audit.decorator';
+import {
+  AuditAction,
+  AuditResource,
+} from '../auditing/schemas/audit-log.schema';
 
 @ApiCookieAuth()
 @ApiTags('Projects')
@@ -54,6 +59,7 @@ export class ProjectsController {
    */
   @Post()
   @Permissions(Action.CreateProject)
+  @Audit(AuditAction.Create, AuditResource.Project)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiOperation({ summary: 'Create a new project' })
   @ApiCreatedResponse({
@@ -85,6 +91,7 @@ export class ProjectsController {
    */
   @Get()
   @Permissions(Action.ReadProject)
+  @Audit(AuditAction.Read, AuditResource.Project)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiOperation({ summary: 'Get all projects' })
   @ApiOkResponse({
@@ -120,6 +127,7 @@ export class ProjectsController {
    */
   @Get(':id')
   @Permissions(Action.ReadProject)
+  @Audit(AuditAction.Read, AuditResource.Project)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'id', description: 'The project id' })
   @ApiOperation({ summary: 'Get a project' })
@@ -158,6 +166,7 @@ export class ProjectsController {
    */
   @Put(':id')
   @Permissions(Action.UpdateProject)
+  @Audit(AuditAction.Update, AuditResource.Project)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'id', description: 'The project id' })
   @ApiOperation({ summary: 'Update a project' })
@@ -206,6 +215,7 @@ export class ProjectsController {
    */
   @Delete(':id')
   @Permissions(Action.DeleteProject)
+  @Audit(AuditAction.Delete, AuditResource.Project)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'id', description: 'The project id' })
   @ApiOperation({ summary: 'Delete a project' })

@@ -1,3 +1,4 @@
+import { AuditResource } from './../../auditing/schemas/audit-log.schema';
 import { IsAdmin } from '../../../decorators/is-admin.decorator';
 import { Permissions } from './../../../decorators/permissions.decorator';
 import { Auth } from '../../../decorators/auth.decorator';
@@ -43,6 +44,8 @@ import { User } from '../../../decorators/user.decorator';
 import { Workspace } from '../../../decorators/workspace.decorator';
 import { Project } from '../../../decorators/project.decorator';
 import { ProjectLane } from '../../../decorators/project-lane.decorator';
+import { Audit } from '../../../decorators/audit.decorator';
+import { AuditAction } from '../../auditing/schemas/audit-log.schema';
 
 @ApiCookieAuth()
 @ApiTags('Project Tasks')
@@ -69,6 +72,7 @@ export class ProjectTasksController {
    */
   @Post()
   @Permissions(Action.CreateProjectTask)
+  @Audit(AuditAction.Create, AuditResource.ProjectTask)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'projectId', description: 'The project id' })
   @ApiParam({ name: 'laneId', description: 'The project lane id' })
@@ -114,6 +118,7 @@ export class ProjectTasksController {
    */
   @Get()
   @Permissions(Action.ReadProjectTask)
+  @Audit(AuditAction.Read, AuditResource.ProjectTask)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'projectId', description: 'The project id' })
   @ApiParam({ name: 'laneId', description: 'The project lane id' })
@@ -167,6 +172,7 @@ export class ProjectTasksController {
    */
   @Get(':id')
   @Permissions(Action.ReadProjectTask)
+  @Audit(AuditAction.Read, AuditResource.ProjectTask)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'projectId', description: 'The project id' })
   @ApiParam({ name: 'laneId', description: 'The project lane id' })
@@ -224,6 +230,7 @@ export class ProjectTasksController {
    */
   @Put(':id')
   @Permissions(Action.UpdateProjectTask)
+  @Audit(AuditAction.Update, AuditResource.ProjectTask)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'projectId', description: 'The project id' })
   @ApiParam({ name: 'laneId', description: 'The project lane id' })
@@ -283,6 +290,7 @@ export class ProjectTasksController {
    */
   @Delete(':id')
   @Permissions(Action.DeleteProjectTask)
+  @Audit(AuditAction.Delete, AuditResource.ProjectTask)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'projectId', description: 'The project id' })
   @ApiParam({ name: 'laneId', description: 'The project lane id' })

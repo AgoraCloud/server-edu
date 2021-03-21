@@ -34,6 +34,11 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 import { Permissions } from '../../decorators/permissions.decorator';
+import { Audit } from '../../decorators/audit.decorator';
+import {
+  AuditAction,
+  AuditResource,
+} from '../auditing/schemas/audit-log.schema';
 
 @ApiCookieAuth()
 @ApiTags('Authorization')
@@ -47,6 +52,7 @@ export class AuthorizationController {
    * @param userId the users id
    */
   @Get('user/permissions')
+  @Audit(AuditAction.Read, AuditResource.Permission)
   @UseInterceptors(new TransformInterceptor(PermissionDto))
   @ApiOperation({ summary: 'Get the logged in users permissions' })
   @ApiOkResponse({
@@ -67,6 +73,7 @@ export class AuthorizationController {
    */
   @Permissions(Action.ManageUser)
   @Get('users/:userId/permissions')
+  @Audit(AuditAction.Read, AuditResource.Permission)
   @UseInterceptors(UserInterceptor, new TransformInterceptor(PermissionDto))
   @ApiParam({ name: 'userId', description: 'The users id' })
   @ApiOperation({ summary: 'Get a users permissions' })
@@ -102,6 +109,7 @@ export class AuthorizationController {
     UserInterceptor,
     new TransformInterceptor(RolesAndPermissionsDto),
   )
+  @Audit(AuditAction.Read, AuditResource.Permission)
   @Get('workspaces/:workspaceId/users/:userId/permissions')
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'userId', description: 'The users id' })
@@ -143,6 +151,7 @@ export class AuthorizationController {
     UserInterceptor,
     new TransformInterceptor(RolesAndPermissionsDto),
   )
+  @Audit(AuditAction.Update, AuditResource.Permission)
   @ApiParam({ name: 'userId', description: 'The users id' })
   @ApiOperation({ summary: 'Update a users application-wide permissions' })
   @ApiOkResponse({
@@ -183,6 +192,7 @@ export class AuthorizationController {
     UserInterceptor,
     new TransformInterceptor(RolesAndPermissionsDto),
   )
+  @Audit(AuditAction.Update, AuditResource.Permission)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'userId', description: 'The users id' })
   @ApiOperation({ summary: 'Update a users workspace-wide permissions' })

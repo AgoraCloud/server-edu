@@ -35,7 +35,7 @@ import * as k8s from '@kubernetes/client-node';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Event } from '../../events/events.enum';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { generateResourceName } from './helpers';
+import { generateResourceName, toPercentage } from './helpers';
 
 @Injectable()
 export class KubernetesService implements OnModuleInit {
@@ -109,9 +109,18 @@ export class KubernetesService implements OnModuleInit {
         workspaceId,
       );
       const workspaceMetrics: MetricsDto = new MetricsDto(
-        resourceQuota.status?.used['limits.cpu'],
-        resourceQuota.status?.used['limits.memory'],
-        resourceQuota.status?.used['requests.storage'],
+        toPercentage(
+          resourceQuota.status?.used['limits.cpu'],
+          workspace.properties?.resources?.cpuCount,
+        ),
+        toPercentage(
+          resourceQuota.status?.used['limits.memory'],
+          workspace.properties?.resources?.memoryCount,
+        ),
+        toPercentage(
+          resourceQuota.status?.used['requests.storage'],
+          workspace.properties?.resources?.storageCount,
+        ),
       );
       return workspaceMetrics;
     } catch (err) {

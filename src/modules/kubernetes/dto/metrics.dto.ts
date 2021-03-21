@@ -1,9 +1,9 @@
 export class MetricsDto {
-  readonly cpu: string;
-  readonly memory: string;
-  readonly storage: string;
+  readonly cpu?: number;
+  readonly memory?: number;
+  readonly storage?: number;
 
-  constructor(cpu?: string, memory?: string, storage?: string) {
+  constructor(cpu?: number, memory?: number, storage?: number) {
     this.cpu = cpu;
     this.memory = memory;
     this.storage = storage;

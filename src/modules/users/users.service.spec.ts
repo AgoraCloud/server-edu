@@ -46,7 +46,7 @@ describe('UsersService', () => {
     service = module.get<UsersService>(UsersService);
     connection = await module.get(getConnectionToken());
     eventEmitter = module.get<EventEmitter2>(EventEmitter2);
-    userModel = module.get<Model<UserDocument>>(getModelToken('User'));
+    userModel = module.get<Model<UserDocument>>(getModelToken(User.name));
   });
 
   afterAll(async () => {

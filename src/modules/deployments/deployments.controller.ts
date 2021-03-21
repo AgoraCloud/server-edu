@@ -1,3 +1,8 @@
+import {
+  AuditAction,
+  AuditResource,
+} from './../auditing/schemas/audit-log.schema';
+import { Audit } from '../../decorators/audit.decorator';
 import { Permissions } from './../../decorators/permissions.decorator';
 import { ExceptionDto } from './../../utils/base.dto';
 import {
@@ -57,6 +62,7 @@ export class DeploymentsController {
    */
   @Post()
   @Permissions(Action.CreateDeployment)
+  @Audit(AuditAction.Create, AuditResource.Deployment)
   @UseInterceptors(new TransformInterceptor(DeploymentDto))
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiOperation({ summary: 'Create a new deployment' })
@@ -87,6 +93,7 @@ export class DeploymentsController {
    */
   @Get('images')
   @UseInterceptors(new TransformInterceptor(DeploymentImageDto))
+  @Audit(AuditAction.ReadImages, AuditResource.Deployment)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiOperation({ summary: 'Get all allowed deployment images' })
   @ApiOkResponse({
@@ -114,6 +121,7 @@ export class DeploymentsController {
    */
   @Get()
   @Permissions(Action.ReadDeployment)
+  @Audit(AuditAction.Read, AuditResource.Deployment)
   @UseInterceptors(new TransformInterceptor(DeploymentDto))
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiOperation({ summary: 'Get all deployments' })
@@ -150,6 +158,7 @@ export class DeploymentsController {
    */
   @Get(':id')
   @Permissions(Action.ReadDeployment)
+  @Audit(AuditAction.Read, AuditResource.Deployment)
   @UseInterceptors(new TransformInterceptor(DeploymentDto))
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'id', description: 'The deployment id' })
@@ -193,6 +202,7 @@ export class DeploymentsController {
    */
   @Put(':id')
   @Permissions(Action.UpdateDeployment)
+  @Audit(AuditAction.Update, AuditResource.Deployment)
   @UseInterceptors(new TransformInterceptor(DeploymentDto))
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'id', description: 'The deployment id' })
@@ -242,6 +252,7 @@ export class DeploymentsController {
    */
   @Delete(':id')
   @Permissions(Action.DeleteDeployment)
+  @Audit(AuditAction.Delete, AuditResource.Deployment)
   @UseInterceptors(new TransformInterceptor(DeploymentDto))
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'id', description: 'The deployment id' })

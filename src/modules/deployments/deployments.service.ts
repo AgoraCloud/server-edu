@@ -1,6 +1,6 @@
+import { DeploymentCannotBeUpdatedException } from '../../exceptions/deployment-cannot-be-updated.exception';
 import { WorkspaceUserRemovedEvent } from './../../events/workspace-user-removed.event';
 import { WorkspaceDeletedEvent } from './../../events/workspace-deleted.event';
-import { DeploymentNotRunningException } from './../../exceptions/deployment-not-running.exception';
 import { deploymentImages } from './deployment-images';
 import { DeploymentDeletedEvent } from './../../events/deployment-deleted.event';
 import { DeploymentUpdatedEvent } from './../../events/deployment-updated.event';
@@ -136,8 +136,12 @@ export class DeploymentsService {
       userId,
       workspaceId,
     );
-    if (deployment.status !== DeploymentStatus.Running) {
-      throw new DeploymentNotRunningException(deploymentId);
+    const allowedStatuses: DeploymentStatus[] = [
+      DeploymentStatus.Running,
+      DeploymentStatus.Failed,
+    ];
+    if (!allowedStatuses.includes(deployment.status)) {
+      throw new DeploymentCannotBeUpdatedException(deploymentId);
     }
 
     const updateDeploymentResourcesDto: UpdateDeploymentResourcesDto =
