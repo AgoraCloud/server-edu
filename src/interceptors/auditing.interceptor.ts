@@ -2,7 +2,10 @@ import {
   AUDIT_ACTION_KEY,
   AUDIT_RESOURCE_KEY,
 } from './../decorators/audit.decorator';
-import { AuditAction } from './../modules/auditing/schemas/audit-log.schema';
+import {
+  AuditAction,
+  AuditResource,
+} from './../modules/auditing/schemas/audit-log.schema';
 import { AuditLog } from '../modules/auditing/schemas/audit-log.schema';
 import { AuditingService } from './../modules/auditing/auditing.service';
 import { Reflector } from '@nestjs/core';
@@ -29,9 +32,10 @@ export class AuditingInterceptor implements NestInterceptor {
       AUDIT_ACTION_KEY,
       context.getHandler(),
     );
-    const auditResource: string = this.reflector
-      .get<string>(AUDIT_RESOURCE_KEY, context.getHandler())
-      .toUpperCase();
+    const auditResource: AuditResource = this.reflector.get<AuditResource>(
+      AUDIT_RESOURCE_KEY,
+      context.getHandler(),
+    );
     const request: RequestWithWorkspaceUserAndIsAdmin = context
       .switchToHttp()
       .getRequest();

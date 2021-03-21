@@ -1,4 +1,4 @@
-import { AuditLog } from './schemas/audit-log.schema';
+import { AuditResource } from './schemas/audit-log.schema';
 import { ExceptionDto } from './../../utils/base.dto';
 import { AuditLogDto } from './dto/audit-log.dto';
 import { TransformInterceptor } from './../../interceptors/transform.interceptor';
@@ -22,6 +22,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { Audit } from '../../decorators/audit.decorator';
+import { AuditLogQueryParamsDto } from './dto/audit-log-query-params.dto';
 
 @ApiCookieAuth()
 @ApiTags('Auditing')
@@ -37,21 +38,73 @@ export class AuditingController {
    */
   @Get('audit')
   @Permissions(Action.ManageUser)
-  @Audit(AuditAction.Read, AuditLog.name)
-  @ApiQuery({ name: 'userId', description: 'The users id' })
+  @Audit(AuditAction.Read, AuditResource.AuditLog)
+  @ApiQuery({
+    name: 'isSuccessful',
+    description: 'The isSuccessful paramter in the audit log',
+    required: false,
+    type: Boolean,
+  })
+  @ApiQuery({
+    name: 'action',
+    description: 'The action in the audit log',
+    required: false,
+    enum: AuditAction,
+  })
+  @ApiQuery({
+    name: 'resource',
+    description: 'The resource in the audit log',
+    required: false,
+    enum: AuditResource,
+  })
+  @ApiQuery({
+    name: 'userAgent',
+    description: 'The user agent in the audit log',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'ip',
+    description: 'The ip address in the audit log',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'userId',
+    description: 'The user id in the audit log',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'workspaceId',
+    description: 'The workspace id in the audit log',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'take',
+    description: 'The number of audit logs to return',
+    required: false,
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'skip',
+    description: 'The number of audit logs to skip',
+    required: false,
+    type: Number,
+  })
   @ApiOperation({ summary: 'Get all audit logs' })
   @ApiOkResponse({
     description: 'The audit logs have been successfully retrieved',
     type: AuditLogDto,
   })
   @ApiBadRequestResponse({
-    description: 'The provided user id was not valid',
+    description:
+      'The provided user id was not valid or the provided query param(s) was not valid',
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
-  findAll(@Query('userId') userId: string): Promise<AuditLogDocument[]> {
-    return this.auditingService.findAll(userId);
+  findAll(
+    @Query() auditLogQueryParamsDto: AuditLogQueryParamsDto,
+  ): Promise<AuditLogDocument[]> {
+    return this.auditingService.findAll(auditLogQueryParamsDto);
   }
 
   /**
@@ -63,16 +116,61 @@ export class AuditingController {
   @Permissions(Action.ManageWorkspace)
   @Get('workspaces/:workspaceId/audit')
   @UseInterceptors(WorkspaceInterceptor)
-  @Audit(AuditAction.Read, AuditLog.name)
-  @ApiQuery({ name: 'userId', description: 'The users id' })
+  @Audit(AuditAction.Read, AuditResource.AuditLog)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
+  @ApiQuery({
+    name: 'isSuccessful',
+    description: 'The isSuccessful paramter in the audit log',
+    required: false,
+    type: Boolean,
+  })
+  @ApiQuery({
+    name: 'action',
+    description: 'The action in the audit log',
+    required: false,
+    enum: AuditAction,
+  })
+  @ApiQuery({
+    name: 'resource',
+    description: 'The resource in the audit log',
+    required: false,
+    enum: AuditResource,
+  })
+  @ApiQuery({
+    name: 'userAgent',
+    description: 'The user agent in the audit log',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'ip',
+    description: 'The ip address in the audit log',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'userId',
+    description: 'The user id in the audit log',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'take',
+    description: 'The number of audit logs to return',
+    required: false,
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'skip',
+    description: 'The number of audit logs to skip',
+    required: false,
+    type: Number,
+  })
   @ApiOperation({ summary: 'Get a workspaces audit logs' })
   @ApiOkResponse({
     description: 'The audit logs have been successfully retrieved',
     type: AuditLogDto,
   })
   @ApiBadRequestResponse({
-    description: 'The provided workspace id or user id was not valid',
+    description:
+      'The provided workspace id or user id was not valid or the provided query param(s) was not valid',
     type: ExceptionDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
@@ -82,9 +180,12 @@ export class AuditingController {
     type: ExceptionDto,
   })
   findAllWorkspace(
-    @Query('userId') userId: string,
+    @Query() auditLogQueryParamsDto: AuditLogQueryParamsDto,
     @Param('workspaceId') workspaceId: string,
   ): Promise<AuditLogDocument[]> {
-    return this.auditingService.findAll(userId, workspaceId);
+    return this.auditingService.findAll({
+      ...auditLogQueryParamsDto,
+      workspaceId,
+    });
   }
 }

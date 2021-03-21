@@ -25,9 +25,10 @@ import { Workspace } from '../../decorators/workspace.decorator';
 import { Permissions } from '../../decorators/permissions.decorator';
 import { Deployment } from '../../decorators/deployment.decorator';
 import { Audit } from '../../decorators/audit.decorator';
-import { AuditAction } from '../auditing/schemas/audit-log.schema';
-import { Workspace as WorkspaceModel } from '../workspaces/schemas/workspace.schema';
-import { Deployment as DeploymentModel } from '../deployments/schemas/deployment.schema';
+import {
+  AuditAction,
+  AuditResource,
+} from '../auditing/schemas/audit-log.schema';
 
 @ApiCookieAuth()
 @Auth(Action.ReadWorkspace)
@@ -47,7 +48,7 @@ export class KubernetesController {
   @Get('deployments/:deploymentId/logs')
   @Permissions(Action.ReadDeployment)
   @UseInterceptors(DeploymentInterceptor)
-  @Audit(AuditAction.ReadLogs, DeploymentModel.name)
+  @Audit(AuditAction.ReadLogs, AuditResource.Deployment)
   @ApiTags('Deployments')
   @ApiOperation({ summary: 'Get a deployments logs' })
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
@@ -85,7 +86,7 @@ export class KubernetesController {
   @Get('deployments/:deploymentId/metrics')
   @Permissions(Action.ReadDeployment)
   @UseInterceptors(DeploymentInterceptor)
-  @Audit(AuditAction.ReadMetrics, DeploymentModel.name)
+  @Audit(AuditAction.ReadMetrics, AuditResource.Deployment)
   @ApiTags('Deployments')
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'deploymentId', description: 'The deployment id' })
@@ -122,7 +123,7 @@ export class KubernetesController {
    */
   @Get('metrics')
   @ApiTags('Workspaces')
-  @Audit(AuditAction.ReadMetrics, WorkspaceModel.name)
+  @Audit(AuditAction.ReadMetrics, AuditResource.Workspace)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiOperation({
     summary: 'Get a workspaces metrics (cpu, memory and storage)',

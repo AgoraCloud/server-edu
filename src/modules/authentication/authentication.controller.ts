@@ -38,8 +38,10 @@ import {
 } from '@nestjs/swagger';
 import { Auth } from '../../decorators/auth.decorator';
 import { Audit } from '../../decorators/audit.decorator';
-import { AuditAction } from '../auditing/schemas/audit-log.schema';
-import { User as UserModel } from '../users/schemas/user.schema';
+import {
+  AuditAction,
+  AuditResource,
+} from '../auditing/schemas/audit-log.schema';
 
 @Controller('api/auth')
 @ApiTags('Authentication')
@@ -72,7 +74,7 @@ export class AuthenticationController {
   @Post('login')
   @ApiCookieAuth()
   @UseGuards(LocalAuthenticationGuard)
-  @Audit(AuditAction.LogIn, UserModel.name)
+  @Audit(AuditAction.LogIn, AuditResource.User)
   @ApiOperation({ summary: 'Log in' })
   @UseInterceptors(new TransformInterceptor(UserDto))
   @ApiCreatedResponse({
@@ -122,7 +124,7 @@ export class AuthenticationController {
    */
   @HttpCode(200)
   @Post('logout')
-  @Audit(AuditAction.LogOut, UserModel.name)
+  @Audit(AuditAction.LogOut, AuditResource.User)
   @ApiCookieAuth()
   @Auth()
   @ApiOperation({ summary: 'Sign out' })

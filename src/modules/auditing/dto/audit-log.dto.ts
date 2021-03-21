@@ -1,4 +1,4 @@
-import { AuditAction } from './../schemas/audit-log.schema';
+import { AuditAction, AuditResource } from './../schemas/audit-log.schema';
 import { WorkspaceDto } from './../../workspaces/dto/workspace.dto';
 import { UserDto } from './../../users/dto/user.dto';
 import { Exclude, Expose, Type } from 'class-transformer';
@@ -12,7 +12,7 @@ export class AuditLogDto {
   action: AuditAction;
 
   @Expose()
-  resource: string;
+  resource: AuditResource;
 
   @Expose({ name: 'createdAt' })
   date: Date;

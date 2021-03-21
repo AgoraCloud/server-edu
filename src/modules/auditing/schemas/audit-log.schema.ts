@@ -21,6 +21,19 @@ export enum AuditAction {
   RemoveUser = 'REMOVE_USER',
 }
 
+export enum AuditResource {
+  User = 'USER',
+  Permission = 'PERMISSION',
+  AuditLog = 'AUDIT_LOG',
+  Workspace = 'WORKSPACE',
+  Deployment = 'DEPLOYMENT',
+  Project = 'PROJECT',
+  ProjectLane = 'PROJECT_LANE',
+  ProjectTask = 'PROJECT_TASK',
+  WikiSection = 'WIKI_SECTION',
+  WikiPage = 'WIKI_PAGE',
+}
+
 export type AuditLogDocument = AuditLog & mongoose.Document;
 
 @Schema({ collection: 'audit_logs', timestamps: true })
@@ -47,8 +60,22 @@ export class AuditLog {
   })
   action: AuditAction;
 
-  @Prop({ required: true })
-  resource: string;
+  @Prop({
+    required: true,
+    enum: [
+      AuditResource.User,
+      AuditResource.Permission,
+      AuditResource.AuditLog,
+      AuditResource.Workspace,
+      AuditResource.Deployment,
+      AuditResource.Project,
+      AuditResource.ProjectLane,
+      AuditResource.ProjectTask,
+      AuditResource.WikiSection,
+      AuditResource.WikiPage,
+    ],
+  })
+  resource: AuditResource;
 
   @Prop({ required: true })
   userAgent: string;

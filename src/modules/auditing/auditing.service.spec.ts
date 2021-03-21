@@ -1,3 +1,4 @@
+import { AuditLogQueryParamsDto } from './dto/audit-log-query-params.dto';
 import {
   Workspace,
   WorkspaceDocument,
@@ -8,6 +9,8 @@ import {
   AuditLog,
   AuditLogSchema,
   AuditLogDocument,
+  AuditAction,
+  AuditResource,
 } from './schemas/audit-log.schema';
 import {
   getConnectionToken,
@@ -21,11 +24,10 @@ import {
 import { Connection, Model } from 'mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuditingService } from './auditing.service';
-import { Action } from '../authorization/schemas/permission.schema';
 
 let user: UserDocument;
 let workspace: WorkspaceDocument;
-let auditLogId: string;
+let auditLog: AuditLogDocument;
 
 describe('AuditingService', () => {
   let service: AuditingService;
@@ -82,36 +84,56 @@ describe('AuditingService', () => {
 
   describe('create', () => {
     it('should create an audit log', async () => {
-      const auditLog: AuditLog = new AuditLog({
+      const auditLogEntry: AuditLog = new AuditLog({
         isSuccessful: true,
-        actions: [Action.ManageUser],
+        action: AuditAction.Create,
+        resource: AuditResource.Deployment,
         userAgent: 'PostmanRuntime/7.26.10',
         ip: '::1',
         user,
         workspace,
       });
-      const createdAuditLog: AuditLogDocument = await service.create(auditLog);
-      expect(createdAuditLog.isSuccessful).toBe(auditLog.isSuccessful);
-      expect(createdAuditLog.actions).toHaveLength(1);
-      expect(createdAuditLog.actions[0]).toBe(auditLog.actions[0]);
-      expect(createdAuditLog.userAgent).toBe(auditLog.userAgent);
-      expect(createdAuditLog.ip).toBe(auditLog.ip);
+      const createdAuditLog: AuditLogDocument = await service.create(
+        auditLogEntry,
+      );
+      expect(createdAuditLog.isSuccessful).toBe(auditLogEntry.isSuccessful);
+      expect(createdAuditLog.action).toBe(auditLogEntry.action);
+      expect(createdAuditLog.resource).toBe(auditLogEntry.resource);
+      expect(createdAuditLog.userAgent).toBe(auditLogEntry.userAgent);
+      expect(createdAuditLog.ip).toBe(auditLogEntry.ip);
       expect(createdAuditLog.user._id).toEqual(user._id);
       expect(createdAuditLog.workspace._id).toBe(workspace._id);
-      auditLogId = createdAuditLog._id;
+      auditLog = createdAuditLog;
     });
   });
 
   describe('findAll', () => {
     it('should find all audit logs', async () => {
+      const auditLogQueryParamsDto: AuditLogQueryParamsDto = {
+        isSuccessful: `${auditLog.isSuccessful}`,
+        action: auditLog.action,
+        resource: auditLog.resource,
+        userAgent: auditLog.userAgent,
+        ip: auditLog.ip,
+        userId: user._id.toString(),
+        workspaceId: workspace._id.toString(),
+        take: '10',
+        skip: '0',
+      };
       const retrievedAuditLogs: AuditLogDocument[] = await service.findAll(
-        user._id.toString(),
-        workspace._id.toString(),
+        auditLogQueryParamsDto,
       );
       expect(retrievedAuditLogs).toHaveLength(1);
-      expect(retrievedAuditLogs[0]._id).toEqual(auditLogId);
-      expect(retrievedAuditLogs[0].user._id).toEqual(user._id);
-      expect(retrievedAuditLogs[0].workspace._id).toEqual(workspace._id);
+
+      const retrievedAuditLog: AuditLogDocument = retrievedAuditLogs[0];
+      expect(retrievedAuditLog._id).toEqual(auditLog._id);
+      expect(retrievedAuditLog.isSuccessful).toBe(auditLog.isSuccessful);
+      expect(retrievedAuditLog.action).toBe(auditLog.action);
+      expect(retrievedAuditLog.resource).toBe(auditLog.resource);
+      expect(retrievedAuditLog.userAgent).toBe(auditLog.userAgent);
+      expect(retrievedAuditLog.ip).toBe(auditLog.ip);
+      expect(retrievedAuditLog.user._id).toEqual(user._id);
+      expect(retrievedAuditLog.workspace._id).toEqual(workspace._id);
     });
   });
 });
