@@ -1,3 +1,4 @@
+import { DeploymentNotFoundException } from './../../../exceptions/deployment-not-found.exception';
 import { PERMISSIONS_KEY } from './../../../decorators/permissions.decorator';
 import { Reflector } from '@nestjs/core';
 import { Action } from './../schemas/permission.schema';
@@ -38,12 +39,15 @@ export class ProxyAuthorizationGuard implements CanActivate {
     );
     const user: UserDocument = request.user;
 
-    const { canActivate } = await this.authorizationService.can(
+    const { canActivate, isAdmin } = await this.authorizationService.can(
       user,
       permissions,
       deployment.workspace._id,
     );
     if (canActivate) {
+      if (!isAdmin && deployment.user._id.toString() != user._id.toString()) {
+        throw new DeploymentNotFoundException(deploymentId);
+      }
       if (deployment.status !== DeploymentStatus.Running) {
         throw new DeploymentNotRunningException(deploymentId);
       }

@@ -32,7 +32,7 @@ export class AuditingInterceptor implements NestInterceptor {
       .getRequest();
     const response: Response = context.switchToHttp().getResponse();
     return next.handle().pipe(
-      tap(() => {
+      tap(async () => {
         const auditLog: AuditLog = new AuditLog({
           isSuccessful:
             response.statusCode >= 200 && response.statusCode <= 299,
@@ -42,7 +42,7 @@ export class AuditingInterceptor implements NestInterceptor {
           user: request.user,
           workspace: request.workspace,
         });
-        this.auditingService.create(auditLog);
+        await this.auditingService.create(auditLog);
       }),
     );
   }

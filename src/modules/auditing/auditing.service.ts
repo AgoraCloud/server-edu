@@ -5,7 +5,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Query } from 'mongoose';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { removeDays } from 'src/utils/date';
+import { removeDays } from '../../utils/date';
 
 @Injectable()
 export class AuditingService {

@@ -1,3 +1,4 @@
+import { Role } from './../authorization/schemas/permission.schema';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { TokenPayload } from './interfaces/token-payload.interface';
@@ -96,8 +97,8 @@ describe('AuthenticationService', () => {
     usersService = module.get<UsersService>(UsersService);
     tokensService = module.get<TokensService>(TokensService);
     eventEmitter = module.get<EventEmitter2>(EventEmitter2);
-    tokensModel = module.get<Model<TokenDocument>>(getModelToken('Token'));
-    usersModel = module.get<Model<UserDocument>>(getModelToken('User'));
+    tokensModel = module.get<Model<TokenDocument>>(getModelToken(Token.name));
+    usersModel = module.get<Model<UserDocument>>(getModelToken(User.name));
   });
 
   afterAll(async () => {
@@ -118,7 +119,11 @@ describe('AuthenticationService', () => {
     it('should register a user', async () => {
       const usersServiceSpy: jest.SpyInstance<
         Promise<UserDocument>,
-        [createUserDto: CreateUserDto]
+        [
+          createUserDto: CreateUserDto,
+          role?: Role.User | Role.SuperAdmin,
+          verify?: boolean,
+        ]
       > = jest.spyOn(usersService, 'create');
       await service.register(createUserDto);
       expect(usersServiceSpy).toHaveBeenCalledTimes(1);
