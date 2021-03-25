@@ -211,6 +211,34 @@ export class WorkspacesController {
   }
 
   /**
+   * Get the users in a workspace
+   * @param workspaceId the workspace id
+   */
+  @Get(':workspaceId/users')
+  @Permissions(Action.ReadWorkspace)
+  @UseInterceptors(WorkspaceInterceptor)
+  @Audit(AuditAction.ReadUsers, AuditResource.Workspace)
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
+  @ApiOperation({ summary: 'Get the users in a workspace' })
+  @ApiOkResponse({
+    description: 'The users in the workspace have been successfully retrieved',
+    type: WorkspaceDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'The provided workspace id was not valid',
+    type: ExceptionDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
+  @ApiNotFoundResponse({
+    description: 'The workspace with the given id was not found',
+    type: ExceptionDto,
+  })
+  getUsers(@Workspace('_id') workspaceId: string): Promise<WorkspaceDocument> {
+    return this.workspacesService.findOneUsers(workspaceId);
+  }
+
+  /**
    * Add a user to a workspace, accessible by super admins and workspace admins
    * @param workspace the workspace
    * @param addWorkspaceUserDto the user to add
@@ -223,6 +251,7 @@ export class WorkspacesController {
   @ApiOperation({ summary: 'Add a user to a workspace' })
   @ApiOkResponse({
     description: 'The user has been successfully added to the workspace',
+    type: WorkspaceDto,
   })
   @ApiBadRequestResponse({
     description:
@@ -256,6 +285,7 @@ export class WorkspacesController {
   @ApiOperation({ summary: 'Remove a user from a workspace' })
   @ApiOkResponse({
     description: 'The user has been successfully removed from the workspace',
+    type: WorkspaceDto,
   })
   @ApiBadRequestResponse({
     description:

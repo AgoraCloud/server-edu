@@ -61,7 +61,7 @@ export class WorkspacesService {
     let workspacesQuery: Query<
       WorkspaceDocument[],
       WorkspaceDocument
-    > = this.workspaceModel.find().populate('users');
+    > = this.workspaceModel.find();
     if (userId) {
       workspacesQuery = workspacesQuery.where('users').in([userId]);
     }
@@ -80,15 +80,27 @@ export class WorkspacesService {
     let workspaceQuery: Query<
       WorkspaceDocument,
       WorkspaceDocument
-    > = this.workspaceModel
-      .findOne()
-      .where('_id')
-      .equals(workspaceId)
-      .populate('users');
+    > = this.workspaceModel.findOne().where('_id').equals(workspaceId);
     if (userId) {
       workspaceQuery = workspaceQuery.where('users').in([userId]);
     }
     const workspace: WorkspaceDocument = await workspaceQuery.exec();
+    if (!workspace) throw new WorkspaceNotFoundException(workspaceId);
+    return workspace;
+  }
+
+  /**
+   * Find the users in a workspace
+   * @param workspaceId the workspace id
+   */
+  async findOneUsers(workspaceId: string): Promise<WorkspaceDocument> {
+    const workspace: WorkspaceDocument = await this.workspaceModel
+      .findOne()
+      .where('_id')
+      .equals(workspaceId)
+      .select('users')
+      .populate('users')
+      .exec();
     if (!workspace) throw new WorkspaceNotFoundException(workspaceId);
     return workspace;
   }
@@ -203,7 +215,7 @@ export class WorkspacesService {
     const workspaceId: string = workspace._id;
     const userId: string = addWorkspaceUserDto.id;
     // Check if the user is already a member
-    if (workspace.users.findIndex((u) => u._id == userId) !== -1) {
+    if (workspace.users.findIndex((u) => u._id.toString() == userId) !== -1) {
       throw new ExistingWorkspaceUserException(workspaceId, userId);
     }
     const user: UserDocument = await this.usersService.findOne(userId);

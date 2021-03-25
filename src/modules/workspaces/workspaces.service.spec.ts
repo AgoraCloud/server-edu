@@ -34,17 +34,8 @@ const jwtConfig: JwtConfig = {
   },
 };
 
-const user: UserDocument = {
-  _id: Types.ObjectId(),
-  fullName: 'Test User',
-  email: 'test@test.com',
-  password: '',
-  isEnabled: true,
-  isVerified: true,
-} as UserDocument;
-
+let user: UserDocument;
 let workspace: WorkspaceDocument;
-
 let workspaceUser2Id: string;
 
 describe('WorkspacesService', () => {
@@ -89,6 +80,13 @@ describe('WorkspacesService', () => {
     usersService = module.get<UsersService>(UsersService);
     connection = await module.get(getConnectionToken());
     eventEmitter = module.get<EventEmitter2>(EventEmitter2);
+
+    // Create a user
+    user = await usersService.create({
+      fullName: 'Test User',
+      email: 'test@test.com',
+      password: 'Password123',
+    });
   });
 
   afterAll(async () => {
@@ -146,6 +144,35 @@ describe('WorkspacesService', () => {
       );
       expect(retrievedWorkspace._id).toEqual(workspace._id);
       expect(retrievedWorkspace.users[0]._id).toEqual(user._id);
+    });
+  });
+
+  describe('findOneUsers', () => {
+    it('should throw an error if the workspace with the given id was not found', async () => {
+      const workspaceId: string = Types.ObjectId().toHexString();
+      const expectedErrorMessage: string = new WorkspaceNotFoundException(
+        workspaceId,
+      ).message;
+      try {
+        await service.findOneUsers(workspaceId);
+        fail('It should throw an error');
+      } catch (err) {
+        expect(err.message).toBe(expectedErrorMessage);
+      }
+    });
+
+    it('should find the users in the workspace with the given id', async () => {
+      const retrievedWorkspace: WorkspaceDocument = await service.findOneUsers(
+        workspace._id,
+      );
+      expect(retrievedWorkspace._id).toEqual(workspace._id);
+      expect(retrievedWorkspace.users.length).toBe(1);
+      const workspaceUser: UserDocument = retrievedWorkspace.users[0];
+      expect(workspaceUser).toBeTruthy();
+      // The information of the user in the workspace should be populated
+      expect(workspaceUser._id).toEqual(user._id);
+      expect(workspaceUser.fullName).toBe(user.fullName);
+      expect(workspaceUser.email).toBe(user.email);
     });
   });
 
