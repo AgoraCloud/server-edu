@@ -1,7 +1,13 @@
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ProjectLanesService } from './../lanes/lanes.service';
 import { UpdateProjectTaskDto } from './dto/update-task.dto';
 import { ProjectTaskNotFoundException } from './../../../exceptions/project-task-not-found.exception';
 import { CreateProjectTaskDto } from './dto/create-task.dto';
-import { ProjectLaneDocument } from './../lanes/schemas/lane.schema';
+import {
+  ProjectLane,
+  ProjectLaneDocument,
+  ProjectLaneSchema,
+} from './../lanes/schemas/lane.schema';
 import { ProjectDocument } from './../schemas/project.schema';
 import { WorkspaceDocument } from './../../workspaces/schemas/workspace.schema';
 import { UserDocument } from './../../users/schemas/user.schema';
@@ -50,10 +56,13 @@ const projectLane: ProjectLaneDocument = {
   project,
 } as ProjectLaneDocument;
 
+let projectLane2: ProjectLaneDocument;
+
 let projectTaskId: string;
 
 describe('ProjectTasksService', () => {
   let service: ProjectTasksService;
+  let projectLanesService: ProjectLanesService;
   let connection: Connection;
 
   beforeAll(async () => {
@@ -65,12 +74,22 @@ describe('ProjectTasksService', () => {
         MongooseModule.forFeature([
           { name: ProjectTask.name, schema: ProjectTaskSchema },
         ]),
+        MongooseModule.forFeature([
+          { name: ProjectLane.name, schema: ProjectLaneSchema },
+        ]),
       ],
-      providers: [ProjectTasksService],
+      providers: [ProjectTasksService, EventEmitter2, ProjectLanesService],
     }).compile();
 
     service = module.get<ProjectTasksService>(ProjectTasksService);
+    projectLanesService = module.get<ProjectLanesService>(ProjectLanesService);
     connection = await module.get(getConnectionToken());
+
+    // Create a new project lane to test the update project task lane
+    // (i.e. simulate moving a task from one lane to the other)
+    projectLane2 = await projectLanesService.create(user, workspace, project, {
+      name: 'Project Lane 2',
+    });
   });
 
   afterAll(async () => {
@@ -186,31 +205,14 @@ describe('ProjectTasksService', () => {
   });
 
   describe('update', () => {
-    const updateProjectTaskDto: UpdateProjectTaskDto = {
-      title: 'new Project Task',
-      description: 'New project task description',
-    };
-    it('should throw an error if the project task with the given id was not found', async () => {
-      const projectTaskId: string = Types.ObjectId().toHexString();
-      const expectedErrorMessage: string = new ProjectTaskNotFoundException(
-        projectTaskId,
-      ).message;
-      try {
-        await service.update(
-          workspace._id,
-          project._id,
-          projectLane._id,
-          projectTaskId,
-          updateProjectTaskDto,
-          user._id,
-        );
-        fail('It should throw an error');
-      } catch (err) {
-        expect(err.message).toBe(expectedErrorMessage);
-      }
-    });
-
     it('should update the project task', async () => {
+      const updateProjectTaskDto: UpdateProjectTaskDto = {
+        title: 'new Project Task',
+        description: 'New project task description',
+        lane: {
+          id: projectLane2._id,
+        },
+      };
       const updatedProjectTask: ProjectTaskDocument = await service.update(
         workspace._id,
         project._id,
@@ -224,6 +226,7 @@ describe('ProjectTasksService', () => {
       expect(updatedProjectTask.description).toBe(
         updateProjectTaskDto.description,
       );
+      expect(updatedProjectTask.lane._id).toEqual(projectLane2._id);
     });
   });
 
@@ -237,7 +240,7 @@ describe('ProjectTasksService', () => {
         await service.remove(
           workspace._id,
           project._id,
-          projectLane._id,
+          projectLane2._id,
           projectTaskId,
           user._id,
         );
@@ -251,13 +254,13 @@ describe('ProjectTasksService', () => {
       await service.remove(
         workspace._id,
         project._id,
-        projectLane._id,
+        projectLane2._id,
         projectTaskId,
         user._id,
       );
       // Make sure that the project task has been deleted
       const retrievedProjectTasks: ProjectTaskDocument[] = await service.findAll(
-        projectLane._id,
+        projectLane2._id,
         user._id,
         workspace._id,
         project._id,
