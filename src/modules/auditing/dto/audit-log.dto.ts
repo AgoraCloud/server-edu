@@ -9,6 +9,9 @@ export class AuditLogDto {
   isSuccessful: boolean;
 
   @Expose()
+  failureReason?: string;
+
+  @Expose()
   action: AuditAction;
 
   @Expose()

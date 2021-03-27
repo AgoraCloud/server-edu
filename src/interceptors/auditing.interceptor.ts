@@ -16,9 +16,9 @@ import {
   NestInterceptor,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { RequestWithWorkspaceUserAndIsAdmin } from '../utils/requests.interface';
-import { tap } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 
 @Injectable()
 export class AuditingInterceptor implements NestInterceptor {
@@ -41,7 +41,7 @@ export class AuditingInterceptor implements NestInterceptor {
       .getRequest();
     const response: Response = context.switchToHttp().getResponse();
     return next.handle().pipe(
-      tap(async () => {
+      tap(() => {
         const auditLog: AuditLog = new AuditLog({
           isSuccessful:
             response.statusCode >= 200 && response.statusCode <= 299,
@@ -52,7 +52,25 @@ export class AuditingInterceptor implements NestInterceptor {
           user: request.user,
           workspace: request.workspace,
         });
-        await this.auditingService.create(auditLog);
+        this.auditingService.create(auditLog);
+      }),
+      catchError((err: any) => {
+        let failureReason: any = err.response?.message;
+        if (Array.isArray(failureReason)) {
+          failureReason = failureReason.toString();
+        }
+        const auditLog: AuditLog = new AuditLog({
+          isSuccessful: false,
+          failureReason,
+          action: auditAction,
+          resource: auditResource,
+          userAgent: request.get('user-agent') || '',
+          ip: request.ip,
+          user: request.user,
+          workspace: request.workspace,
+        });
+        this.auditingService.create(auditLog);
+        return throwError(err);
       }),
     );
   }

@@ -42,6 +42,9 @@ export class AuditLog {
   @Prop({ required: true })
   isSuccessful: boolean;
 
+  @Prop()
+  failureReason?: string;
+
   @Prop({
     required: true,
     enum: [
