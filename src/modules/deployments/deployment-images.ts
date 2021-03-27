@@ -1,6 +1,7 @@
 import { DeploymentImage } from './schemas/deployment.schema';
 
 export const deploymentImages: DeploymentImage[] = [
+  { name: 'linuxserver/code-server', tag: 'version-v3.9.2' },
   { name: 'linuxserver/code-server', tag: 'version-v3.9.1' },
   { name: 'linuxserver/code-server', tag: 'version-v3.9.0' },
   { name: 'linuxserver/code-server', tag: 'version-v3.8.1' },
