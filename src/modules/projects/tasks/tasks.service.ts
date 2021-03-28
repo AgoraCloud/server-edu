@@ -1,3 +1,4 @@
+import { ProjectLanesService } from './../lanes/lanes.service';
 import { ProjectTaskNotFoundException } from './../../../exceptions/project-task-not-found.exception';
 import { ProjectLaneDocument } from './../lanes/schemas/lane.schema';
 import { ProjectDocument } from './../schemas/project.schema';
@@ -18,6 +19,7 @@ export class ProjectTasksService {
   constructor(
     @InjectModel(ProjectTask.name)
     private readonly projectTasksModel: Model<ProjectTaskDocument>,
+    private readonly projectLanesService: ProjectLanesService,
   ) {}
 
   /**
@@ -131,11 +133,33 @@ export class ProjectTasksService {
     updateProjectTaskDto: UpdateProjectTaskDto,
     userId?: string,
   ): Promise<ProjectTaskDocument> {
+    const projectTask: ProjectTaskDocument = await this.findOne(
+      workspaceId,
+      projectId,
+      projectLaneId,
+      projectTaskId,
+      userId,
+    );
+    // Change the updated fields only
+    projectTask.title = updateProjectTaskDto.title || projectTask.title;
+    projectTask.description =
+      updateProjectTaskDto.description || projectTask.description;
+    const newProjectLaneId: string = updateProjectTaskDto.lane?.id;
+    if (newProjectLaneId && newProjectLaneId != projectLaneId) {
+      const newProjectLane: ProjectLaneDocument = await this.projectLanesService.findOne(
+        workspaceId,
+        projectId,
+        newProjectLaneId,
+        userId,
+      );
+      projectTask.lane = newProjectLane;
+    }
+
     let projectTaskQuery: Query<
-      ProjectTaskDocument,
+      { ok: number; n: number; nModified: number },
       ProjectTaskDocument
     > = this.projectTasksModel
-      .findOneAndUpdate(null, updateProjectTaskDto, { new: true })
+      .updateOne(null, projectTask)
       .where('_id')
       .equals(projectTaskId)
       .where('workspace')
@@ -147,8 +171,7 @@ export class ProjectTasksService {
     if (userId) {
       projectTaskQuery = projectTaskQuery.where('user').equals(userId);
     }
-    const projectTask: ProjectTaskDocument = await projectTaskQuery.exec();
-    if (!projectTask) throw new ProjectTaskNotFoundException(projectTaskId);
+    await projectTaskQuery.exec();
     return projectTask;
   }
 

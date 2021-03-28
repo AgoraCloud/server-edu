@@ -17,6 +17,7 @@ export enum AuditAction {
   Delete = 'DELETE',
   LogIn = 'LOG_IN',
   LogOut = 'LOG_OUT',
+  ReadUsers = 'READ_USERS',
   AddUser = 'ADD_USER',
   RemoveUser = 'REMOVE_USER',
 }
@@ -41,6 +42,9 @@ export class AuditLog {
   @Prop({ required: true })
   isSuccessful: boolean;
 
+  @Prop()
+  failureReason?: string;
+
   @Prop({
     required: true,
     enum: [
@@ -54,6 +58,7 @@ export class AuditLog {
       AuditAction.Delete,
       AuditAction.LogIn,
       AuditAction.LogOut,
+      AuditAction.ReadUsers,
       AuditAction.AddUser,
       AuditAction.RemoveUser,
     ],
