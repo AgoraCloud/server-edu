@@ -31,26 +31,24 @@ export class JwtAuthenticationGuard extends AuthGuard('jwt') {
       // Check the access token
       const accessToken: string = request.cookies?.jwt;
       if (!accessToken) throw new UnauthorizedException();
-      let isValidAccessToken: TokenPayload;
       try {
-        isValidAccessToken = this.authenticationService.validateJwtToken(
-          accessToken,
-        );
+        if (this.authenticationService.validateJwtToken(accessToken)) {
+          return this.activate(context);
+        }
       } catch (err) {
         // Catch TokenExpiredError, do nothing
       }
-      if (isValidAccessToken) return this.activate(context);
 
       // Check the refresh token
       const refreshToken: string = request.cookies?.jwt_refresh;
       if (!refreshToken) throw new UnauthorizedException();
-      const isValidRefreshToken: TokenPayload = this.authenticationService.validateJwtRefreshToken(
+      const decodedRefreshToken: TokenPayload = this.authenticationService.validateJwtRefreshToken(
         refreshToken,
       );
-      if (!isValidRefreshToken) throw new UnauthorizedException();
+      if (!decodedRefreshToken) throw new UnauthorizedException();
 
       // Check if the user has the refresh token
-      const email: string = isValidRefreshToken.email;
+      const email: string = decodedRefreshToken.email;
       const user: UserDocument = await this.userService.findByEmailAndRefreshToken(
         email,
         refreshToken,
@@ -69,6 +67,7 @@ export class JwtAuthenticationGuard extends AuthGuard('jwt') {
       );
       return this.activate(context);
     } catch (err) {
+      // Something went wrong, clear the users access and refresh tokens
       response.clearCookie(
         accessTokenConstants.name,
         accessTokenConstants.cookieOptions,
@@ -85,7 +84,7 @@ export class JwtAuthenticationGuard extends AuthGuard('jwt') {
     return super.canActivate(context) as Promise<boolean>;
   }
 
-  handleRequest(err, user) {
+  handleRequest(err: any, user: any): any {
     if (err || !user) throw new UnauthorizedException();
     return user;
   }
