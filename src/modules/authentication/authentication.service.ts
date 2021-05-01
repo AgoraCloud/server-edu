@@ -154,9 +154,7 @@ export class AuthenticationService {
       changePasswordDto.token,
       TokenType.ChangePassword,
     );
-    if (this.tokensService.isTokenExpired(token)) {
-      throw new TokenExpiredException(token._id);
-    }
+    this.tokensService.isTokenExpired(token);
     await this.userService.updatePassword(
       token.user._id,
       changePasswordDto.password,
@@ -176,9 +174,7 @@ export class AuthenticationService {
       verifyAccountDto.token,
       TokenType.VerifyAccount,
     );
-    if (this.tokensService.isTokenExpired(token)) {
-      throw new TokenExpiredException(token._id);
-    }
+    this.tokensService.isTokenExpired(token);
     await this.userService.verify(token.user._id);
   }
 }

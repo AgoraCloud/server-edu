@@ -1,3 +1,4 @@
+import { TokenExpiredException } from './../../exceptions/token-expired.exception';
 import { UserDeletedEvent } from './../../events/user-deleted.event';
 import { OnEvent } from '@nestjs/event-emitter';
 import { TokenNotFoundException } from './../../exceptions/token-not-found.exception';
@@ -56,8 +57,10 @@ export class TokensService {
    * Checks if a token is expired
    * @param token the token to check
    */
-  isTokenExpired(token: TokenDocument): boolean {
-    return token.expiresAt < new Date();
+  isTokenExpired(token: TokenDocument): void {
+    if (token.expiresAt < new Date()) {
+      throw new TokenExpiredException(token._id);
+    }
   }
 
   /**
