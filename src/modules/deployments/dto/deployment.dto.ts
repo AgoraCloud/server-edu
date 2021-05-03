@@ -1,5 +1,8 @@
 import { BaseDto } from './../../../utils/base.dto';
-import { DeploymentStatus } from './../schemas/deployment.schema';
+import {
+  DeploymentStatus,
+  DeploymentType,
+} from './../schemas/deployment.schema';
 import { UserDto } from './../../users/dto/user.dto';
 import { WorkspaceDto } from './../../workspaces/dto/workspace.dto';
 import { Exclude, Expose, Type } from 'class-transformer';
@@ -19,14 +22,17 @@ export class DeploymentResourcesDto {
 @Exclude()
 export class DeploymentImageDto {
   @Expose()
-  readonly name: string;
+  readonly type: DeploymentType;
 
   @Expose()
-  readonly tag: string;
+  readonly version: string;
 }
 
 @Exclude()
 export class DeploymentPropertiesDto {
+  @Expose()
+  readonly isFavorite?: boolean;
+
   @Expose()
   @Type(() => DeploymentImageDto)
   readonly image: DeploymentImageDto;

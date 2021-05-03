@@ -1,14 +1,9 @@
-import { DeploymentImage } from './schemas/deployment.schema';
+import { DeploymentImage, DeploymentType } from './schemas/deployment.schema';
 
 export const deploymentImages: DeploymentImage[] = [
-  { name: 'linuxserver/code-server', tag: 'version-v3.9.3' },
-  { name: 'linuxserver/code-server', tag: 'version-v3.9.2' },
-  { name: 'linuxserver/code-server', tag: 'version-v3.9.1' },
-  { name: 'linuxserver/code-server', tag: 'version-v3.9.0' },
-  { name: 'linuxserver/code-server', tag: 'version-v3.8.1' },
-  { name: 'linuxserver/code-server', tag: 'version-v3.8.0' },
-  { name: 'linuxserver/code-server', tag: 'version-v3.7.4' },
-  { name: 'linuxserver/code-server', tag: 'version-v3.7.3' },
-  { name: 'linuxserver/code-server', tag: 'version-v3.7.2' },
-  { name: 'linuxserver/code-server', tag: 'version-v3.7.1' },
+  // VSCode Deployments
+  { type: DeploymentType.VSCode, version: '3.9.3' },
+  { type: DeploymentType.VSCode, version: '3.9.2' },
+  { type: DeploymentType.VSCode, version: '3.9.1' },
+  { type: DeploymentType.VSCode, version: '3.9.0' },
 ];

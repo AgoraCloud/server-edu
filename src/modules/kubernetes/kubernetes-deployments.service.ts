@@ -1,3 +1,7 @@
+import {
+  DeploymentImage,
+  DeploymentType,
+} from './../deployments/schemas/deployment.schema';
 import { DeploymentProperties } from '../deployments/schemas/deployment.schema';
 import { UpdateDeploymentResourcesDto } from '../deployments/dto/update-deployment.dto';
 import { Inject, Injectable } from '@nestjs/common';
@@ -88,7 +92,7 @@ export class KubernetesDeploymentsService {
             containers: [
               {
                 name: resourceName,
-                image: `${deploymentProperties.image.name}:${deploymentProperties.image.tag}`,
+                image: this.generateContainerImage(deploymentProperties.image),
                 imagePullPolicy: 'Always',
                 resources: {
                   limits: {
@@ -197,5 +201,16 @@ export class KubernetesDeploymentsService {
       generateResourceName(deploymentId),
       namespace,
     );
+  }
+
+  /**
+   * Generates a container image from the given deployment type and version
+   * @param deploymentImage the deployment image to convert
+   * @returns a container image
+   */
+  private generateContainerImage(deploymentImage: DeploymentImage): string {
+    if (deploymentImage.type === DeploymentType.VSCode) {
+      return `linuxserver/code-server:version-v${deploymentImage.version}`;
+    }
   }
 }

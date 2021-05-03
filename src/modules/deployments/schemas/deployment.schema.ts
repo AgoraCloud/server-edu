@@ -17,6 +17,10 @@ export enum DeploymentStatus {
   Unknown = 'UNKNOWN',
 }
 
+export enum DeploymentType {
+  VSCode = 'VSCODE',
+}
+
 export class DeploymentResources {
   @Prop({ required: true, min: 1 })
   cpuCount: number;
@@ -33,11 +37,14 @@ export class DeploymentResources {
 }
 
 export class DeploymentImage {
-  @Prop({ required: true })
-  name: string;
+  @Prop({
+    required: true,
+    enum: [DeploymentType.VSCode],
+  })
+  type: DeploymentType;
 
   @Prop({ required: true })
-  tag: string;
+  version: string;
 
   constructor(partial: Partial<DeploymentImage>) {
     Object.assign(this, partial);
@@ -45,6 +52,9 @@ export class DeploymentImage {
 }
 
 export class DeploymentProperties {
+  @Prop({ default: false })
+  isFavorite?: boolean;
+
   @Prop({ required: true, type: DeploymentImage })
   image: DeploymentImage;
 

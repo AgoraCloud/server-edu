@@ -14,6 +14,7 @@ import * as HttpProxy from 'http-proxy';
 import { Server } from 'http';
 import { Socket } from 'net';
 import { resourcePrefix } from '../kubernetes/helpers';
+import { IncomingMessage, ServerResponse } from 'node:http';
 
 @Injectable()
 export class ProxyService implements OnModuleInit {
@@ -32,12 +33,19 @@ export class ProxyService implements OnModuleInit {
    * Handle proxy errors
    */
   private onProxyError(): void {
-    this.httpProxy.on('error', (err: Error, req: Request, res: Response) => {
-      const exception: InternalServerErrorException = new InternalServerErrorException(
-        `Proxy Error`,
-      );
-      res.status(exception.getStatus()).json(exception.getResponse());
-    });
+    this.httpProxy.on(
+      'error',
+      (err: Error, req: IncomingMessage, res: ServerResponse) => {
+        const exception: InternalServerErrorException = new InternalServerErrorException(
+          `Proxy Error`,
+        );
+        res
+          .writeHead(exception.getStatus(), {
+            'Content-Type': 'application/json',
+          })
+          .end(exception.getResponse());
+      },
+    );
   }
 
   /**

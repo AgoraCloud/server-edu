@@ -2,7 +2,6 @@ import { accessTokenConstants, refreshTokenConstants } from './constants';
 import { PasswordChangedEvent } from '../../events/password-changed.event';
 import { ForgotPasswordEvent } from '../../events/forgot-password.event';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { TokenExpiredException } from './../../exceptions/token-expired.exception';
 import { TokenType, TokenDocument } from '../tokens/schemas/token.schema';
 import { TokensService } from './../tokens/tokens.service';
 import { VerifyAccountDto } from './dto/verify-account.dto';

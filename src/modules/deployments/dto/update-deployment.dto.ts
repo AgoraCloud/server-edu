@@ -7,6 +7,7 @@ import {
   Min,
   IsInt,
   ValidateNested,
+  IsBoolean,
 } from 'class-validator';
 
 export class UpdateDeploymentResourcesDto {
@@ -22,6 +23,10 @@ export class UpdateDeploymentResourcesDto {
 }
 
 export class UpdateDeploymentPropertiesDto {
+  @IsBoolean()
+  @IsOptional()
+  readonly isFavorite?: boolean;
+
   @IsOptional()
   @ValidateNested()
   @Type(() => UpdateDeploymentResourcesDto)

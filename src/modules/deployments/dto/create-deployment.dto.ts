@@ -1,5 +1,8 @@
 import { deploymentImages } from './../deployment-images';
-import { DeploymentImage } from './../schemas/deployment.schema';
+import {
+  DeploymentImage,
+  DeploymentType,
+} from './../schemas/deployment.schema';
 import { Type } from 'class-transformer';
 import {
   IsDefined,
@@ -13,6 +16,8 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
   Validate,
+  IsBoolean,
+  IsEnum,
 } from 'class-validator';
 
 /**
@@ -20,13 +25,13 @@ import {
  */
 @ValidatorConstraint({ name: 'isValidDeploymentImage', async: false })
 class IsValidDeploymentImage implements ValidatorConstraintInterface {
-  validate(image: DeploymentImage) {
+  validate(image: DeploymentImage): boolean {
     return (
       image &&
-      image.name &&
-      image.tag &&
+      image.type &&
+      image.version &&
       deploymentImages.findIndex(
-        (i) => i.name === image.name && i.tag === image.tag,
+        (i) => i.type === image.type && i.version === image.version,
       ) !== -1
     );
   }
@@ -39,11 +44,12 @@ class IsValidDeploymentImage implements ValidatorConstraintInterface {
 export class CreateDeploymentImageDto {
   @IsString()
   @IsNotEmpty()
-  readonly name: string;
+  @IsEnum(DeploymentType)
+  readonly type: DeploymentType;
 
   @IsString()
   @IsNotEmpty()
-  readonly tag: string;
+  readonly version: string;
 }
 
 export class CreateDeploymentResourcesDto {
@@ -62,6 +68,10 @@ export class CreateDeploymentResourcesDto {
 }
 
 export class CreateDeploymentPropertiesDto {
+  @IsBoolean()
+  @IsOptional()
+  readonly isFavorite?: boolean;
+
   @IsDefined()
   @ValidateNested()
   @Type(() => CreateDeploymentImageDto)
