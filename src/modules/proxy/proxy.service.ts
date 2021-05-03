@@ -43,7 +43,7 @@ export class ProxyService implements OnModuleInit {
           .writeHead(exception.getStatus(), {
             'Content-Type': 'application/json',
           })
-          .end(exception.getResponse());
+          .end(JSON.stringify(exception.getResponse()));
       },
     );
   }

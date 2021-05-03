@@ -100,7 +100,7 @@ import { AuditingModule } from './modules/auditing/auditing.module';
     EventEmitterModule.forRoot(),
     MailModule,
     DeploymentsModule,
-    KubernetesModule,
+    // KubernetesModule,
     ProxyModule,
     HealthModule,
     LoggerModule,
