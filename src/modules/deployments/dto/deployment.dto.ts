@@ -54,6 +54,12 @@ export class DeploymentDto extends BaseDto {
   readonly failureReason?: string;
 
   @Expose()
+  readonly createdAt: Date;
+
+  @Expose()
+  readonly updatedAt: Date;
+
+  @Expose()
   @Type(() => DeploymentPropertiesDto)
   readonly properties: DeploymentPropertiesDto;
 

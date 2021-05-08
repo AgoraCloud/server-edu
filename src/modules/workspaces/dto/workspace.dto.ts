@@ -27,6 +27,12 @@ export class WorkspaceDto extends BaseDto {
   readonly name: string;
 
   @Expose()
+  readonly createdAt: Date;
+
+  @Expose()
+  readonly updatedAt: Date;
+
+  @Expose()
   @Type(() => WorkspacePropertiesDto)
   readonly properties?: WorkspacePropertiesDto;
 

@@ -12,6 +12,12 @@ export class ProjectDto extends BaseDto {
   readonly description: string;
 
   @Expose()
+  readonly createdAt: Date;
+
+  @Expose()
+  readonly updatedAt: Date;
+
+  @Expose()
   @Type(() => UserDto)
   readonly user: UserDto;
 

@@ -10,6 +10,12 @@ export class ProjectLaneDto extends BaseDto {
   readonly name: string;
 
   @Expose()
+  readonly createdAt: Date;
+
+  @Expose()
+  readonly updatedAt: Date;
+
+  @Expose()
   @Type(() => UserDto)
   readonly user: UserDto;
 

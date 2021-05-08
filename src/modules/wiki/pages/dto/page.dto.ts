@@ -13,6 +13,12 @@ export class WikiPageDto extends BaseDto {
   readonly body: string;
 
   @Expose()
+  readonly createdAt: Date;
+
+  @Expose()
+  readonly updatedAt: Date;
+
+  @Expose()
   @Type(() => WorkspaceDto)
   readonly workspace: WorkspaceDto;
 

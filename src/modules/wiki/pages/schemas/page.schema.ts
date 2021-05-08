@@ -13,7 +13,7 @@ import {
 
 export type WikiPageDocument = WikiPage & Document;
 
-@Schema({ collection: 'wiki_pages' })
+@Schema({ collection: 'wiki_pages', timestamps: true })
 export class WikiPage {
   @Prop({ required: true, minlength: 1 })
   title: string;

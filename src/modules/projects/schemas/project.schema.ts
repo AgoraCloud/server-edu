@@ -8,7 +8,7 @@ import * as mongoose from 'mongoose';
 
 export type ProjectDocument = Project & mongoose.Document;
 
-@Schema({ collection: 'projects' })
+@Schema({ collection: 'projects', timestamps: true })
 export class Project {
   @Prop({ required: true, minlength: 4 })
   name: string;

@@ -9,6 +9,12 @@ export class WikiSectionDto extends BaseDto {
   readonly name: string;
 
   @Expose()
+  readonly createdAt: Date;
+
+  @Expose()
+  readonly updatedAt: Date;
+
+  @Expose()
   @Type(() => WorkspaceDto)
   readonly workspace: WorkspaceDto;
 
