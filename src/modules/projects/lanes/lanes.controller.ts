@@ -20,7 +20,6 @@ import { FindOneParams } from './../../../utils/find-one-params';
 import { ProjectDocument } from './../schemas/project.schema';
 import { WorkspaceDocument } from './../../workspaces/schemas/workspace.schema';
 import { UserDocument } from './../../users/schemas/user.schema';
-import { TransformInterceptor } from './../../../interceptors/transform.interceptor';
 import { ProjectInterceptor } from './../../../interceptors/project.interceptor';
 import { WorkspaceInterceptor } from './../../../interceptors/workspace.interceptor';
 import {
@@ -43,16 +42,14 @@ import { Project } from '../../../decorators/project.decorator';
 import { ProjectLaneDocument } from './schemas/lane.schema';
 import { Audit } from '../../../decorators/audit.decorator';
 import { AuditAction } from '../../auditing/schemas/audit-log.schema';
+import { Transform } from '../../../decorators/transform.decorator';
 
 @ApiCookieAuth()
 @ApiTags('Project Lanes')
 @Auth(Action.ReadWorkspace, Action.ReadProject)
 @Controller('api/workspaces/:workspaceId/projects/:projectId/lanes')
-@UseInterceptors(
-  WorkspaceInterceptor,
-  ProjectInterceptor,
-  new TransformInterceptor(ProjectLaneDto),
-)
+@UseInterceptors(WorkspaceInterceptor, ProjectInterceptor)
+@Transform(ProjectLaneDto)
 export class ProjectLanesController {
   constructor(private readonly projectLanesService: ProjectLanesService) {}
 

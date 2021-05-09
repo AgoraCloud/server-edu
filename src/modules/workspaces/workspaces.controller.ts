@@ -19,7 +19,6 @@ import {
   ApiForbiddenResponse,
 } from '@nestjs/swagger';
 import { WorkspaceDto } from './dto/workspace.dto';
-import { TransformInterceptor } from './../../interceptors/transform.interceptor';
 import { WorkspaceDocument } from './schemas/workspace.schema';
 import { UserDocument } from '../users/schemas/user.schema';
 import { FindOneParams } from './../../utils/find-one-params';
@@ -41,12 +40,13 @@ import { IsAdmin } from '../../decorators/is-admin.decorator';
 import { Workspace } from '../../decorators/workspace.decorator';
 import { Audit } from '../../decorators/audit.decorator';
 import { AuditAction } from '../auditing/schemas/audit-log.schema';
+import { Transform } from '../../decorators/transform.decorator';
 
 @ApiCookieAuth()
 @ApiTags('Workspaces')
 @Controller('api/workspaces')
 @Auth()
-@UseInterceptors(new TransformInterceptor(WorkspaceDto))
+@Transform(WorkspaceDto)
 export class WorkspacesController {
   constructor(private readonly workspacesService: WorkspacesService) {}
 

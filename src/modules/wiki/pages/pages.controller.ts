@@ -22,7 +22,6 @@ import { WorkspaceDocument } from './../../workspaces/schemas/workspace.schema';
 import { UserDocument } from './../../users/schemas/user.schema';
 import { WikiSectionInterceptor } from './../../../interceptors/wiki-section.interceptor';
 import { WikiPageDto } from './dto/page.dto';
-import { TransformInterceptor } from './../../../interceptors/transform.interceptor';
 import { WorkspaceInterceptor } from './../../../interceptors/workspace.interceptor';
 import {
   Controller,
@@ -43,16 +42,14 @@ import { WikiSection } from '../../../decorators/wiki-section.decorator';
 import { WikiPageDocument } from './schemas/page.schema';
 import { Audit } from '../../../decorators/audit.decorator';
 import { AuditAction } from '../../auditing/schemas/audit-log.schema';
+import { Transform } from '../../../decorators/transform.decorator';
 
 @ApiCookieAuth()
 @ApiTags('Wiki Pages')
 @Auth(Action.ReadWorkspace, Action.ReadWikiSection)
 @Controller('api/workspaces/:workspaceId/sections/:sectionId/pages')
-@UseInterceptors(
-  WorkspaceInterceptor,
-  WikiSectionInterceptor,
-  new TransformInterceptor(WikiPageDto),
-)
+@UseInterceptors(WorkspaceInterceptor, WikiSectionInterceptor)
+@Transform(WikiPageDto)
 export class WikiPagesController {
   constructor(private readonly wikiPagesService: WikiPagesService) {}
 

@@ -1,7 +1,6 @@
 import { AuditResource } from './schemas/audit-log.schema';
 import { ExceptionDto } from './../../utils/base.dto';
 import { AuditLogDto } from './dto/audit-log.dto';
-import { TransformInterceptor } from './../../interceptors/transform.interceptor';
 import { AuditAction, AuditLogDocument } from './schemas/audit-log.schema';
 import { WorkspaceInterceptor } from './../../interceptors/workspace.interceptor';
 import { Controller, Get, Param, Query, UseInterceptors } from '@nestjs/common';
@@ -23,12 +22,13 @@ import {
 } from '@nestjs/swagger';
 import { Audit } from '../../decorators/audit.decorator';
 import { AuditLogQueryParamsDto } from './dto/audit-log-query-params.dto';
+import { Transform } from '../../decorators/transform.decorator';
 
 @ApiCookieAuth()
 @ApiTags('Auditing')
 @Auth()
 @Controller('api')
-@UseInterceptors(new TransformInterceptor(AuditLogDto))
+@Transform(AuditLogDto)
 export class AuditingController {
   constructor(private readonly auditingService: AuditingService) {}
 

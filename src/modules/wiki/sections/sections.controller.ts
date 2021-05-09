@@ -20,7 +20,6 @@ import { WorkspaceDocument } from './../../workspaces/schemas/workspace.schema';
 import { FindOneParams } from './../../../utils/find-one-params';
 import { UserDocument } from './../../users/schemas/user.schema';
 import { WikiSectionDto } from './dto/section.dto';
-import { TransformInterceptor } from './../../../interceptors/transform.interceptor';
 import {
   Controller,
   Get,
@@ -40,12 +39,14 @@ import { Workspace } from '../../../decorators/workspace.decorator';
 import { WikiSectionDocument } from './schemas/section.schema';
 import { Audit } from '../../../decorators/audit.decorator';
 import { AuditAction } from '../../auditing/schemas/audit-log.schema';
+import { Transform } from '../../../decorators/transform.decorator';
 
 @ApiCookieAuth()
 @ApiTags('Wiki Sections')
 @Auth(Action.ReadWorkspace)
 @Controller('api/workspaces/:workspaceId/sections')
-@UseInterceptors(WorkspaceInterceptor, new TransformInterceptor(WikiSectionDto))
+@UseInterceptors(WorkspaceInterceptor)
+@Transform(WikiSectionDto)
 export class WikiSectionsController {
   constructor(private readonly wikiSectionsService: WikiSectionsService) {}
 

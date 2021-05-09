@@ -17,7 +17,6 @@ import { FindOneParams } from './../../utils/find-one-params';
 import { WorkspaceDocument } from './../workspaces/schemas/workspace.schema';
 import { UserDocument } from './../users/schemas/user.schema';
 import { ProjectDto } from './dto/project.dto';
-import { TransformInterceptor } from './../../interceptors/transform.interceptor';
 import { WorkspaceInterceptor } from './../../interceptors/workspace.interceptor';
 import {
   Controller,
@@ -42,12 +41,14 @@ import {
   AuditAction,
   AuditResource,
 } from '../auditing/schemas/audit-log.schema';
+import { Transform } from '../../decorators/transform.decorator';
 
 @ApiCookieAuth()
 @ApiTags('Projects')
 @Auth(Action.ReadWorkspace)
 @Controller('api/workspaces/:workspaceId/projects')
-@UseInterceptors(WorkspaceInterceptor, new TransformInterceptor(ProjectDto))
+@UseInterceptors(WorkspaceInterceptor)
+@Transform(ProjectDto)
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 

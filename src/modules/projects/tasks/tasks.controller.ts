@@ -22,7 +22,6 @@ import { ProjectDocument } from './../schemas/project.schema';
 import { WorkspaceDocument } from './../../workspaces/schemas/workspace.schema';
 import { UserDocument } from './../../users/schemas/user.schema';
 import { ProjectTaskDocument } from './schemas/task.schema';
-import { TransformInterceptor } from './../../../interceptors/transform.interceptor';
 import { ProjectTaskDto } from './dto/task.dto';
 import { ProjectLaneInterceptor } from './../../../interceptors/project-lane.interceptor';
 import { ProjectInterceptor } from './../../../interceptors/project.interceptor';
@@ -46,6 +45,7 @@ import { Project } from '../../../decorators/project.decorator';
 import { ProjectLane } from '../../../decorators/project-lane.decorator';
 import { Audit } from '../../../decorators/audit.decorator';
 import { AuditAction } from '../../auditing/schemas/audit-log.schema';
+import { Transform } from '../../../decorators/transform.decorator';
 
 @ApiCookieAuth()
 @ApiTags('Project Tasks')
@@ -57,8 +57,8 @@ import { AuditAction } from '../../auditing/schemas/audit-log.schema';
   WorkspaceInterceptor,
   ProjectInterceptor,
   ProjectLaneInterceptor,
-  new TransformInterceptor(ProjectTaskDto),
 )
+@Transform(ProjectTaskDto)
 export class ProjectTasksController {
   constructor(private readonly projectTasksService: ProjectTasksService) {}
 

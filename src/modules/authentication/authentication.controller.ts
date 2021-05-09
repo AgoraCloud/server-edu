@@ -1,7 +1,6 @@
 import { ExceptionDto } from './../../utils/base.dto';
 import { SignInDto } from './dto/sign-in.dto';
 import { UserDto } from './../users/dto/user.dto';
-import { TransformInterceptor } from './../../interceptors/transform.interceptor';
 import { MongoExceptionFilter } from './../../filters/mongo-exception.filter';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { VerifyAccountDto } from './dto/verify-account.dto';
@@ -42,6 +41,7 @@ import {
   AuditAction,
   AuditResource,
 } from '../auditing/schemas/audit-log.schema';
+import { Transform } from '../../decorators/transform.decorator';
 
 @Controller('api/auth')
 @ApiTags('Authentication')
@@ -76,7 +76,7 @@ export class AuthenticationController {
   @UseGuards(LocalAuthenticationGuard)
   @Audit(AuditAction.LogIn, AuditResource.User)
   @ApiOperation({ summary: 'Log in' })
-  @UseInterceptors(new TransformInterceptor(UserDto))
+  @Transform(UserDto)
   @ApiCreatedResponse({
     description: 'The user has been successfully logged in',
   })

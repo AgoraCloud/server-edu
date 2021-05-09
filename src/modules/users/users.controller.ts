@@ -17,7 +17,6 @@ import {
   ApiCreatedResponse,
 } from '@nestjs/swagger';
 import { UserDto, AdminUserDto } from './dto/user.dto';
-import { TransformInterceptor } from './../../interceptors/transform.interceptor';
 import {
   Controller,
   Get,
@@ -36,12 +35,13 @@ import { UserDocument } from '../users/schemas/user.schema';
 import { Auth } from '../../decorators/auth.decorator';
 import { Audit } from '../../decorators/audit.decorator';
 import { AuditAction } from '../auditing/schemas/audit-log.schema';
+import { Transform } from '../../decorators/transform.decorator';
 
 @ApiCookieAuth()
 @ApiTags('Users')
 @Auth()
 @Controller('api/user')
-@UseInterceptors(new TransformInterceptor(UserDto))
+@Transform(UserDto)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -103,7 +103,7 @@ export class UsersController {
 @ApiTags('Users')
 @Auth(Action.ManageUser)
 @Controller('api/users')
-@UseInterceptors(new TransformInterceptor(AdminUserDto))
+@Transform(AdminUserDto)
 export class AdminUsersController {
   constructor(private readonly usersService: UsersService) {}
 
