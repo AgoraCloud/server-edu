@@ -19,11 +19,24 @@ import {
   WorkspaceSchema,
 } from './schemas/workspace.schema';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { getConnectionToken, MongooseModule } from '@nestjs/mongoose';
+import {
+  getConnectionToken,
+  getModelToken,
+  MongooseModule,
+} from '@nestjs/mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
 import { WorkspacesService } from './workspaces.service';
-import { Connection, Types } from 'mongoose';
+import { Connection, Model, Types } from 'mongoose';
 import { JwtConfig } from '../../config/configuration.interface';
+import { AuthorizationService } from '../authorization/authorization.service';
+import {
+  Permission,
+  PermissionDocument,
+  PermissionSchema,
+  Role,
+  WorkspaceRolesAndPermissions,
+} from '../authorization/schemas/permission.schema';
+import { MinOneAdminUserInWorkspaceException } from './../../exceptions/min-one-admin-user-in-workspace.exception';
 
 const jwtConfig: JwtConfig = {
   access: {
@@ -35,14 +48,15 @@ const jwtConfig: JwtConfig = {
 };
 
 let user: UserDocument;
+let user2: UserDocument;
 let workspace: WorkspaceDocument;
-let workspaceUser2Id: string;
 
 describe('WorkspacesService', () => {
   let service: WorkspacesService;
   let usersService: UsersService;
   let connection: Connection;
   let eventEmitter: EventEmitter2;
+  let permissionsModel: Model<PermissionDocument>;
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -55,6 +69,9 @@ describe('WorkspacesService', () => {
         ]),
         MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
         MongooseModule.forFeature([{ name: Token.name, schema: TokenSchema }]),
+        MongooseModule.forFeature([
+          { name: Permission.name, schema: PermissionSchema },
+        ]),
       ],
       providers: [
         WorkspacesService,
@@ -71,6 +88,7 @@ describe('WorkspacesService', () => {
             },
           },
         },
+        AuthorizationService,
         TokensService,
         EventEmitter2,
       ],
@@ -80,11 +98,21 @@ describe('WorkspacesService', () => {
     usersService = module.get<UsersService>(UsersService);
     connection = await module.get(getConnectionToken());
     eventEmitter = module.get<EventEmitter2>(EventEmitter2);
+    permissionsModel = module.get<Model<PermissionDocument>>(
+      getModelToken(Permission.name),
+    );
 
     // Create a user
     user = await usersService.create({
       fullName: 'Test User',
       email: 'test@test.com',
+      password: 'Password123',
+    });
+
+    // Create another test user
+    user2 = await usersService.create({
+      fullName: 'Test User 2',
+      email: 'test2@test.com',
       password: 'Password123',
     });
   });
@@ -239,38 +267,80 @@ describe('WorkspacesService', () => {
     });
 
     it('should add the user to the workspace', async () => {
-      // Create a new user
-      const newUser: UserDocument = await usersService.create({
-        fullName: 'Test User 2',
-        email: 'test2@test.com',
-        password: 'Password123',
-      });
-      workspaceUser2Id = newUser._id;
       const eventEmitterSpy: jest.SpyInstance<boolean, any[]> = jest.spyOn(
         eventEmitter,
         'emit',
       );
       const updatedWorkspace: WorkspaceDocument = await service.addUser(
         workspace,
-        { id: workspaceUser2Id },
+        { id: user2._id },
       );
       expect(updatedWorkspace.users.length).toBe(2);
-      expect(updatedWorkspace.users[1]._id).toEqual(workspaceUser2Id);
+      expect(updatedWorkspace.users[1]._id).toEqual(user2._id);
       expect(eventEmitterSpy).toHaveBeenCalledTimes(1);
+      workspace = updatedWorkspace;
     });
   });
 
   describe('removeUser', () => {
+    beforeAll(async () => {
+      // Create permissions for user
+      const userPermission: Permission = new Permission({
+        user,
+        roles: [Role.User],
+      });
+      userPermission.workspaces = new Map<
+        string,
+        WorkspaceRolesAndPermissions
+      >();
+      userPermission.workspaces.set(workspace._id, {
+        roles: [Role.WorkspaceAdmin],
+        permissions: [],
+      });
+      await permissionsModel.create(userPermission);
+
+      // Create permissions for user2
+      const user2Permission = new Permission({
+        user: user2,
+        roles: [Role.User],
+      });
+      user2Permission.workspaces = new Map<
+        string,
+        WorkspaceRolesAndPermissions
+      >();
+      user2Permission.workspaces.set(workspace._id, {
+        roles: [Role.User],
+        permissions: [],
+      });
+      await permissionsModel.create(user2Permission);
+    });
+
     it('should remove the user from the workspace', async () => {
       const updatedWorkspace: WorkspaceDocument = await service.removeUser(
         workspace,
-        workspaceUser2Id,
+        user2._id,
       );
       expect(updatedWorkspace.users.length).toBe(1);
+      workspace = updatedWorkspace;
     });
 
     it('should throw an error if the workspace will have no members left if the user was removed', async () => {
       const expectedErrorMessage: string = new MinOneUserInWorkspaceException(
+        workspace._id,
+      ).message;
+      try {
+        await service.removeUser(workspace, user._id);
+        fail('It should throw an error');
+      } catch (err) {
+        expect(err.message).toBe(expectedErrorMessage);
+      }
+    });
+
+    it('should throw an error if the workspace will have no admin members left if the user was removed', async () => {
+      // Re-add user2 temporarily
+      workspace = await service.addUser(workspace, { id: user2._id });
+
+      const expectedErrorMessage: string = new MinOneAdminUserInWorkspaceException(
         workspace._id,
       ).message;
       try {

@@ -23,6 +23,7 @@ import { Connection, Types, Model } from 'mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthorizationService } from './authorization.service';
 import { InternalServerErrorException } from '@nestjs/common';
+import { WorkspaceNotFoundException } from './../../exceptions/workspace-not-found.exception';
 
 const user: UserDocument = {
   _id: Types.ObjectId(),
@@ -169,8 +170,7 @@ describe('AuthorizationService', () => {
 
     it('should throw an error if the permissions for the given workspace id and user were not found', async () => {
       const workspaceId: string = Types.ObjectId().toHexString();
-      const expectedErrorMessage: string = new UserNotInWorkspaceException(
-        user._id,
+      const expectedErrorMessage: string = new WorkspaceNotFoundException(
         workspaceId,
       ).message;
       try {

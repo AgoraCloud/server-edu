@@ -22,6 +22,9 @@ import { UserDocument } from '../users/schemas/user.schema';
 import { Model, Query } from 'mongoose';
 import { Event } from '../../events/events.enum';
 import { WorkspaceUpdatedEvent } from '../../events/workspace-updated.event';
+import { AuthorizationService } from '../authorization/authorization.service';
+import { MinOneAdminUserInWorkspaceException } from '../../exceptions/min-one-admin-user-in-workspace.exception';
+import { PermissionDocument } from '../authorization/schemas/permission.schema';
 
 @Injectable()
 export class WorkspacesService {
@@ -29,6 +32,7 @@ export class WorkspacesService {
     @InjectModel(Workspace.name)
     private readonly workspaceModel: Model<WorkspaceDocument>,
     private readonly usersService: UsersService,
+    private readonly authorizationService: AuthorizationService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -239,12 +243,25 @@ export class WorkspacesService {
   ): Promise<WorkspaceDocument> {
     const workspaceId: string = workspace._id;
     // Remove the user from the workspace
-    workspace.users = workspace.users.filter((u) => u._id.toString() != userId);
+    const workspaceUsers: UserDocument[] = workspace.users.filter(
+      (u) => u._id.toString() != userId,
+    );
     // Check if the workspace has at-least one member after removing the user
-    if (workspace.users.length === 0) {
+    if (workspaceUsers.length === 0) {
       throw new MinOneUserInWorkspaceException(workspaceId);
     }
-    await this.updateUsers(workspaceId, workspace.users);
+    // Check if the workspace has at-least one admin member left after removing the user
+    const workspaceAdminPermissions: PermissionDocument[] = await this.authorizationService.findAllWorkspaceAdminPermissions(
+      workspace._id,
+    );
+    if (
+      !workspaceAdminPermissions.filter((p) => p.user._id.toString() != userId)
+        .length
+    ) {
+      throw new MinOneAdminUserInWorkspaceException(workspace._id);
+    }
+    await this.updateUsers(workspaceId, workspaceUsers);
+    workspace.users = workspaceUsers;
     this.eventEmitter.emit(
       Event.WorkspaceUserRemoved,
       new WorkspaceUserRemovedEvent(workspaceId, userId),

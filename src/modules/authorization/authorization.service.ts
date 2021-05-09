@@ -22,6 +22,7 @@ import {
 import { Model } from 'mongoose';
 import { Event } from '../../events/events.enum';
 import { OnEvent } from '@nestjs/event-emitter';
+import { WorkspaceNotFoundException } from '../../exceptions/workspace-not-found.exception';
 
 @Injectable()
 export class AuthorizationService {
@@ -83,6 +84,22 @@ export class AuthorizationService {
       throw new UserNotInWorkspaceException(userId, workspaceId);
     }
     return workspaceRolesAndPermissions;
+  }
+
+  /**
+   * Find all permissions for admins in the given workspace
+   * @param workspaceId the workspace id
+   */
+  async findAllWorkspaceAdminPermissions(
+    workspaceId: string,
+  ): Promise<PermissionDocument[]> {
+    return this.permissionModel
+      .find()
+      .where(`workspaces.${workspaceId}`)
+      .exists(true)
+      .where(`workspaces.${workspaceId}.roles`)
+      .in([Role.WorkspaceAdmin])
+      .exec();
   }
 
   /**
@@ -311,7 +328,7 @@ export class AuthorizationService {
       workspaceId,
     );
     if (!workspaceRolesAndPermissions) {
-      throw new UserNotInWorkspaceException(user._id, workspaceId);
+      throw new WorkspaceNotFoundException(workspaceId);
     }
     // A workspace admin can perform any action workspace-wide
     if (workspaceRolesAndPermissions.roles.includes(Role.WorkspaceAdmin)) {
