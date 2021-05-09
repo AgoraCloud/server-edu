@@ -1,4 +1,4 @@
-import { BaseDto } from './../../../utils/base.dto';
+import { IdWithTimestampDto } from './../../../utils/base.dto';
 import {
   DeploymentStatus,
   DeploymentType,
@@ -43,7 +43,7 @@ export class DeploymentPropertiesDto {
 }
 
 @Exclude()
-export class DeploymentDto extends BaseDto {
+export class DeploymentDto extends IdWithTimestampDto {
   @Expose()
   readonly name: string;
 
@@ -52,12 +52,6 @@ export class DeploymentDto extends BaseDto {
 
   @Expose()
   readonly failureReason?: string;
-
-  @Expose()
-  readonly createdAt: Date;
-
-  @Expose()
-  readonly updatedAt: Date;
 
   @Expose()
   @Type(() => DeploymentPropertiesDto)

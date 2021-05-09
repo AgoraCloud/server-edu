@@ -1,8 +1,8 @@
-import { BaseDto } from './../../../utils/base.dto';
+import { IdDto } from './../../../utils/base.dto';
 import { Exclude, Expose } from 'class-transformer';
 
 @Exclude()
-export class UserDto extends BaseDto {
+export class UserDto extends IdDto {
   @Expose()
   readonly fullName: string;
 

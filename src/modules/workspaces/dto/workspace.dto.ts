@@ -1,4 +1,4 @@
-import { BaseDto } from './../../../utils/base.dto';
+import { IdWithTimestampDto } from './../../../utils/base.dto';
 import { UserDto } from './../../users/dto/user.dto';
 import { Exclude, Expose, Type } from 'class-transformer';
 
@@ -22,15 +22,9 @@ export class WorkspacePropertiesDto {
 }
 
 @Exclude()
-export class WorkspaceDto extends BaseDto {
+export class WorkspaceDto extends IdWithTimestampDto {
   @Expose()
   readonly name: string;
-
-  @Expose()
-  readonly createdAt: Date;
-
-  @Expose()
-  readonly updatedAt: Date;
 
   @Expose()
   @Type(() => WorkspacePropertiesDto)

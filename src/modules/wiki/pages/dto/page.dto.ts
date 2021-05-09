@@ -1,22 +1,16 @@
-import { BaseDto } from './../../../../utils/base.dto';
+import { IdWithTimestampDto } from './../../../../utils/base.dto';
 import { WorkspaceDto } from './../../../workspaces/dto/workspace.dto';
 import { UserDto } from './../../../users/dto/user.dto';
 import { WikiSectionDto } from './../../sections/dto/section.dto';
 import { Exclude, Expose, Type } from 'class-transformer';
 
 @Exclude()
-export class WikiPageDto extends BaseDto {
+export class WikiPageDto extends IdWithTimestampDto {
   @Expose()
   readonly title: string;
 
   @Expose()
   readonly body: string;
-
-  @Expose()
-  readonly createdAt: Date;
-
-  @Expose()
-  readonly updatedAt: Date;
 
   @Expose()
   @Type(() => WorkspaceDto)
