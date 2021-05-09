@@ -18,6 +18,7 @@ export class KubernetesDeploymentsService {
   /**
    * Get all Kubernetes deployments
    * @param namespace the Kubernetes namespace
+   * @returns a list of all Kubernetes deployments
    */
   getAllDeployments(
     namespace: string,
@@ -40,6 +41,7 @@ export class KubernetesDeploymentsService {
    * @param namespace the Kubernetes namespace
    * @param deploymentId the deployment id
    * @param deploymentProperties the deployment properties
+   * @returns the created Kubernetes deployment
    */
   createDeployment(
     namespace: string,
@@ -137,6 +139,7 @@ export class KubernetesDeploymentsService {
    * @param namespace the Kubernetes namespace
    * @param deploymentId the deployment id
    * @param updatedResources the updated deployment resources
+   * @returns the updated Kubernetes deployment
    */
   updateDeployment(
     namespace: string,
@@ -189,6 +192,7 @@ export class KubernetesDeploymentsService {
    * Delete a Kubernetes deployment
    * @param namespace the Kubernetes namespace
    * @param deploymentId the deployment id
+   * @returns the deleted Kubernetes deployment
    */
   deleteDeployment(
     namespace: string,
@@ -206,7 +210,7 @@ export class KubernetesDeploymentsService {
   /**
    * Generates a container image from the given deployment type and version
    * @param deploymentImage the deployment image to convert
-   * @returns a container image
+   * @returns the generated container image
    */
   private generateContainerImage(deploymentImage: DeploymentImage): string {
     if (deploymentImage.type === DeploymentType.VSCode) {

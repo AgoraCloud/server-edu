@@ -14,6 +14,7 @@ export class KubernetesResourceQuotasService {
    * Get a Kubernetes resource quota
    * @param namespace the Kubernetes namespace
    * @param workspaceId the workspace id
+   * @returns the Kubernetes resource quota
    */
   getResourceQuota(
     namespace: string,
@@ -33,6 +34,7 @@ export class KubernetesResourceQuotasService {
    * @param namespace the Kubernetes namespace
    * @param workspaceId the workspace id
    * @param workspaceResources the workspace resources
+   * @returns the created Kubernetes resource quota
    */
   createResourceQuota(
     namespace: string,
@@ -72,6 +74,7 @@ export class KubernetesResourceQuotasService {
    * @param namespace the Kubernetes namespace
    * @param workspaceId the workspace id
    * @param workspaceResources the workspace resources
+   * @returns the updated Kubernetes resource quota
    */
   updateResourceQuota(
     namespace: string,
@@ -111,6 +114,7 @@ export class KubernetesResourceQuotasService {
    * Delete a Kubernetes resource quota
    * @param namespace the Kubernetes namespace
    * @param workspaceId the workspace id
+   * @returns the deleted Kubernetes resource quota
    */
   deleteResourceQuota(
     namespace: string,

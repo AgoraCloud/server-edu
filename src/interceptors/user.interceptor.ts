@@ -10,6 +10,10 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 
+/**
+ * An interceptor that extracts the user id from the request and checks
+ * whether the user exists or not
+ */
 @Injectable()
 export class UserInterceptor implements NestInterceptor {
   constructor(private readonly usersService: UsersService) {}

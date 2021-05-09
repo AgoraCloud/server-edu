@@ -14,6 +14,10 @@ import {
 } from '@nestjs/common';
 import { RequestWithWorkspaceUserProjectProjectLaneAndIsAdmin } from '../utils/requests.interface';
 
+/**
+ * An interceptor that extracts the project lane id from the request, fetches
+ * it from the database and attaches it to the request
+ */
 @Injectable()
 export class ProjectLaneInterceptor implements NestInterceptor {
   constructor(private readonly projectLanesService: ProjectLanesService) {}

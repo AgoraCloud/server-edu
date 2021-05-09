@@ -17,6 +17,7 @@ export class KubernetesRolesService {
    * Create a Kubernetes role
    * @param namespace the Kubernetes namespace
    * @param workspaceId the workspace id
+   * @returns the created Kubernetes role
    */
   createRole(
     namespace: string,
@@ -62,6 +63,7 @@ export class KubernetesRolesService {
    * Create a Kubernetes role binding
    * @param namespace the Kubernetes namespace
    * @param workspaceId the workspace id
+   * @returns the created Kubernetes role binding
    */
   createRoleBinding(
     namespace: string,

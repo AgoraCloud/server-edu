@@ -18,6 +18,7 @@ export class KubernetesNetworkPoliciesService {
    * Create a Kubernetes network policy
    * @param namespace the Kubernetes namespace
    * @param workspaceId the workspace id
+   * @returns the created Kubernetes network policy
    */
   createNetworkPolicy(
     namespace: string,

@@ -11,6 +11,7 @@ export class KubernetesNamespacesService {
 
   /**
    * Get all Kubernetes namespaces
+   * @returns a list of all Kubernetes namespaces
    */
   getAllNamespaces(): Promise<{
     response: http.IncomingMessage;
@@ -29,6 +30,7 @@ export class KubernetesNamespacesService {
    * Create a Kubernetes namespace
    * @param name the name of the namespace
    * @param workspaceId the workspace id
+   * @returns the created Kubernetes namespace
    */
   createNamespace(
     name: string,
@@ -50,6 +52,7 @@ export class KubernetesNamespacesService {
   /**
    * Delete a Kubernetes namespace
    * @param name The name of the namespace
+   * @returns the deleted Kubernetes namespace
    */
   deleteNamespace(
     name: string,

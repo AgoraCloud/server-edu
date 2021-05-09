@@ -18,6 +18,7 @@ export class KubernetesPodsService {
   /**
    * Get all Kubernetes pods
    * @param namespace the Kubernetes namespace
+   * @returns a list of all Kubernetes pods
    */
   async getAllPods(
     namespace: string,
@@ -39,6 +40,7 @@ export class KubernetesPodsService {
    * Get a Kubernetes pod
    * @param namespace the Kubernetes namespace
    * @param deploymentId the pods deployment id
+   * @returns a Kubernetes pod
    */
   async getPod(namespace: string, deploymentId: string): Promise<k8s.V1Pod> {
     // Get all pods
@@ -60,6 +62,7 @@ export class KubernetesPodsService {
    * Get a Kubernetes pod logs
    * @param workspaceId the pods workspace id
    * @param deploymentId the pods deployment id
+   * @returns a Kubernetes pod logs
    */
   async getPodLogs(workspaceId: string, deploymentId: string): Promise<string> {
     const namespace: string = generateResourceName(workspaceId);
@@ -75,6 +78,7 @@ export class KubernetesPodsService {
    * Get a Kubernetes pod metrics
    * @param workspaceId the pods workspace id
    * @param deployment the pods deployment
+   * @returns the metrics of the Kubernetes pod
    */
   async getPodMetrics(
     workspaceId: string,
@@ -136,6 +140,7 @@ export class KubernetesPodsService {
   /**
    * Creates a namespaced pod list function for use with a Kubernetes informer
    * @param namespace the Kubernetes namespace
+   * @returns the created namespaced pod list function
    */
   makeNamespacedPodListFunction(
     namespace: string,

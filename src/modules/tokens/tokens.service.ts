@@ -19,6 +19,7 @@ export class TokensService {
   /**
    * Create a token
    * @param token the token to create
+   * @returns the created token document
    */
   create(token: Token): Promise<TokenDocument> {
     const createdToken: TokenDocument = new this.tokenModel(token);
@@ -29,6 +30,8 @@ export class TokensService {
    * Find and remove a token with the given id and type
    * @param tokenId the token id
    * @param type the token type
+   * @throws TokenNotFoundException
+   * @returns the deleted token document
    */
   async findOneAndRemove(
     tokenId: string,
@@ -56,6 +59,7 @@ export class TokensService {
   /**
    * Checks if a token is expired
    * @param token the token to check
+   * @throws TokenExpiredException
    */
   isTokenExpired(token: TokenDocument): void {
     if (token.expiresAt < new Date()) {

@@ -16,6 +16,7 @@ export class AuditingService {
   /**
    * Create an audit log
    * @param auditLog the audit log to create
+   * @returns the created audit log document
    */
   async create(auditLog: AuditLog): Promise<AuditLogDocument> {
     return this.auditLogModel.create(auditLog);
@@ -24,6 +25,7 @@ export class AuditingService {
   /**
    * Find all audit logs
    * @param auditLogQueryParamsDto the audit logs query params
+   * @returns an array of audit log documents
    */
   async findAll(
     auditLogQueryParamsDto: AuditLogQueryParamsDto,

@@ -40,6 +40,7 @@ export class WorkspacesService {
    * Create a workspace
    * @param user the user
    * @param createWorkspaceDto the workspace to create
+   * @returns the created workspace document
    */
   async create(
     user: UserDocument,
@@ -60,6 +61,7 @@ export class WorkspacesService {
   /**
    * Find all workspaces
    * @param userId the users id
+   * @returns an array of workspace documents
    */
   async findAll(userId?: string): Promise<WorkspaceDocument[]> {
     let workspacesQuery: Query<
@@ -76,6 +78,8 @@ export class WorkspacesService {
    * Find a workspace
    * @param workspaceId the workspace id
    * @param userId the users id
+   * @throws WorkspaceNotFoundException
+   * @returns the workspace document
    */
   async findOne(
     workspaceId: string,
@@ -96,6 +100,8 @@ export class WorkspacesService {
   /**
    * Find the users in a workspace
    * @param workspaceId the workspace id
+   * @throws WorkspaceNotFoundException
+   * @returns the workspace document
    */
   async findOneUsers(workspaceId: string): Promise<WorkspaceDocument> {
     const workspace: WorkspaceDocument = await this.workspaceModel
@@ -114,6 +120,7 @@ export class WorkspacesService {
    * @param workspaceId the workspace id
    * @param updateWorkspaceDto the updated workspace
    * @param userId the users id
+   * @returns the updated workspace
    */
   async update(
     workspaceId: string,
@@ -190,6 +197,7 @@ export class WorkspacesService {
    * Delete a workspace
    * @param workspaceId the workspace id
    * @param userId the users id
+   * @throws WorkspaceNotFoundException
    */
   async remove(workspaceId: string, userId?: string): Promise<void> {
     let workspaceQuery: Query<
@@ -211,6 +219,8 @@ export class WorkspacesService {
    * Add a user to a workspace
    * @param workspace the workspace
    * @param addWorkspaceUserDto the user to add
+   * @throws ExistingWorkspaceUserException
+   * @returns the updated workspace document
    */
   async addUser(
     workspace: WorkspaceDocument,
@@ -236,6 +246,9 @@ export class WorkspacesService {
    * Remove a user from a workspace
    * @param workspace the workspace
    * @param userId the id of the user to remove
+   * @throws MinOneUserInWorkspaceException
+   * @throws MinOneAdminUserInWorkspaceException
+   * @returns the updated workspace document
    */
   async removeUser(
     workspace: WorkspaceDocument,

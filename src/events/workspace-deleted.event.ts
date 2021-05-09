@@ -1,3 +1,6 @@
+/**
+ * Payload of the workspace.deleted event
+ */
 export class WorkspaceDeletedEvent {
   id: string;
 

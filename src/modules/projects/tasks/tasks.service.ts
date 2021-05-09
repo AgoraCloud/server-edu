@@ -29,6 +29,7 @@ export class ProjectTasksService {
    * @param project the project
    * @param projectLane the project lane
    * @param createProjectTaskDto the project task to create
+   * @returns the created project task document
    */
   async create(
     user: UserDocument,
@@ -54,6 +55,7 @@ export class ProjectTasksService {
    * @param userId the users id
    * @param workspaceId the workspace id
    * @param projectId the project id
+   * @returns an array of project task documents
    */
   async findAll(
     projectLaneId: string,
@@ -87,6 +89,8 @@ export class ProjectTasksService {
    * @param projectLaneId the project lane id
    * @param projectTaskId the project task id
    * @param userId the users id
+   * @throws ProjectTaskNotFoundException
+   * @returns a project task document
    */
   async findOne(
     workspaceId: string,
@@ -124,6 +128,7 @@ export class ProjectTasksService {
    * @param projectTaskId the project task id
    * @param updateProjectTaskDto the updated project task
    * @param userId the users id
+   * @returns the updated project task document
    */
   async update(
     workspaceId: string,
@@ -182,6 +187,7 @@ export class ProjectTasksService {
    * @param projectLaneId the project lane id
    * @param projectTaskId the project task id
    * @param userId the users id
+   * @throws ProjectTaskNotFoundException
    */
   async remove(
     workspaceId: string,

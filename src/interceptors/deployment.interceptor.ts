@@ -17,6 +17,10 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 
+/**
+ * An interceptor that extracts the deployment id from the request, fetches it from
+ * the database and attaches it to the request
+ */
 @Injectable()
 export class DeploymentInterceptor implements NestInterceptor {
   constructor(private readonly deploymentsService: DeploymentsService) {}

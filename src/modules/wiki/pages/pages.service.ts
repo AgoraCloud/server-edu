@@ -26,6 +26,7 @@ export class WikiPagesService {
    * @param workspace the workspace
    * @param wikiSection the wiki section to create the wiki page in
    * @param createWikiPageDto the wiki page to create
+   * @returns the created wiki page document
    */
   async create(
     user: UserDocument,
@@ -48,6 +49,7 @@ export class WikiPagesService {
    * @param workspaceId the workspace id
    * @param wikiSectionId the wiki section id
    * @param userId the users id
+   * @returns an array of wiki page documents
    */
   async findAll(
     workspaceId: string,
@@ -76,6 +78,8 @@ export class WikiPagesService {
    * @param wikiSectionId the wiki section id
    * @param wikiPageId the wiki page id
    * @param userId the users id
+   * @throws WikiPageNotFoundException
+   * @returns the wiki page document
    */
   async findOne(
     workspaceId: string,
@@ -109,6 +113,8 @@ export class WikiPagesService {
    * @param wikiPageId the wiki page id
    * @param updateWikiPageDto the updated wiki page
    * @param userId the users id
+   * @throws WikiPageNotFoundException
+   * @returns the updated wiki page document
    */
   async update(
     workspaceId: string,
@@ -142,6 +148,7 @@ export class WikiPagesService {
    * @param wikiSectionId the wiki section id
    * @param wikiPageId the wiki page id
    * @param userId the users id
+   * @throws WikiPageNotFoundException
    */
   async remove(
     workspaceId: string,

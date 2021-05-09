@@ -28,6 +28,7 @@ export class ProjectLanesService {
    * @param workspace the workspace
    * @param project the project
    * @param createProjectLaneDto the project lane to create
+   * @returns the created project lane document
    */
   async create(
     user: UserDocument,
@@ -50,6 +51,7 @@ export class ProjectLanesService {
    * @param projectId the project id
    * @param userId the users id
    * @param workspaceId the workspace is
+   * @returns an array of project lane documents
    */
   async findAll(
     projectId: string,
@@ -78,6 +80,8 @@ export class ProjectLanesService {
    * @param projectId the project id
    * @param projectLaneId the project lane id
    * @param userId the users id
+   * @throws ProjectLaneNotFoundException
+   * @returns a project lane document
    */
   async findOne(
     workspaceId: string,
@@ -111,6 +115,8 @@ export class ProjectLanesService {
    * @param projectLaneId the project lane id
    * @param updateProjectLaneDto the updated project lane
    * @param userId the users id
+   * @throws ProjectLaneNotFoundException
+   * @returns the updated project lane document
    */
   async update(
     workspaceId: string,
@@ -144,6 +150,7 @@ export class ProjectLanesService {
    * @param projectId the project id
    * @param projectLaneId the project lane id
    * @param userId the users id
+   * @throws ProjectLaneNotFoundException
    */
   async remove(
     workspaceId: string,

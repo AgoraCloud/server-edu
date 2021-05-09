@@ -1,3 +1,7 @@
+/**
+ * Represents all the possible internally emitted events.
+ * For documentation, visit: https://github.com/AgoraCloud/server/wiki/Events.
+ */
 export enum Event {
   // User Events
   UserCreated = 'user.created',

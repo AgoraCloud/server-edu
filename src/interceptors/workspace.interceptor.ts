@@ -13,6 +13,10 @@ import {
 import { Observable } from 'rxjs';
 import { isMongoId } from 'class-validator';
 
+/**
+ * An interceptor that extracts the workspace id from the request, fetches it from
+ * the database and attaches it to the request
+ */
 @Injectable()
 export class WorkspaceInterceptor implements NestInterceptor {
   constructor(private readonly workspaceService: WorkspacesService) {}

@@ -64,6 +64,7 @@ export class UsersService implements OnModuleInit {
    * @param createUserDto the user to create
    * @param role the users role
    * @param verify verify the user
+   * @returns the created user document
    */
   async create(
     createUserDto: CreateUserDto,
@@ -92,6 +93,7 @@ export class UsersService implements OnModuleInit {
 
   /**
    * Find all users
+   * @returns an array of user documents
    */
   async findAll(): Promise<UserDocument[]> {
     const users: UserDocument[] = await this.userModel.find().exec();
@@ -101,6 +103,8 @@ export class UsersService implements OnModuleInit {
   /**
    * Find a user by id
    * @param userId the users id
+   * @throws UserWithIdNotFoundException
+   * @returns a user document
    */
   async findOne(userId: string): Promise<UserDocument> {
     const user: UserDocument = await this.userModel
@@ -113,6 +117,10 @@ export class UsersService implements OnModuleInit {
   /**
    * Find a user by email
    * @param email the users email
+   * @throws UserNotFoundException
+   * @throws AccountDisabledException
+   * @throws AccountNotVerifiedException
+   * @returns a user document
    */
   async findByEmail(email: string): Promise<UserDocument> {
     const user: UserDocument = await this.userModel.findOne({ email }).exec();
@@ -126,6 +134,7 @@ export class UsersService implements OnModuleInit {
    * Find a user by email and refresh token
    * @param email the users email
    * @param refreshToken the users latest refresh token
+   * @returns a user document
    */
   async findByEmailAndRefreshToken(
     email: string,
@@ -143,6 +152,7 @@ export class UsersService implements OnModuleInit {
   /**
    * Checks whether a user exists or not
    * @param userId the users id
+   * @throws UserWithIdNotFoundException
    */
   async doesExist(userId: string): Promise<void> {
     const exists: boolean = await this.userModel.exists({ _id: userId });
@@ -153,6 +163,7 @@ export class UsersService implements OnModuleInit {
    * Update a user
    * @param userId the users id
    * @param updateUserDto the updated user
+   * @returns the updated user document
    */
   async update(
     userId: string,
@@ -168,6 +179,7 @@ export class UsersService implements OnModuleInit {
    * Update a user, accessible by super admins only
    * @param userId the users id
    * @param adminUpdateUserDto the updated user
+   * @returns the updated user document
    */
   async adminUpdate(
     userId: string,
@@ -247,6 +259,7 @@ export class UsersService implements OnModuleInit {
   /**
    * Create an account verification token
    * @param user the users details
+   * @returns the created token document
    */
   private createVerifyAccountToken(user: UserDocument): Promise<TokenDocument> {
     return this.tokensService.create({
@@ -259,6 +272,7 @@ export class UsersService implements OnModuleInit {
   /**
    * Generates a hash for the given value
    * @param value the value to hash
+   * @returns the hashed value of the given string
    */
   private async hash(value: string): Promise<string> {
     return bcrypt.hash(value, 10);

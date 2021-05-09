@@ -34,6 +34,7 @@ export class AuthorizationService {
   /**
    * Create a users permissions
    * @param permission the users permissions to create
+   * @returns the created permissions document
    */
   private async create(permission: Permission): Promise<PermissionDocument> {
     const createdPermission: PermissionDocument = await this.permissionModel.create(
@@ -45,6 +46,7 @@ export class AuthorizationService {
   /**
    * Find all permissions for users that are members in the given workspace
    * @param workspaceId the workspace id
+   * @returns an array of permission documents
    */
   private async findAll(workspaceId: string): Promise<PermissionDocument[]> {
     const retrievedPermissions: PermissionDocument[] = await this.permissionModel
@@ -56,6 +58,8 @@ export class AuthorizationService {
   /**
    * Find a users permissions
    * @param userId the users id
+   * @throws InternalServerErrorException
+   * @returns the users permissions document
    */
   async findOne(userId: string): Promise<PermissionDocument> {
     const permission: PermissionDocument = await this.permissionModel
@@ -71,6 +75,8 @@ export class AuthorizationService {
    * Find a users workspace permissions
    * @param userId the users id
    * @param workspaceId the workspace id
+   * @throws UserNotInWorkspaceException
+   * @returns the users workspace permissions
    */
   async findOneWorkspacePermissions(
     userId: string,
@@ -89,6 +95,7 @@ export class AuthorizationService {
   /**
    * Find all permissions for admins in the given workspace
    * @param workspaceId the workspace id
+   * @returns an array of permission documents
    */
   async findAllWorkspaceAdminPermissions(
     workspaceId: string,
@@ -105,6 +112,7 @@ export class AuthorizationService {
   /**
    * Update a users permissions
    * @param permission the updated users permissions
+   * @returns the updated permission document
    */
   private async update(
     permission: PermissionDocument,
@@ -121,6 +129,7 @@ export class AuthorizationService {
    * Update a users permissions (application-wide)
    * @param userId the users id
    * @param updateUserPermissionsDto the updated user permissions
+   * @returns the updated permission document
    */
   async updateUserPermissions(
     userId: string,
@@ -143,6 +152,8 @@ export class AuthorizationService {
    * @param userId the users id
    * @param workspaceId the workspace id
    * @param updateWorkspaceUserPermissionsDto the updated users workspace permissions
+   * @throws UserNotInWorkspaceException
+   * @returns the updated workspace permissions
    */
   async updateUsersWorkspacePermissions(
     userId: string,
@@ -285,6 +296,8 @@ export class AuthorizationService {
    * @param user the user
    * @param neededPermissions the needed permissions
    * @param workspaceId the workspace id
+   * @throws WorkspaceNotFoundException
+   * @returns whether the user has the needed permissions
    */
   async can(
     user: UserDocument,

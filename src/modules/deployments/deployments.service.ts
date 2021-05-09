@@ -42,6 +42,7 @@ export class DeploymentsService {
    * @param user the user
    * @param workspace the workspace
    * @param createDeploymentDto the deployment to create
+   * @returns the created deployment document
    */
   async create(
     user: UserDocument,
@@ -67,6 +68,7 @@ export class DeploymentsService {
 
   /**
    * Find all deployment images
+   * @returns all deployment images
    */
   findAllImages(): DeploymentImage[] {
     return this.deploymentImages;
@@ -76,6 +78,7 @@ export class DeploymentsService {
    * Find all deployments
    * @param workspaceId the workspace id
    * @param userId the users id
+   * @returns an array of deployment documents
    */
   async findAll(
     workspaceId: string,
@@ -97,6 +100,8 @@ export class DeploymentsService {
    * @param deploymentId the deployment id
    * @param userId the users id
    * @param workspaceId the workspace id
+   * @throws DeploymentNotFoundException
+   * @returns a deployment document
    */
   async findOne(
     deploymentId: string,
@@ -124,6 +129,8 @@ export class DeploymentsService {
    * @param deploymentId the deployment id
    * @param updateDeploymentDto the updated deployment
    * @param userId the users id
+   * @throws DeploymentCannotBeUpdatedException
+   * @returns the updated deployment document
    */
   async update(
     workspaceId: string,
@@ -194,6 +201,7 @@ export class DeploymentsService {
    * @param deploymentId the deployment id
    * @param status the deployment status
    * @param failureReason failure reason if a deployments status is FAILED
+   * @throws DeploymentNotFoundException
    */
   async updateStatus(
     deploymentId: string,

@@ -20,6 +20,9 @@ import { Observable, throwError } from 'rxjs';
 import { RequestWithWorkspaceUserAndIsAdmin } from '../utils/requests.interface';
 import { catchError, tap } from 'rxjs/operators';
 
+/**
+ * An interceptor that records every action performed by every user
+ */
 @Injectable()
 export class AuditingInterceptor implements NestInterceptor {
   constructor(

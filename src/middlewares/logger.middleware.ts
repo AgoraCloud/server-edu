@@ -2,8 +2,8 @@ import { NextFunction, Request, Response } from 'express';
 import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
 
 /**
- * Logs information about every API request
- * From https://github.com/julien-sarazin/nest-playground/issues/1#issuecomment-682588094
+ * A middleware that logs information about every API request.
+ * From: https://github.com/julien-sarazin/nest-playground/issues/1#issuecomment-682588094
  */
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {

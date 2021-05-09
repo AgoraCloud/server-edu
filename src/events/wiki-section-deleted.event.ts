@@ -1,3 +1,6 @@
+/**
+ * Payload of the wiki.section.deleted event
+ */
 export class WikiSectionDeletedEvent {
   id: string;
 

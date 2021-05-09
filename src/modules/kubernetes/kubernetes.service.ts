@@ -88,6 +88,8 @@ export class KubernetesService implements OnModuleInit {
   /**
    * Get a Workspaces metrics (through the workspaces namespace resource quota)
    * @param workspace the workspace
+   * @throws WorkspaceMetricsNotAvailableException
+   * @returns the workspace metrics
    */
   async getWorkspaceMetrics(workspace: WorkspaceDocument): Promise<MetricsDto> {
     const workspaceId: string = workspace._id;
@@ -513,6 +515,7 @@ export class KubernetesService implements OnModuleInit {
 
   /**
    * Get all workspace namespaces
+   * @returns all workspace namespaces
    */
   private async getAllWorkspaceNamespaces(): Promise<WorkspaceNamespace[]> {
     const workspaces: WorkspaceDocument[] = await this.workspacesService.findAll();

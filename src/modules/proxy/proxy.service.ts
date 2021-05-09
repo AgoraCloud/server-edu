@@ -50,6 +50,7 @@ export class ProxyService implements OnModuleInit {
 
   /**
    * Proxy all deployment websockets
+   * @throws InvalidMongoIdException
    */
   private proxyWebsockets(): void {
     const httpServer: Server = this.httpAdapterHost.httpAdapter.getHttpServer();
@@ -94,6 +95,7 @@ export class ProxyService implements OnModuleInit {
    * Dynamically creates configuration options for the proxy
    * @param workspaceId the deployments workspace id
    * @param deploymentId the deployment id
+   * @returns the http-proxy server options
    */
   private makeProxyOptions(
     workspaceId: string,
@@ -109,6 +111,7 @@ export class ProxyService implements OnModuleInit {
    * Removes the /proxy/:deploymentId prefix from request urls
    * @param requestUrl the request url
    * @param deploymentId the deployment id
+   * @returns the modified request url
    */
   private removeProxyUrlPrefix(
     requestUrl: string,

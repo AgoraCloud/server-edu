@@ -12,6 +12,7 @@ export class KubernetesServicesService {
   /**
    * Get all Kubernetes services
    * @param namespace the Kubernetes namespace
+   * @returns a list of all Kubernetes services
    */
   getAllServices(
     namespace: string,
@@ -33,6 +34,7 @@ export class KubernetesServicesService {
    * Create a Kubernetes service
    * @param namespace the Kubernetes namespace
    * @param deploymentId the deployment id
+   * @returns the created Kubernetes service
    */
   createService(
     namespace: string,
@@ -68,6 +70,7 @@ export class KubernetesServicesService {
    * Delete a Kubernetes service
    * @param namespace the Kubernetes namespace
    * @param deploymentId the deployment id
+   * @returns the deleted Kubernetes service
    */
   deleteService(
     namespace: string,

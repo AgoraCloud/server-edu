@@ -27,6 +27,7 @@ export class ProjectsService {
    * @param user the user
    * @param workspace the workspace
    * @param createProjectDto the project to create
+   * @returns the created project document
    */
   async create(
     user: UserDocument,
@@ -50,6 +51,7 @@ export class ProjectsService {
    * Find all projects
    * @param workspaceId the workspace id
    * @param userId the users id
+   * @returns an array of project documents
    */
   async findAll(
     workspaceId: string,
@@ -71,6 +73,8 @@ export class ProjectsService {
    * @param workspaceId the workspace id
    * @param projectId the project id
    * @param userId the users id
+   * @throws ProjectNotFoundException
+   * @returns a project document
    */
   async findOne(
     workspaceId: string,
@@ -100,6 +104,8 @@ export class ProjectsService {
    * @param projectId the project id
    * @param updateProjectDto the updated project
    * @param userId the users id
+   * @throws ProjectNotFoundException
+   * @returns the updated project document
    */
   async update(
     workspaceId: string,
@@ -129,6 +135,7 @@ export class ProjectsService {
    * @param workspaceId the workspace id
    * @param projectId the project id
    * @param userId the users id
+   * @throws ProjectNotFoundException
    */
   async remove(
     workspaceId: string,

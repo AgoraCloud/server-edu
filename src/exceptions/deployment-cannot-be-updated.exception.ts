@@ -1,6 +1,10 @@
 import { DeploymentStatus } from '../modules/deployments/schemas/deployment.schema';
 import { BadRequestException } from '@nestjs/common';
 
+/**
+ * An exception that is thrown when a user is updating a deployment that
+ * is not in the RUNNING or FAILED state
+ */
 export class DeploymentCannotBeUpdatedException extends BadRequestException {
   constructor(deploymentId: string) {
     super(

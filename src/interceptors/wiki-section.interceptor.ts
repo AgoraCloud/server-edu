@@ -13,6 +13,10 @@ import {
 import { WikiSectionDocument } from './../modules/wiki/sections/schemas/section.schema';
 import { RequestWithWorkspaceUserWikiSectionAndIsAdmin } from '../utils/requests.interface';
 
+/**
+ * An interceptor that extracts the wiki section id from the request, fetches
+ * it from the database and attaches it to the request
+ */
 @Injectable()
 export class WikiSectionInterceptor implements NestInterceptor {
   constructor(private readonly wikiSectionsService: WikiSectionsService) {}

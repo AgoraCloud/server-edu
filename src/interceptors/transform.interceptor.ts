@@ -13,7 +13,8 @@ interface ClassType<T> {
 }
 
 /**
- * Serializes objects before being returned in the response body
+ * An interceptor that serializes objects before being returned in the
+ * response body
  */
 @Injectable()
 export class TransformInterceptor<T> implements NestInterceptor<Partial<T>, T> {

@@ -1,3 +1,6 @@
+/**
+ * Payload of the workspace.user.added event
+ */
 export class WorkspaceUserAddedEvent {
   workspaceId: string;
   userId: string;

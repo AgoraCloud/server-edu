@@ -26,6 +26,7 @@ export class WikiSectionsService {
    * @param user the user
    * @param workspace the workspace
    * @param createWikiSectionDto the wiki section to create
+   * @returns the created wiki section document
    */
   async create(
     user: UserDocument,
@@ -45,6 +46,7 @@ export class WikiSectionsService {
    * Find all wiki sections
    * @param workspaceId the workspace id
    * @param userId the users id
+   * @returns an array of wiki section documents
    */
   async findAll(
     workspaceId: string,
@@ -66,6 +68,8 @@ export class WikiSectionsService {
    * @param workspaceId the workspace id
    * @param wikiSectionId the wiki section id
    * @param userId the users id
+   * @throws WikiSectionNotFoundException
+   * @returns the wiki section document
    */
   async findOne(
     workspaceId: string,
@@ -95,6 +99,8 @@ export class WikiSectionsService {
    * @param wikiSectionId the wiki section id
    * @param updateWikiSectionDto the updated wiki section
    * @param userId the users id
+   * @throws WikiSectionNotFoundException
+   * @returns the updated wiki section document
    */
   async update(
     workspaceId: string,
@@ -124,6 +130,7 @@ export class WikiSectionsService {
    * @param workspaceId the workspace id
    * @param wikiSectionId the wiki section id
    * @param userId the users id
+   * @throws WikiSectionNotFoundException
    */
   async remove(
     workspaceId: string,
