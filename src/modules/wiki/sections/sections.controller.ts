@@ -1,9 +1,14 @@
+import {
+  ExceptionDto,
+  WikiSectionDto,
+  CreateWikiSectionDto,
+  UpdateWikiSectionDto,
+} from '@agoracloud/common';
 import { AuditResource } from './../../auditing/schemas/audit-log.schema';
 import { IsAdmin } from '../../../decorators/is-admin.decorator';
 import { Permissions } from './../../../decorators/permissions.decorator';
 import { Action } from './../../authorization/schemas/permission.schema';
 import { Auth } from '../../../decorators/auth.decorator';
-import { ExceptionDto } from './../../../utils/base.dto';
 import {
   ApiTags,
   ApiCookieAuth,
@@ -19,7 +24,6 @@ import {
 import { WorkspaceDocument } from './../../workspaces/schemas/workspace.schema';
 import { FindOneParams } from './../../../utils/find-one-params';
 import { UserDocument } from './../../users/schemas/user.schema';
-import { WikiSectionDto } from './dto/section.dto';
 import {
   Controller,
   Get,
@@ -31,8 +35,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { WikiSectionsService } from './sections.service';
-import { CreateWikiSectionDto } from './dto/create-section.dto';
-import { UpdateWikiSectionDto } from './dto/update-section.dto';
 import { WorkspaceInterceptor } from '../../../interceptors/workspace.interceptor';
 import { User } from '../../../decorators/user.decorator';
 import { Workspace } from '../../../decorators/workspace.decorator';

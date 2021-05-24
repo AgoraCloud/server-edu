@@ -1,6 +1,6 @@
+import { ExceptionDto } from '@agoracloud/common';
 import { Action } from './../authorization/schemas/permission.schema';
 import { JwtAuthenticationGuard } from './../authentication/guards/jwt-authentication.guard';
-import { ExceptionDto } from './../../utils/base.dto';
 import {
   ApiTags,
   ApiCookieAuth,

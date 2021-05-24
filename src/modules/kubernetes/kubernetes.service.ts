@@ -25,7 +25,7 @@ import {
 } from './schemas/pod-condition.schema';
 import { PodPhase } from './schemas/pod-phase.schema';
 import { DeploymentsService } from '../deployments/deployments.service';
-import { MetricsDto } from './dto/metrics.dto';
+import { MetricsDto } from '@agoracloud/common';
 import { DeploymentStatus } from '../deployments/schemas/deployment.schema';
 import { DeploymentDeletedEvent } from '../../events/deployment-deleted.event';
 import { DeploymentUpdatedEvent } from '../../events/deployment-updated.event';
@@ -110,20 +110,20 @@ export class KubernetesService implements OnModuleInit {
         generateResourceName(workspaceId),
         workspaceId,
       );
-      const workspaceMetrics: MetricsDto = new MetricsDto(
-        toPercentage(
+      const workspaceMetrics: MetricsDto = new MetricsDto({
+        cpu: toPercentage(
           resourceQuota.status?.used['limits.cpu'],
           workspace.properties?.resources?.cpuCount,
         ),
-        toPercentage(
+        memory: toPercentage(
           resourceQuota.status?.used['limits.memory'],
           workspace.properties?.resources?.memoryCount,
         ),
-        toPercentage(
+        storage: toPercentage(
           resourceQuota.status?.used['requests.storage'],
           workspace.properties?.resources?.storageCount,
         ),
-      );
+      });
       return workspaceMetrics;
     } catch (err) {
       throw new WorkspaceMetricsNotAvailableException(workspaceId);

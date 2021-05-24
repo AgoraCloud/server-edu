@@ -18,11 +18,11 @@ import { UserDocument } from '../users/schemas/user.schema';
 import { DeploymentDocument } from './schemas/deployment.schema';
 import { Model, Query } from 'mongoose';
 import { Injectable } from '@nestjs/common';
-import { CreateDeploymentDto } from './dto/create-deployment.dto';
 import {
+  CreateDeploymentDto,
   UpdateDeploymentDto,
   UpdateDeploymentResourcesDto,
-} from './dto/update-deployment.dto';
+} from '@agoracloud/common';
 import { Event } from '../../events/events.enum';
 
 @Injectable()
@@ -52,7 +52,9 @@ export class DeploymentsService {
     const sudoPassword: string = createDeploymentDto.properties.sudoPassword;
     // Remove the sudoPassword field
     delete createDeploymentDto.properties.sudoPassword;
-    const deployment: Deployment = new Deployment(createDeploymentDto);
+    const deployment: Deployment = new Deployment(
+      Deployment.fromCreateDeploymentDto(createDeploymentDto),
+    );
     deployment.user = user;
     deployment.workspace = workspace;
 

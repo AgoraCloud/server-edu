@@ -8,8 +8,7 @@ import { ProjectLaneDeletedEvent } from './../../../events/project-lane-deleted.
 import { ProjectTask, ProjectTaskDocument } from './schemas/task.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
-import { CreateProjectTaskDto } from './dto/create-task.dto';
-import { UpdateProjectTaskDto } from './dto/update-task.dto';
+import { CreateProjectTaskDto, UpdateProjectTaskDto } from '@agoracloud/common';
 import { Model, Query } from 'mongoose';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Event } from '../../../events/events.enum';

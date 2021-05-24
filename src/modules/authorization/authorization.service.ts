@@ -1,7 +1,9 @@
 import { WorkspaceUserAddedEvent } from './../../events/workspace-user-added.event';
 import { UserNotInWorkspaceException } from './../../exceptions/user-not-in-workspace.exception';
-import { UpdateWorkspaceUserPermissionsDto } from './dto/update-workspace-user-permissions.dto';
-import { UpdateUserPermissionsDto } from './dto/update-user-permissions.dto';
+import {
+  UpdateWorkspaceUserPermissionsDto,
+  UpdateUserPermissionsDto,
+} from '@agoracloud/common';
 import { UserDocument } from './../users/schemas/user.schema';
 import { WorkspaceDocument } from './../workspaces/schemas/workspace.schema';
 import { WorkspaceDeletedEvent } from './../../events/workspace-deleted.event';
@@ -13,6 +15,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import {
   Action,
+  fromActionsDto,
+  fromRolesDto,
   InWorkspaceActions,
   Permission,
   PermissionDocument,
@@ -136,12 +140,14 @@ export class AuthorizationService {
     updateUserPermissionsDto: UpdateUserPermissionsDto,
   ): Promise<PermissionDocument> {
     let permissions: PermissionDocument = await this.findOne(userId);
-    permissions.roles = updateUserPermissionsDto.roles;
+    permissions.roles = fromRolesDto(updateUserPermissionsDto.roles);
     // For now, a users roles can only contain one role
     if (permissions.roles[0] === Role.SuperAdmin) {
       permissions.permissions = [];
     } else {
-      permissions.permissions = updateUserPermissionsDto.permissions;
+      permissions.permissions = fromActionsDto(
+        updateUserPermissionsDto.permissions,
+      );
     }
     permissions = await this.update(permissions);
     return permissions;
@@ -168,14 +174,16 @@ export class AuthorizationService {
       throw new UserNotInWorkspaceException(userId, workspaceId);
     }
 
-    workspaceRolesAndPermissions.roles =
-      updateWorkspaceUserPermissionsDto.roles;
+    workspaceRolesAndPermissions.roles = fromRolesDto(
+      updateWorkspaceUserPermissionsDto.roles,
+    );
     // For now, a users roles can only contain one role
     if (workspaceRolesAndPermissions.roles[0] === Role.WorkspaceAdmin) {
       workspaceRolesAndPermissions.permissions = [];
     } else {
-      workspaceRolesAndPermissions.permissions =
-        updateWorkspaceUserPermissionsDto.permissions;
+      workspaceRolesAndPermissions.permissions = fromActionsDto(
+        updateWorkspaceUserPermissionsDto.permissions,
+      );
     }
     permissions.workspaces.set(workspaceId, workspaceRolesAndPermissions);
     await this.update(permissions);

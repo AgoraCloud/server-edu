@@ -1,4 +1,5 @@
-import { isDefined } from './../../utils/dto-validators';
+import { isDefined } from 'class-validator';
+
 const resourcePrefix = 'agoracloud';
 
 /**

@@ -9,8 +9,7 @@ import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { InjectModel } from '@nestjs/mongoose';
 import { ProjectLane, ProjectLaneDocument } from './schemas/lane.schema';
 import { Injectable } from '@nestjs/common';
-import { CreateProjectLaneDto } from './dto/create-lane.dto';
-import { UpdateProjectLaneDto } from './dto/update-lane.dto';
+import { CreateProjectLaneDto, UpdateProjectLaneDto } from '@agoracloud/common';
 import { Model, Query } from 'mongoose';
 import { Event } from '../../../events/events.enum';
 

@@ -3,7 +3,7 @@ import { Action } from './../authorization/schemas/permission.schema';
 import { Auth } from '../../decorators/auth.decorator';
 import { KubernetesPodsService } from './kubernetes-pods.service';
 import { WorkspaceDocument } from './../workspaces/schemas/workspace.schema';
-import { ExceptionDto } from './../../utils/base.dto';
+import { ExceptionDto, MetricsDto } from '@agoracloud/common';
 import {
   ApiTags,
   ApiCookieAuth,
@@ -17,7 +17,6 @@ import {
   ApiForbiddenResponse,
 } from '@nestjs/swagger';
 import { DeploymentInterceptor } from '../../interceptors/deployment.interceptor';
-import { MetricsDto } from './dto/metrics.dto';
 import { KubernetesService } from './kubernetes.service';
 import { WorkspaceInterceptor } from '../../interceptors/workspace.interceptor';
 import { Controller, UseInterceptors, Get, Param } from '@nestjs/common';

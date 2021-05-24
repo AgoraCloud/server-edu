@@ -1,4 +1,3 @@
-import { isDefined } from './../../utils/dto-validators';
 import {
   UserWithIdNotFoundException,
   UserNotFoundException,
@@ -17,12 +16,16 @@ import { User, UserDocument } from './schemas/user.schema';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto, AdminUpdateUserDto } from './dto/update-user.dto';
+import {
+  CreateUserDto,
+  UpdateUserDto,
+  AdminUpdateUserDto,
+} from '@agoracloud/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import * as bcrypt from 'bcryptjs';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Role } from '../authorization/schemas/permission.schema';
+import { isDefined } from 'class-validator';
 
 @Injectable()
 export class UsersService implements OnModuleInit {

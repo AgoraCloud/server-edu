@@ -1,5 +1,5 @@
 import { DeploymentDocument } from './../deployments/schemas/deployment.schema';
-import { MetricsDto } from './dto/metrics.dto';
+import { MetricsDto } from '@agoracloud/common';
 import { DeploymentPodMetricsNotAvailableException } from '../../exceptions/deployment-pod-metrics-not-available.exception';
 import { DeploymentPodNotAvailableException } from '../../exceptions/deployment-pod-not-available.exception';
 import { Inject, Injectable } from '@nestjs/common';
@@ -121,16 +121,16 @@ export class KubernetesPodsService {
     if (containerIndex === -1) {
       throw new DeploymentPodMetricsNotAvailableException(deploymentId);
     }
-    const containerMetrics: MetricsDto = new MetricsDto(
-      toPercentage(
+    const containerMetrics: MetricsDto = new MetricsDto({
+      cpu: toPercentage(
         containers[containerIndex].usage?.cpu,
         deployment.properties.resources.cpuCount,
       ),
-      toPercentage(
+      memory: toPercentage(
         containers[containerIndex].usage?.memory,
         deployment.properties.resources.memoryCount,
       ),
-    );
+    });
     if (!containerMetrics?.cpu && !containerMetrics?.memory) {
       throw new DeploymentPodMetricsNotAvailableException(deploymentId);
     }

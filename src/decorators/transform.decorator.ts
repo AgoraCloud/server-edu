@@ -1,9 +1,6 @@
+import { ClassType } from 'class-transformer/ClassTransformer';
 import { UseInterceptors } from '@nestjs/common';
 import { TransformInterceptor } from '../interceptors/transform.interceptor';
-
-interface ClassType<T> {
-  new (): T;
-}
 
 /**
  * A decorator that applies the transform interceptor to classes

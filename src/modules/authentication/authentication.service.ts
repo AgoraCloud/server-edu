@@ -4,14 +4,16 @@ import { ForgotPasswordEvent } from '../../events/forgot-password.event';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { TokenType, TokenDocument } from '../tokens/schemas/token.schema';
 import { TokensService } from './../tokens/tokens.service';
-import { VerifyAccountDto } from './dto/verify-account.dto';
-import { ChangePasswordDto } from './dto/change-password.dto';
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import {
+  VerifyAccountDto,
+  CreateUserDto,
+  ChangePasswordDto,
+  ForgotPasswordDto,
+} from '@agoracloud/common';
 import { JwtConfig } from '../../config/configuration.interface';
 import { TokenPayload } from './interfaces/token-payload.interface';
 import { ConfigService } from '@nestjs/config';
 import { InvalidCredentialsException } from '../../exceptions/invalid-credentials.exception';
-import { CreateUserDto } from '../users/dto/create-user.dto';
 import { Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';

@@ -1,9 +1,15 @@
+import {
+  UserDto,
+  ExceptionDto,
+  UpdateUserDto,
+  AdminUpdateUserDto,
+  AdminUserDto,
+  CreateUserDto,
+} from '@agoracloud/common';
 import { AuditResource } from './../auditing/schemas/audit-log.schema';
 import { MongoExceptionFilter } from './../../filters/mongo-exception.filter';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UserInterceptor } from './../../interceptors/user.interceptor';
 import { Action, Role } from './../authorization/schemas/permission.schema';
-import { ExceptionDto } from './../../utils/base.dto';
 import {
   ApiTags,
   ApiCookieAuth,
@@ -16,7 +22,6 @@ import {
   ApiNotFoundResponse,
   ApiCreatedResponse,
 } from '@nestjs/swagger';
-import { UserDto, AdminUserDto } from './dto/user.dto';
 import {
   Controller,
   Get,
@@ -29,7 +34,6 @@ import {
   UseFilters,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { UpdateUserDto, AdminUpdateUserDto } from './dto/update-user.dto';
 import { User } from '../../decorators/user.decorator';
 import { UserDocument } from '../users/schemas/user.schema';
 import { Auth } from '../../decorators/auth.decorator';

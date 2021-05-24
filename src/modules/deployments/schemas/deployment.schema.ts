@@ -1,3 +1,4 @@
+import { CreateDeploymentDto, DeploymentTypeDto } from '@agoracloud/common';
 import {
   Workspace,
   WorkspaceDocument,
@@ -111,6 +112,26 @@ export class Deployment {
 
   constructor(partial: Partial<Deployment>) {
     Object.assign(this, partial);
+  }
+
+  /**
+   * Converts a CreateDeploymentDto into a Deployment
+   * @param createDeploymentDto the CreateDeploymentDto to convert
+   * @returns a converted Deployment
+   */
+  static fromCreateDeploymentDto(
+    createDeploymentDto: CreateDeploymentDto,
+  ): Deployment {
+    const deployment: Deployment = new Deployment({});
+    deployment.name = createDeploymentDto.name;
+    deployment.properties.isFavorite =
+      createDeploymentDto.properties.isFavorite;
+    deployment.properties.resources = createDeploymentDto.properties.resources;
+    deployment.properties.image.version =
+      createDeploymentDto.properties.image.version;
+    deployment.properties.image.type =
+      DeploymentType[createDeploymentDto.properties.image.type];
+    return deployment;
   }
 }
 

@@ -7,8 +7,7 @@ import { WikiSectionDeletedEvent } from './../../../events/wiki-section-deleted.
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Event } from '../../../events/events.enum';
-import { CreateWikiPageDto } from './dto/create-page.dto';
-import { UpdateWikiPageDto } from './dto/update-page.dto';
+import { CreateWikiPageDto, UpdateWikiPageDto } from '@agoracloud/common';
 import { WikiPageDocument } from './schemas/page.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Query } from 'mongoose';

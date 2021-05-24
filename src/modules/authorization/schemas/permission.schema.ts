@@ -1,5 +1,6 @@
 import { User, UserDocument } from './../../users/schemas/user.schema';
 import { SchemaFactory, Prop, Schema } from '@nestjs/mongoose';
+import { RoleDto, ActionDto } from '@agoracloud/common';
 import * as mongoose from 'mongoose';
 
 export enum Role {
@@ -161,5 +162,31 @@ export class Permission {
     Object.assign(this, partial);
   }
 }
+
+/**
+ * Converts a RoleDto[] to Role[]
+ * @param rolesDto the RolesDto[] to convert
+ * @returns the converted Role[]
+ */
+export const fromRolesDto = (rolesDto: RoleDto[]): Role[] => {
+  const roles: Role[] = [];
+  rolesDto.forEach((roleDto: RoleDto) => {
+    roles.push(Role[roleDto]);
+  });
+  return roles;
+};
+
+/**
+ * Converts a ActionDto[] to Action[]
+ * @param actionsDto the ActionDto[] to convert
+ * @returns the converted Action[]
+ */
+export const fromActionsDto = (actionsDto: ActionDto[]): Action[] => {
+  const actions: Action[] = [];
+  actionsDto.forEach((actionDto: ActionDto) => {
+    actions.push(Action[actionDto]);
+  });
+  return actions;
+};
 
 export const PermissionSchema = SchemaFactory.createForClass(Permission);

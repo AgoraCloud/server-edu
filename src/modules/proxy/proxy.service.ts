@@ -14,7 +14,7 @@ import * as HttpProxy from 'http-proxy';
 import { Server } from 'http';
 import { Socket } from 'net';
 import { resourcePrefix } from '../kubernetes/helpers';
-import { IncomingMessage, ServerResponse } from 'node:http';
+import { IncomingMessage, ServerResponse } from 'http';
 
 @Injectable()
 export class ProxyService implements OnModuleInit {

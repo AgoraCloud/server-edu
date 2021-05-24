@@ -1,3 +1,4 @@
+import { ClassType } from 'class-transformer/ClassTransformer';
 import {
   CallHandler,
   ExecutionContext,
@@ -7,10 +8,6 @@ import {
 import { plainToClass } from 'class-transformer';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-
-interface ClassType<T> {
-  new (): T;
-}
 
 /**
  * An interceptor that serializes objects before being returned in the

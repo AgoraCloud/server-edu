@@ -1,12 +1,15 @@
-import { ExceptionDto } from './../../utils/base.dto';
-import { PermissionDto, RolesAndPermissionsDto } from './dto/permission.dto';
+import {
+  ExceptionDto,
+  UpdateWorkspaceUserPermissionsDto,
+  UpdateUserPermissionsDto,
+  PermissionDto,
+  RolesAndPermissionsDto,
+} from '@agoracloud/common';
 import {
   Action,
   PermissionDocument,
   WorkspaceRolesAndPermissions,
 } from './schemas/permission.schema';
-import { UpdateWorkspaceUserPermissionsDto } from './dto/update-workspace-user-permissions.dto';
-import { UpdateUserPermissionsDto } from './dto/update-user-permissions.dto';
 import { UserInterceptor } from './../../interceptors/user.interceptor';
 import { WorkspaceInterceptor } from './../../interceptors/workspace.interceptor';
 import { Auth } from '../../decorators/auth.decorator';

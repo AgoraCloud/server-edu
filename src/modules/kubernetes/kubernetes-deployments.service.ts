@@ -3,7 +3,7 @@ import {
   DeploymentType,
 } from './../deployments/schemas/deployment.schema';
 import { DeploymentProperties } from '../deployments/schemas/deployment.schema';
-import { UpdateDeploymentResourcesDto } from '../deployments/dto/update-deployment.dto';
+import { UpdateDeploymentResourcesDto } from '@agoracloud/common';
 import { Inject, Injectable } from '@nestjs/common';
 import * as k8s from '@kubernetes/client-node';
 import * as http from 'http';

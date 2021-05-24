@@ -1,9 +1,14 @@
+import {
+  CreateProjectTaskDto,
+  UpdateProjectTaskDto,
+  ExceptionDto,
+  ProjectTaskDto,
+} from '@agoracloud/common';
 import { AuditResource } from './../../auditing/schemas/audit-log.schema';
 import { IsAdmin } from '../../../decorators/is-admin.decorator';
 import { Permissions } from './../../../decorators/permissions.decorator';
 import { Auth } from '../../../decorators/auth.decorator';
 import { Action } from './../../authorization/schemas/permission.schema';
-import { ExceptionDto } from './../../../utils/base.dto';
 import {
   ApiTags,
   ApiCookieAuth,
@@ -22,7 +27,6 @@ import { ProjectDocument } from './../schemas/project.schema';
 import { WorkspaceDocument } from './../../workspaces/schemas/workspace.schema';
 import { UserDocument } from './../../users/schemas/user.schema';
 import { ProjectTaskDocument } from './schemas/task.schema';
-import { ProjectTaskDto } from './dto/task.dto';
 import { ProjectLaneInterceptor } from './../../../interceptors/project-lane.interceptor';
 import { ProjectInterceptor } from './../../../interceptors/project.interceptor';
 import { WorkspaceInterceptor } from './../../../interceptors/workspace.interceptor';
@@ -37,8 +41,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ProjectTasksService } from './tasks.service';
-import { CreateProjectTaskDto } from './dto/create-task.dto';
-import { UpdateProjectTaskDto } from './dto/update-task.dto';
 import { User } from '../../../decorators/user.decorator';
 import { Workspace } from '../../../decorators/workspace.decorator';
 import { Project } from '../../../decorators/project.decorator';

@@ -1,4 +1,4 @@
-import { UpdateDeploymentDto } from './../modules/deployments/dto/update-deployment.dto';
+import { UpdateDeploymentDto } from '@agoracloud/common';
 
 /**
  * Payload of the deployment.updated event

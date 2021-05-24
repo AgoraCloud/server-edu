@@ -1,3 +1,4 @@
+import { UpdateWikiSectionDto, CreateWikiSectionDto } from '@agoracloud/common';
 import { WikiSectionDeletedEvent } from './../../../events/wiki-section-deleted.event';
 import { WikiSectionNotFoundException } from './../../../exceptions/wiki-section-not-found.exception';
 import { WorkspaceUserRemovedEvent } from './../../../events/workspace-user-removed.event';
@@ -8,8 +9,6 @@ import { UserDocument } from './../../users/schemas/user.schema';
 import { WikiSection, WikiSectionDocument } from './schemas/section.schema';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { CreateWikiSectionDto } from './dto/create-section.dto';
-import { UpdateWikiSectionDto } from './dto/update-section.dto';
 import { Model, Query } from 'mongoose';
 import { Event } from '../../../events/events.enum';
 

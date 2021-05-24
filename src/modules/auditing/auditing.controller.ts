@@ -1,6 +1,5 @@
 import { AuditResource } from './schemas/audit-log.schema';
-import { ExceptionDto } from './../../utils/base.dto';
-import { AuditLogDto } from './dto/audit-log.dto';
+import { ExceptionDto, AuditLogDto } from '@agoracloud/common';
 import { AuditAction, AuditLogDocument } from './schemas/audit-log.schema';
 import { WorkspaceInterceptor } from './../../interceptors/workspace.interceptor';
 import { Controller, Get, Param, Query, UseInterceptors } from '@nestjs/common';

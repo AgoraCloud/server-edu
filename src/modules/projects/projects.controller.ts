@@ -1,6 +1,11 @@
+import {
+  CreateProjectDto,
+  UpdateProjectDto,
+  ProjectDto,
+} from '@agoracloud/common';
+import { ExceptionDto } from '@agoracloud/common';
 import { Action } from './../authorization/schemas/permission.schema';
 import { Auth } from '../../decorators/auth.decorator';
-import { ExceptionDto } from './../../utils/base.dto';
 import {
   ApiTags,
   ApiCookieAuth,
@@ -16,7 +21,6 @@ import {
 import { FindOneParams } from './../../utils/find-one-params';
 import { WorkspaceDocument } from './../workspaces/schemas/workspace.schema';
 import { UserDocument } from './../users/schemas/user.schema';
-import { ProjectDto } from './dto/project.dto';
 import { WorkspaceInterceptor } from './../../interceptors/workspace.interceptor';
 import {
   Controller,
@@ -29,8 +33,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ProjectsService } from './projects.service';
-import { CreateProjectDto } from './dto/create-project.dto';
-import { UpdateProjectDto } from './dto/update-project.dto';
 import { User } from '../../decorators/user.decorator';
 import { Workspace } from '../../decorators/workspace.decorator';
 import { ProjectDocument } from './schemas/project.schema';

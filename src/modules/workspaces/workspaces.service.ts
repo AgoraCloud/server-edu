@@ -1,9 +1,13 @@
+import {
+  CreateWorkspaceDto,
+  UpdateWorkspaceDto,
+  UpdateWorkspaceResourcesDto,
+  AddWorkspaceUserDto,
+} from '@agoracloud/common';
 import { WorkspaceUserAddedEvent } from './../../events/workspace-user-added.event';
 import { MinOneUserInWorkspaceException } from './../../exceptions/min-one-user-in-workspace.exception';
 import { ExistingWorkspaceUserException } from './../../exceptions/existing-workspace-user.exception';
 import { UsersService } from './../users/users.service';
-import { AddWorkspaceUserDto } from './dto/add-workspace-user.dto';
-import { isDefined } from './../../utils/dto-validators';
 import { WorkspaceCreatedEvent } from './../../events/workspace-created.event';
 import { WorkspaceUserRemovedEvent } from './../../events/workspace-user-removed.event';
 import { UserDeletedEvent } from './../../events/user-deleted.event';
@@ -13,11 +17,6 @@ import { WorkspaceNotFoundException } from './../../exceptions/workspace-not-fou
 import { InjectModel } from '@nestjs/mongoose';
 import { Workspace, WorkspaceDocument } from './schemas/workspace.schema';
 import { Injectable } from '@nestjs/common';
-import { CreateWorkspaceDto } from './dto/create-workspace.dto';
-import {
-  UpdateWorkspaceDto,
-  UpdateWorkspaceResourcesDto,
-} from './dto/update-workspace.dto';
 import { UserDocument } from '../users/schemas/user.schema';
 import { Model, Query } from 'mongoose';
 import { Event } from '../../events/events.enum';
@@ -25,6 +24,7 @@ import { WorkspaceUpdatedEvent } from '../../events/workspace-updated.event';
 import { AuthorizationService } from '../authorization/authorization.service';
 import { MinOneAdminUserInWorkspaceException } from '../../exceptions/min-one-admin-user-in-workspace.exception';
 import { PermissionDocument } from '../authorization/schemas/permission.schema';
+import { isDefined } from 'class-validator';
 
 @Injectable()
 export class WorkspacesService {

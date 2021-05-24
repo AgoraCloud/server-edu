@@ -1,9 +1,14 @@
+import {
+  ProjectLaneDto,
+  ExceptionDto,
+  CreateProjectLaneDto,
+  UpdateProjectLaneDto,
+} from '@agoracloud/common';
 import { AuditResource } from './../../auditing/schemas/audit-log.schema';
 import { IsAdmin } from '../../../decorators/is-admin.decorator';
 import { Permissions } from '../../../decorators/permissions.decorator';
 import { Action } from './../../authorization/schemas/permission.schema';
 import { Auth } from '../../../decorators/auth.decorator';
-import { ExceptionDto } from './../../../utils/base.dto';
 import {
   ApiTags,
   ApiCookieAuth,
@@ -33,9 +38,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ProjectLanesService } from './lanes.service';
-import { CreateProjectLaneDto } from './dto/create-lane.dto';
-import { UpdateProjectLaneDto } from './dto/update-lane.dto';
-import { ProjectLaneDto } from './dto/lane.dto';
 import { User } from '../../../decorators/user.decorator';
 import { Workspace } from '../../../decorators/workspace.decorator';
 import { Project } from '../../../decorators/project.decorator';

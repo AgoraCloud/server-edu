@@ -1,11 +1,16 @@
+import {
+  WorkspaceDto,
+  ExceptionDto,
+  CreateWorkspaceDto,
+  UpdateWorkspaceDto,
+  AddWorkspaceUserDto,
+} from '@agoracloud/common';
 import { AuditResource } from './../auditing/schemas/audit-log.schema';
-import { AddWorkspaceUserDto } from './dto/add-workspace-user.dto';
 import { UserInterceptor } from './../../interceptors/user.interceptor';
 import { WorkspaceInterceptor } from './../../interceptors/workspace.interceptor';
 import { Auth } from '../../decorators/auth.decorator';
 import { Action } from './../authorization/schemas/permission.schema';
 import { Permissions } from './../../decorators/permissions.decorator';
-import { ExceptionDto } from './../../utils/base.dto';
 import {
   ApiTags,
   ApiCookieAuth,
@@ -18,7 +23,6 @@ import {
   ApiOperation,
   ApiForbiddenResponse,
 } from '@nestjs/swagger';
-import { WorkspaceDto } from './dto/workspace.dto';
 import { WorkspaceDocument } from './schemas/workspace.schema';
 import { UserDocument } from '../users/schemas/user.schema';
 import { FindOneParams } from './../../utils/find-one-params';
@@ -33,8 +37,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { WorkspacesService } from './workspaces.service';
-import { CreateWorkspaceDto } from './dto/create-workspace.dto';
-import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
 import { User } from '../../decorators/user.decorator';
 import { IsAdmin } from '../../decorators/is-admin.decorator';
 import { Workspace } from '../../decorators/workspace.decorator';

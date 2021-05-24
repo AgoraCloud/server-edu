@@ -1,14 +1,16 @@
-import { ExceptionDto } from './../../utils/base.dto';
-import { SignInDto } from './dto/sign-in.dto';
-import { UserDto } from './../users/dto/user.dto';
+import {
+  ExceptionDto,
+  CreateUserDto,
+  SignInDto,
+  UserDto,
+  ChangePasswordDto,
+  VerifyAccountDto,
+  ForgotPasswordDto,
+} from '@agoracloud/common';
 import { MongoExceptionFilter } from './../../filters/mongo-exception.filter';
-import { ChangePasswordDto } from './dto/change-password.dto';
-import { VerifyAccountDto } from './dto/verify-account.dto';
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { accessTokenConstants, refreshTokenConstants } from './constants';
 import { UserDocument } from '../users/schemas/user.schema';
 import { LocalAuthenticationGuard } from './guards/local-authentication.guard';
-import { CreateUserDto } from '../users/dto/create-user.dto';
 import {
   Controller,
   Post,
@@ -16,7 +18,6 @@ import {
   UseGuards,
   HttpCode,
   UseFilters,
-  UseInterceptors,
   Request,
 } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';

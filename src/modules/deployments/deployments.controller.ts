@@ -1,10 +1,16 @@
 import {
+  DeploymentDto,
+  ExceptionDto,
+  CreateDeploymentDto,
+  DeploymentImageDto,
+  UpdateDeploymentDto,
+} from '@agoracloud/common';
+import {
   AuditAction,
   AuditResource,
 } from './../auditing/schemas/audit-log.schema';
 import { Audit } from '../../decorators/audit.decorator';
 import { Permissions } from './../../decorators/permissions.decorator';
-import { ExceptionDto } from './../../utils/base.dto';
 import {
   ApiTags,
   ApiCookieAuth,
@@ -17,7 +23,6 @@ import {
   ApiOperation,
   ApiForbiddenResponse,
 } from '@nestjs/swagger';
-import { DeploymentDto, DeploymentImageDto } from './dto/deployment.dto';
 import { FindOneParams } from './../../utils/find-one-params';
 import { WorkspaceInterceptor } from './../../interceptors/workspace.interceptor';
 import { UserDocument } from '../users/schemas/user.schema';
@@ -34,8 +39,6 @@ import {
 } from '@nestjs/common';
 import { Workspace } from '../../decorators/workspace.decorator';
 import { DeploymentsService } from './deployments.service';
-import { CreateDeploymentDto } from './dto/create-deployment.dto';
-import { UpdateDeploymentDto } from './dto/update-deployment.dto';
 import { User } from '../../decorators/user.decorator';
 import {
   DeploymentDocument,
