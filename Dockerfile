@@ -2,11 +2,7 @@
 FROM node:12.13-alpine as development
 WORKDIR /agoracloud
 COPY package*.json ./
-ARG NODE_AUTH_TOKEN=${NODE_AUTH_TOKEN}
-RUN echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN} \
-    @agoracloud:registry=https://npm.pkg.github.com" > /agoracloud/.npmrc && \
-    npm i && \
-    rm -f /agoracloud/.npmrc
+RUN npm ci
 COPY . .
 RUN npm i rimraf
 RUN npm run build
@@ -16,11 +12,7 @@ ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
 WORKDIR /agoracloud
 COPY package*.json ./
-ARG NODE_AUTH_TOKEN=${NODE_AUTH_TOKEN}
-RUN echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN} \
-    @agoracloud:registry=https://npm.pkg.github.com" > /agoracloud/.npmrc && \
-    npm i && \
-    rm -f /agoracloud/.npmrc
+RUN npm i
 COPY . .
 COPY --from=development /agoracloud/dist ./dist
 CMD ["npm", "run", "start:prod"]

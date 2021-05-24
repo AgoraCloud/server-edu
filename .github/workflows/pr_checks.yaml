@@ -7,9 +7,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: read
     steps:
       - name: Check Out Repo
         uses: actions/checkout@v2
@@ -18,9 +15,7 @@ jobs:
         with:
           node-version: '12'
       - name: Install Dependencies
-        run: npm i
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm ci
       - name: Build
         run: npm run build
   test:
@@ -33,9 +28,7 @@ jobs:
         with:
           node-version: '12'
       - name: Install Dependencies
-        run: npm i
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm ci
       - name: Test
         run: npm run test
   lint:
@@ -48,8 +41,6 @@ jobs:
         with:
           node-version: '12'
       - name: Install Dependencies
-        run: npm i
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm ci
       - name: Lint
         run: npm run lint

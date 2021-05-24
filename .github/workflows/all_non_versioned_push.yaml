@@ -8,9 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: read
     steps:
       - name: Check Out Repo
         uses: actions/checkout@v2
@@ -41,4 +38,3 @@ jobs:
           push: true
           tags: agoracloud/server:${{ steps.extract_branch_name.outputs.branch_name }}-latest,agoracloud/server:${{ steps.extract_branch_name.outputs.branch_name }}-${{ steps.extract_commit_short_sha.outputs.commit_short_sha }}
           platforms: linux/amd64,linux/arm64,linux/arm/v7
-          build-args: NODE_AUTH_TOKEN=${{ secrets.GITHUB_TOKEN }}
