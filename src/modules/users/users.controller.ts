@@ -5,11 +5,13 @@ import {
   AdminUpdateUserDto,
   AdminUserDto,
   CreateUserDto,
+  AuditActionDto,
+  AuditResourceDto,
+  ActionDto,
+  RoleDto,
 } from '@agoracloud/common';
-import { AuditResource } from './../auditing/schemas/audit-log.schema';
 import { MongoExceptionFilter } from './../../filters/mongo-exception.filter';
 import { UserInterceptor } from './../../interceptors/user.interceptor';
-import { Action, Role } from './../authorization/schemas/permission.schema';
 import {
   ApiTags,
   ApiCookieAuth,
@@ -38,7 +40,6 @@ import { User } from '../../decorators/user.decorator';
 import { UserDocument } from '../users/schemas/user.schema';
 import { Auth } from '../../decorators/auth.decorator';
 import { Audit } from '../../decorators/audit.decorator';
-import { AuditAction } from '../auditing/schemas/audit-log.schema';
 import { Transform } from '../../decorators/transform.decorator';
 
 @ApiCookieAuth()
@@ -54,7 +55,7 @@ export class UsersController {
    * @param user the user
    */
   @Get()
-  @Audit(AuditAction.Read, AuditResource.User)
+  @Audit(AuditActionDto.Read, AuditResourceDto.User)
   @ApiOperation({ summary: 'Get the logged in user' })
   @ApiOkResponse({
     description: 'The user has been successfully retrieved',
@@ -71,7 +72,7 @@ export class UsersController {
    * @param updateUserDto the updated user
    */
   @Put()
-  @Audit(AuditAction.Update, AuditResource.User)
+  @Audit(AuditActionDto.Update, AuditResourceDto.User)
   @ApiOperation({ summary: 'Update the logged in user' })
   @ApiOkResponse({
     description: 'The user has been successfully updated',
@@ -94,7 +95,7 @@ export class UsersController {
    * @param userId the users id
    */
   @Delete()
-  @Audit(AuditAction.Delete, AuditResource.User)
+  @Audit(AuditActionDto.Delete, AuditResourceDto.User)
   @ApiOperation({ summary: 'Delete the logged in user' })
   @ApiOkResponse({ description: 'The user has been successfully deleted' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
@@ -105,7 +106,7 @@ export class UsersController {
 
 @ApiCookieAuth()
 @ApiTags('Users')
-@Auth(Action.ManageUser)
+@Auth(ActionDto.ManageUser)
 @Controller('api/users')
 @Transform(AdminUserDto)
 export class AdminUsersController {
@@ -117,7 +118,7 @@ export class AdminUsersController {
    */
   @Post()
   @UseFilters(new MongoExceptionFilter())
-  @Audit(AuditAction.Create, AuditResource.User)
+  @Audit(AuditActionDto.Create, AuditResourceDto.User)
   @ApiOperation({ summary: 'Create a user' })
   @ApiCreatedResponse({
     description: 'The user has been successfully created',
@@ -131,14 +132,14 @@ export class AdminUsersController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
   create(@Body() createUserDto: CreateUserDto): Promise<UserDocument> {
-    return this.usersService.create(createUserDto, Role.User, true);
+    return this.usersService.create(createUserDto, RoleDto.User, true);
   }
 
   /**
    * Get all users, accessible by super admins only
    */
   @Get()
-  @Audit(AuditAction.Read, AuditResource.User)
+  @Audit(AuditActionDto.Read, AuditResourceDto.User)
   @ApiOperation({ summary: 'Get all users' })
   @ApiOkResponse({
     description: 'The users have been successfully retrieved',
@@ -157,7 +158,7 @@ export class AdminUsersController {
    */
   @Put(':userId')
   @UseInterceptors(UserInterceptor)
-  @Audit(AuditAction.Update, AuditResource.User)
+  @Audit(AuditActionDto.Update, AuditResourceDto.User)
   @ApiParam({ name: 'userId', description: 'The users id' })
   @ApiOperation({ summary: 'Update a user' })
   @ApiOkResponse({
@@ -186,7 +187,7 @@ export class AdminUsersController {
    * @param userId the users id
    */
   @Delete(':userId')
-  @Audit(AuditAction.Delete, AuditResource.User)
+  @Audit(AuditActionDto.Delete, AuditResourceDto.User)
   @ApiParam({ name: 'userId', description: 'The users id' })
   @ApiOperation({ summary: 'Delete a user' })
   @ApiOkResponse({

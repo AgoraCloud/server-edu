@@ -20,11 +20,11 @@ import {
   CreateUserDto,
   UpdateUserDto,
   AdminUpdateUserDto,
+  RoleDto,
 } from '@agoracloud/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import * as bcrypt from 'bcryptjs';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { Role } from '../authorization/schemas/permission.schema';
 import { isDefined } from 'class-validator';
 
 @Injectable()
@@ -45,9 +45,8 @@ export class UsersService implements OnModuleInit {
    * the admin user is created.
    */
   private async createAdminUser(): Promise<void> {
-    const adminConfig: AdminConfig = this.configService.get<AdminConfig>(
-      'admin',
-    );
+    const adminConfig: AdminConfig =
+      this.configService.get<AdminConfig>('admin');
     try {
       await this.findByEmail(adminConfig.email);
     } catch (err) {
@@ -58,7 +57,7 @@ export class UsersService implements OnModuleInit {
         password: adminConfig.password,
       };
       // Add an artificial delay, the event emitter does not emit any events on initialization
-      setTimeout(() => this.create(createUserDto, Role.SuperAdmin), 2000);
+      setTimeout(() => this.create(createUserDto, RoleDto.SuperAdmin), 2000);
     }
   }
 
@@ -71,7 +70,7 @@ export class UsersService implements OnModuleInit {
    */
   async create(
     createUserDto: CreateUserDto,
-    role: Role.User | Role.SuperAdmin = Role.User,
+    role: RoleDto.User | RoleDto.SuperAdmin = RoleDto.User,
     verify = false,
   ): Promise<UserDocument> {
     const user: User = new User({
@@ -79,7 +78,7 @@ export class UsersService implements OnModuleInit {
       fullName: createUserDto.fullName,
       password: await this.hash(createUserDto.password),
     });
-    if (role === Role.SuperAdmin || verify) {
+    if (role === RoleDto.SuperAdmin || verify) {
       user.isVerified = true;
     }
     const createdUser: UserDocument = await this.userModel.create(user);

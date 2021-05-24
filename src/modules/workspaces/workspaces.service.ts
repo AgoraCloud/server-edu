@@ -48,9 +48,8 @@ export class WorkspacesService {
   ): Promise<WorkspaceDocument> {
     const workspace: Workspace = new Workspace(createWorkspaceDto);
     workspace.users = [user._id];
-    const createdWorkspace: WorkspaceDocument = await this.workspaceModel.create(
-      workspace,
-    );
+    const createdWorkspace: WorkspaceDocument =
+      await this.workspaceModel.create(workspace);
     this.eventEmitter.emit(
       Event.WorkspaceCreated,
       new WorkspaceCreatedEvent(createdWorkspace),
@@ -64,10 +63,8 @@ export class WorkspacesService {
    * @returns an array of workspace documents
    */
   async findAll(userId?: string): Promise<WorkspaceDocument[]> {
-    let workspacesQuery: Query<
-      WorkspaceDocument[],
-      WorkspaceDocument
-    > = this.workspaceModel.find();
+    let workspacesQuery: Query<WorkspaceDocument[], WorkspaceDocument> =
+      this.workspaceModel.find();
     if (userId) {
       workspacesQuery = workspacesQuery.where('users').in([userId]);
     }
@@ -85,10 +82,8 @@ export class WorkspacesService {
     workspaceId: string,
     userId?: string,
   ): Promise<WorkspaceDocument> {
-    let workspaceQuery: Query<
-      WorkspaceDocument,
-      WorkspaceDocument
-    > = this.workspaceModel.findOne().where('_id').equals(workspaceId);
+    let workspaceQuery: Query<WorkspaceDocument, WorkspaceDocument> =
+      this.workspaceModel.findOne().where('_id').equals(workspaceId);
     if (userId) {
       workspaceQuery = workspaceQuery.where('users').in([userId]);
     }
@@ -200,10 +195,8 @@ export class WorkspacesService {
    * @throws WorkspaceNotFoundException
    */
   async remove(workspaceId: string, userId?: string): Promise<void> {
-    let workspaceQuery: Query<
-      WorkspaceDocument,
-      WorkspaceDocument
-    > = this.workspaceModel.findOneAndDelete().where('_id').equals(workspaceId);
+    let workspaceQuery: Query<WorkspaceDocument, WorkspaceDocument> =
+      this.workspaceModel.findOneAndDelete().where('_id').equals(workspaceId);
     if (userId) {
       workspaceQuery = workspaceQuery.where('users').in([userId]);
     }
@@ -264,9 +257,10 @@ export class WorkspacesService {
       throw new MinOneUserInWorkspaceException(workspaceId);
     }
     // Check if the workspace has at-least one admin member left after removing the user
-    const workspaceAdminPermissions: PermissionDocument[] = await this.authorizationService.findAllWorkspaceAdminPermissions(
-      workspace._id,
-    );
+    const workspaceAdminPermissions: PermissionDocument[] =
+      await this.authorizationService.findAllWorkspaceAdminPermissions(
+        workspace._id,
+      );
     if (
       !workspaceAdminPermissions.filter((p) => p.user._id.toString() != userId)
         .length

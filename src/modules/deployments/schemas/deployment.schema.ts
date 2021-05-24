@@ -1,4 +1,4 @@
-import { CreateDeploymentDto, DeploymentTypeDto } from '@agoracloud/common';
+import { DeploymentStatusDto, DeploymentTypeDto } from '@agoracloud/common';
 import {
   Workspace,
   WorkspaceDocument,
@@ -7,20 +7,6 @@ import { User, UserDocument } from '../../users/schemas/user.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import * as mongoose from 'mongoose';
-
-export enum DeploymentStatus {
-  Pending = 'PENDING',
-  Creating = 'CREATING',
-  Running = 'RUNNING',
-  Updating = 'UPDATING',
-  Deleting = 'DELETING',
-  Failed = 'FAILED',
-  Unknown = 'UNKNOWN',
-}
-
-export enum DeploymentType {
-  VSCode = 'VSCODE',
-}
 
 export class DeploymentResources {
   @Prop({ required: true, min: 1 })
@@ -40,9 +26,9 @@ export class DeploymentResources {
 export class DeploymentImage {
   @Prop({
     required: true,
-    enum: [DeploymentType.VSCode],
+    enum: [DeploymentTypeDto.VSCode],
   })
-  type: DeploymentType;
+  type: DeploymentTypeDto;
 
   @Prop({ required: true })
   version: string;
@@ -77,16 +63,16 @@ export class Deployment {
   @Prop({
     required: true,
     enum: [
-      DeploymentStatus.Pending,
-      DeploymentStatus.Creating,
-      DeploymentStatus.Running,
-      DeploymentStatus.Updating,
-      DeploymentStatus.Failed,
-      DeploymentStatus.Unknown,
+      DeploymentStatusDto.Pending,
+      DeploymentStatusDto.Creating,
+      DeploymentStatusDto.Running,
+      DeploymentStatusDto.Updating,
+      DeploymentStatusDto.Failed,
+      DeploymentStatusDto.Unknown,
     ],
-    default: DeploymentStatus.Pending,
+    default: DeploymentStatusDto.Pending,
   })
-  status: DeploymentStatus;
+  status: DeploymentStatusDto;
 
   @Prop()
   failureReason?: string;
@@ -112,26 +98,6 @@ export class Deployment {
 
   constructor(partial: Partial<Deployment>) {
     Object.assign(this, partial);
-  }
-
-  /**
-   * Converts a CreateDeploymentDto into a Deployment
-   * @param createDeploymentDto the CreateDeploymentDto to convert
-   * @returns a converted Deployment
-   */
-  static fromCreateDeploymentDto(
-    createDeploymentDto: CreateDeploymentDto,
-  ): Deployment {
-    const deployment: Deployment = new Deployment({});
-    deployment.name = createDeploymentDto.name;
-    deployment.properties.isFavorite =
-      createDeploymentDto.properties.isFavorite;
-    deployment.properties.resources = createDeploymentDto.properties.resources;
-    deployment.properties.image.version =
-      createDeploymentDto.properties.image.version;
-    deployment.properties.image.type =
-      DeploymentType[createDeploymentDto.properties.image.type];
-    return deployment;
   }
 }
 

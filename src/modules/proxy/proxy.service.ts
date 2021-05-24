@@ -36,9 +36,8 @@ export class ProxyService implements OnModuleInit {
     this.httpProxy.on(
       'error',
       (err: Error, req: IncomingMessage, res: ServerResponse) => {
-        const exception: InternalServerErrorException = new InternalServerErrorException(
-          `Proxy Error`,
-        );
+        const exception: InternalServerErrorException =
+          new InternalServerErrorException(`Proxy Error`);
         res
           .writeHead(exception.getStatus(), {
             'Content-Type': 'application/json',
@@ -61,9 +60,8 @@ export class ProxyService implements OnModuleInit {
         if (!isMongoId(deploymentId)) {
           throw new InvalidMongoIdException('deploymentId');
         }
-        const deployment: DeploymentDocument = await this.deploymentsService.findOne(
-          deploymentId,
-        );
+        const deployment: DeploymentDocument =
+          await this.deploymentsService.findOne(deploymentId);
         req.url = this.removeProxyUrlPrefix(req.url, deploymentId);
         this.httpProxy.ws(
           req,

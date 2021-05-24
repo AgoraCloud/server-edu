@@ -1,9 +1,14 @@
 import { DeploymentDocument } from './../deployments/schemas/deployment.schema';
-import { Action } from './../authorization/schemas/permission.schema';
 import { Auth } from '../../decorators/auth.decorator';
 import { KubernetesPodsService } from './kubernetes-pods.service';
 import { WorkspaceDocument } from './../workspaces/schemas/workspace.schema';
-import { ExceptionDto, MetricsDto } from '@agoracloud/common';
+import {
+  ActionDto,
+  AuditActionDto,
+  AuditResourceDto,
+  ExceptionDto,
+  MetricsDto,
+} from '@agoracloud/common';
 import {
   ApiTags,
   ApiCookieAuth,
@@ -24,13 +29,9 @@ import { Workspace } from '../../decorators/workspace.decorator';
 import { Permissions } from '../../decorators/permissions.decorator';
 import { Deployment } from '../../decorators/deployment.decorator';
 import { Audit } from '../../decorators/audit.decorator';
-import {
-  AuditAction,
-  AuditResource,
-} from '../auditing/schemas/audit-log.schema';
 
 @ApiCookieAuth()
-@Auth(Action.ReadWorkspace)
+@Auth(ActionDto.ReadWorkspace)
 @UseInterceptors(WorkspaceInterceptor)
 @Controller('api/workspaces/:workspaceId')
 export class KubernetesController {
@@ -45,9 +46,9 @@ export class KubernetesController {
    * @param deploymentId the deployment id
    */
   @Get('deployments/:deploymentId/logs')
-  @Permissions(Action.ReadDeployment)
+  @Permissions(ActionDto.ReadDeployment)
   @UseInterceptors(DeploymentInterceptor)
-  @Audit(AuditAction.ReadLogs, AuditResource.Deployment)
+  @Audit(AuditActionDto.ReadLogs, AuditResourceDto.Deployment)
   @ApiTags('Deployments')
   @ApiOperation({ summary: 'Get a deployments logs' })
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
@@ -83,9 +84,9 @@ export class KubernetesController {
    * @param deploymentId the deployment id
    */
   @Get('deployments/:deploymentId/metrics')
-  @Permissions(Action.ReadDeployment)
+  @Permissions(ActionDto.ReadDeployment)
   @UseInterceptors(DeploymentInterceptor)
-  @Audit(AuditAction.ReadMetrics, AuditResource.Deployment)
+  @Audit(AuditActionDto.ReadMetrics, AuditResourceDto.Deployment)
   @ApiTags('Deployments')
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'deploymentId', description: 'The deployment id' })
@@ -122,7 +123,7 @@ export class KubernetesController {
    */
   @Get('metrics')
   @ApiTags('Workspaces')
-  @Audit(AuditAction.ReadMetrics, AuditResource.Workspace)
+  @Audit(AuditActionDto.ReadMetrics, AuditResourceDto.Workspace)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiOperation({
     summary: 'Get a workspaces metrics (cpu, memory and storage)',

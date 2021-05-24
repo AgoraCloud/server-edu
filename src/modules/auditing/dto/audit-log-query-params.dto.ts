@@ -7,7 +7,7 @@ import {
   IsNotEmpty,
   IsBooleanString,
 } from 'class-validator';
-import { AuditResource, AuditAction } from './../schemas/audit-log.schema';
+import { AuditActionDto, AuditResourceDto } from '@agoracloud/common';
 
 export class AuditLogQueryParamsDto extends PaginationQueryParamsDto {
   @IsNotEmpty()
@@ -19,37 +19,37 @@ export class AuditLogQueryParamsDto extends PaginationQueryParamsDto {
   @IsOptional()
   @IsNotEmpty()
   @IsIn([
-    AuditAction.Create,
-    AuditAction.Read,
-    AuditAction.ReadImages,
-    AuditAction.ReadLogs,
-    AuditAction.ReadMetrics,
-    AuditAction.Proxy,
-    AuditAction.Update,
-    AuditAction.Delete,
-    AuditAction.LogIn,
-    AuditAction.LogOut,
-    AuditAction.AddUser,
-    AuditAction.RemoveUser,
+    AuditActionDto.Create,
+    AuditActionDto.Read,
+    AuditActionDto.ReadImages,
+    AuditActionDto.ReadLogs,
+    AuditActionDto.ReadMetrics,
+    AuditActionDto.Proxy,
+    AuditActionDto.Update,
+    AuditActionDto.Delete,
+    AuditActionDto.LogIn,
+    AuditActionDto.LogOut,
+    AuditActionDto.AddUser,
+    AuditActionDto.RemoveUser,
   ])
-  readonly action?: AuditAction;
+  readonly action?: AuditActionDto;
 
   @IsString()
   @IsOptional()
   @IsNotEmpty()
   @IsIn([
-    AuditResource.User,
-    AuditResource.Permission,
-    AuditResource.AuditLog,
-    AuditResource.Workspace,
-    AuditResource.Deployment,
-    AuditResource.Project,
-    AuditResource.ProjectLane,
-    AuditResource.ProjectTask,
-    AuditResource.WikiSection,
-    AuditResource.WikiPage,
+    AuditResourceDto.User,
+    AuditResourceDto.Permission,
+    AuditResourceDto.AuditLog,
+    AuditResourceDto.Workspace,
+    AuditResourceDto.Deployment,
+    AuditResourceDto.Project,
+    AuditResourceDto.ProjectLane,
+    AuditResourceDto.ProjectTask,
+    AuditResourceDto.WikiSection,
+    AuditResourceDto.WikiPage,
   ])
-  readonly resource?: AuditResource;
+  readonly resource?: AuditResourceDto;
 
   @IsString()
   @IsOptional()

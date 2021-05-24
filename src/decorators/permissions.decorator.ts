@@ -1,5 +1,5 @@
+import { ActionDto } from '@agoracloud/common';
 import { SetMetadata } from '@nestjs/common';
-import { Action } from '../modules/authorization/schemas/permission.schema';
 
 /**
  * The permissions metadata key, used to extract the permissions
@@ -13,5 +13,5 @@ export const PERMISSIONS_KEY = 'permissions';
  * @param permissions the permissions needed to activate this route
  * @returns a fully configured permissions decorator
  */
-export const Permissions = (...permissions: Action[]) =>
+export const Permissions = (...permissions: ActionDto[]) =>
   SetMetadata(PERMISSIONS_KEY, permissions);

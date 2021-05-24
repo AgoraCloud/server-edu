@@ -25,8 +25,7 @@ import {
 } from './schemas/pod-condition.schema';
 import { PodPhase } from './schemas/pod-phase.schema';
 import { DeploymentsService } from '../deployments/deployments.service';
-import { MetricsDto } from '@agoracloud/common';
-import { DeploymentStatus } from '../deployments/schemas/deployment.schema';
+import { DeploymentStatusDto, MetricsDto } from '@agoracloud/common';
 import { DeploymentDeletedEvent } from '../../events/deployment-deleted.event';
 import { DeploymentUpdatedEvent } from '../../events/deployment-updated.event';
 import { DeploymentCreatedEvent } from '../../events/deployment-created.event';
@@ -64,7 +63,8 @@ export class KubernetesService implements OnModuleInit {
    * Set up and start the Kubernetes pod informer for all namespaces
    */
   private async startPodInformer(): Promise<void> {
-    const workspaceNamespaces: WorkspaceNamespace[] = await this.getAllWorkspaceNamespaces();
+    const workspaceNamespaces: WorkspaceNamespace[] =
+      await this.getAllWorkspaceNamespaces();
     for (const workspaceNamespace of workspaceNamespaces) {
       await this.startNamespacedPodInformer(workspaceNamespace.namespace);
     }
@@ -104,12 +104,11 @@ export class KubernetesService implements OnModuleInit {
       throw new WorkspaceMetricsNotAvailableException(workspaceId);
     }
     try {
-      const {
-        body: resourceQuota,
-      } = await this.resourceQuotasService.getResourceQuota(
-        generateResourceName(workspaceId),
-        workspaceId,
-      );
+      const { body: resourceQuota } =
+        await this.resourceQuotasService.getResourceQuota(
+          generateResourceName(workspaceId),
+          workspaceId,
+        );
       const workspaceMetrics: MetricsDto = new MetricsDto({
         cpu: toPercentage(
           resourceQuota.status?.used['limits.cpu'],
@@ -259,7 +258,7 @@ export class KubernetesService implements OnModuleInit {
     const storageCount = payload.deployment.properties.resources.storageCount;
     await this.deploymentsService.updateStatus(
       deploymentId,
-      DeploymentStatus.Creating,
+      DeploymentStatusDto.Creating,
     );
 
     try {
@@ -290,7 +289,7 @@ export class KubernetesService implements OnModuleInit {
       });
       await this.deploymentsService.updateStatus(
         deploymentId,
-        DeploymentStatus.Failed,
+        DeploymentStatusDto.Failed,
         failureReason,
       );
     }
@@ -308,7 +307,7 @@ export class KubernetesService implements OnModuleInit {
     const deploymentId: string = payload.deploymentId;
     await this.deploymentsService.updateStatus(
       deploymentId,
-      DeploymentStatus.Updating,
+      DeploymentStatusDto.Updating,
     );
     try {
       await this.kubeDeploymentsService.updateDeployment(
@@ -325,7 +324,7 @@ export class KubernetesService implements OnModuleInit {
       });
       await this.deploymentsService.updateStatus(
         deploymentId,
-        DeploymentStatus.Failed,
+        DeploymentStatusDto.Failed,
         failureReason,
       );
     }
@@ -373,7 +372,8 @@ export class KubernetesService implements OnModuleInit {
     const {
       body: { items: namespaces },
     } = await this.namespacesService.getAllNamespaces();
-    const workspaceNamespaces: WorkspaceNamespace[] = await this.getAllWorkspaceNamespaces();
+    const workspaceNamespaces: WorkspaceNamespace[] =
+      await this.getAllWorkspaceNamespaces();
     for (const namespace of namespaces) {
       const namespaceName: string = namespace.metadata?.name;
       if (
@@ -392,12 +392,12 @@ export class KubernetesService implements OnModuleInit {
    */
   @Cron(CronExpression.EVERY_HOUR)
   private async deleteRemainingKubernetesResourcesJob(): Promise<void> {
-    const workspaceNamespaces: WorkspaceNamespace[] = await this.getAllWorkspaceNamespaces();
+    const workspaceNamespaces: WorkspaceNamespace[] =
+      await this.getAllWorkspaceNamespaces();
     for (const workspaceNamespace of workspaceNamespaces) {
       const namespace: string = workspaceNamespace.namespace;
-      const storedDeployments: DeploymentDocument[] = await this.deploymentsService.findAll(
-        workspaceNamespace.workspaceId,
-      );
+      const storedDeployments: DeploymentDocument[] =
+        await this.deploymentsService.findAll(workspaceNamespace.workspaceId);
       const storedDeploymentIds: string[] = storedDeployments.map((d) =>
         d._id.toString(),
       );
@@ -455,7 +455,8 @@ export class KubernetesService implements OnModuleInit {
    */
   @Cron(CronExpression.EVERY_MINUTE)
   private async updateDeploymentStatusesJob(): Promise<void> {
-    const workspaceNamespaces: WorkspaceNamespace[] = await this.getAllWorkspaceNamespaces();
+    const workspaceNamespaces: WorkspaceNamespace[] =
+      await this.getAllWorkspaceNamespaces();
     for (const workspaceNamespace of workspaceNamespaces) {
       const {
         body: { items: pods },
@@ -479,12 +480,12 @@ export class KubernetesService implements OnModuleInit {
     if (!podPhase || podPhase === PodPhase.Unknown) {
       await this.deploymentsService.updateStatus(
         deploymentId,
-        DeploymentStatus.Unknown,
+        DeploymentStatusDto.Unknown,
       );
     } else if (podPhase === PodPhase.Running) {
       await this.deploymentsService.updateStatus(
         deploymentId,
-        DeploymentStatus.Running,
+        DeploymentStatusDto.Running,
       );
     } else if (podPhase === PodPhase.Pending) {
       /**
@@ -501,14 +502,14 @@ export class KubernetesService implements OnModuleInit {
       if (podScheduledConditionIndex !== -1) {
         await this.deploymentsService.updateStatus(
           deploymentId,
-          DeploymentStatus.Failed,
+          DeploymentStatusDto.Failed,
           conditions[podScheduledConditionIndex].message,
         );
       }
     } else if (podPhase === PodPhase.Failed) {
       await this.deploymentsService.updateStatus(
         deploymentId,
-        DeploymentStatus.Failed,
+        DeploymentStatusDto.Failed,
       );
     }
   }
@@ -518,7 +519,8 @@ export class KubernetesService implements OnModuleInit {
    * @returns all workspace namespaces
    */
   private async getAllWorkspaceNamespaces(): Promise<WorkspaceNamespace[]> {
-    const workspaces: WorkspaceDocument[] = await this.workspacesService.findAll();
+    const workspaces: WorkspaceDocument[] =
+      await this.workspacesService.findAll();
     return workspaces.map(
       (w) => new WorkspaceNamespace(w._id, generateResourceName(w._id)),
     );

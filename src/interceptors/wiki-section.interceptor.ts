@@ -36,11 +36,12 @@ export class WikiSectionInterceptor implements NestInterceptor {
     const user: UserDocument = request.user;
     const workspace: WorkspaceDocument = request.workspace;
     const isAdmin: boolean = request.isAdmin;
-    const wikiSection: WikiSectionDocument = await this.wikiSectionsService.findOne(
-      workspace._id,
-      wikiSectionId,
-      isAdmin ? undefined : user._id,
-    );
+    const wikiSection: WikiSectionDocument =
+      await this.wikiSectionsService.findOne(
+        workspace._id,
+        wikiSectionId,
+        isAdmin ? undefined : user._id,
+      );
     request.wikiSection = wikiSection;
     return next.handle();
   }

@@ -42,9 +42,8 @@ export class ProjectTasksService {
     projectTask.workspace = workspace;
     projectTask.project = project;
     projectTask.lane = projectLane;
-    const createdProjectTask: ProjectTaskDocument = await this.projectTasksModel.create(
-      projectTask,
-    );
+    const createdProjectTask: ProjectTaskDocument =
+      await this.projectTasksModel.create(projectTask);
     return createdProjectTask;
   }
 
@@ -62,10 +61,8 @@ export class ProjectTasksService {
     workspaceId?: string,
     projectId?: string,
   ): Promise<ProjectTaskDocument[]> {
-    let projectTasksQuery: Query<
-      ProjectTaskDocument[],
-      ProjectTaskDocument
-    > = this.projectTasksModel.find().where('lane').equals(projectLaneId);
+    let projectTasksQuery: Query<ProjectTaskDocument[], ProjectTaskDocument> =
+      this.projectTasksModel.find().where('lane').equals(projectLaneId);
     if (userId) {
       projectTasksQuery = projectTasksQuery.where('user').equals(userId);
     }
@@ -98,19 +95,17 @@ export class ProjectTasksService {
     projectTaskId: string,
     userId?: string,
   ): Promise<ProjectTaskDocument> {
-    let projectTaskQuery: Query<
-      ProjectTaskDocument,
-      ProjectTaskDocument
-    > = this.projectTasksModel
-      .findOne()
-      .where('_id')
-      .equals(projectTaskId)
-      .where('workspace')
-      .equals(workspaceId)
-      .where('project')
-      .equals(projectId)
-      .where('lane')
-      .equals(projectLaneId);
+    let projectTaskQuery: Query<ProjectTaskDocument, ProjectTaskDocument> =
+      this.projectTasksModel
+        .findOne()
+        .where('_id')
+        .equals(projectTaskId)
+        .where('workspace')
+        .equals(workspaceId)
+        .where('project')
+        .equals(projectId)
+        .where('lane')
+        .equals(projectLaneId);
     if (userId) {
       projectTaskQuery = projectTaskQuery.where('user').equals(userId);
     }
@@ -150,12 +145,13 @@ export class ProjectTasksService {
       updateProjectTaskDto.description || projectTask.description;
     const newProjectLaneId: string = updateProjectTaskDto.lane?.id;
     if (newProjectLaneId && newProjectLaneId != projectLaneId) {
-      const newProjectLane: ProjectLaneDocument = await this.projectLanesService.findOne(
-        workspaceId,
-        projectId,
-        newProjectLaneId,
-        userId,
-      );
+      const newProjectLane: ProjectLaneDocument =
+        await this.projectLanesService.findOne(
+          workspaceId,
+          projectId,
+          newProjectLaneId,
+          userId,
+        );
       projectTask.lane = newProjectLane;
     }
 
@@ -195,19 +191,17 @@ export class ProjectTasksService {
     projectTaskId: string,
     userId?: string,
   ): Promise<void> {
-    let projectTaskQuery: Query<
-      ProjectTaskDocument,
-      ProjectTaskDocument
-    > = this.projectTasksModel
-      .findOneAndDelete()
-      .where('_id')
-      .equals(projectTaskId)
-      .where('workspace')
-      .equals(workspaceId)
-      .where('project')
-      .equals(projectId)
-      .where('lane')
-      .equals(projectLaneId);
+    let projectTaskQuery: Query<ProjectTaskDocument, ProjectTaskDocument> =
+      this.projectTasksModel
+        .findOneAndDelete()
+        .where('_id')
+        .equals(projectTaskId)
+        .where('workspace')
+        .equals(workspaceId)
+        .where('project')
+        .equals(projectId)
+        .where('lane')
+        .equals(projectLaneId);
     if (userId) {
       projectTaskQuery = projectTaskQuery.where('user').equals(userId);
     }

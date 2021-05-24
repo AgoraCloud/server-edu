@@ -94,29 +94,23 @@ describe('ProjectLanesService', () => {
 
   describe('findAll', () => {
     it('should find all project lanes in the given project', async () => {
-      const retrievedProjectLanes: ProjectLaneDocument[] = await service.findAll(
-        project._id,
-      );
+      const retrievedProjectLanes: ProjectLaneDocument[] =
+        await service.findAll(project._id);
       expect(retrievedProjectLanes).toBeTruthy();
       expect(retrievedProjectLanes[0].project._id).toEqual(project._id);
     });
 
     it('should find all project lanes in the given project for the given user', async () => {
-      const retrievedProjectLanes: ProjectLaneDocument[] = await service.findAll(
-        project._id,
-        user._id,
-      );
+      const retrievedProjectLanes: ProjectLaneDocument[] =
+        await service.findAll(project._id, user._id);
       expect(retrievedProjectLanes).toBeTruthy();
       expect(retrievedProjectLanes[0].user._id).toEqual(user._id);
       expect(retrievedProjectLanes[0].project._id).toEqual(project._id);
     });
 
     it('should find all project lanes in the given workspace and project for the given user', async () => {
-      const retrievedProjectLanes: ProjectLaneDocument[] = await service.findAll(
-        project._id,
-        user._id,
-        workspace._id,
-      );
+      const retrievedProjectLanes: ProjectLaneDocument[] =
+        await service.findAll(project._id, user._id, workspace._id);
       expect(retrievedProjectLanes).toBeTruthy();
       expect(retrievedProjectLanes[0].user._id).toEqual(user._id);
       expect(retrievedProjectLanes[0].workspace._id).toEqual(workspace._id);

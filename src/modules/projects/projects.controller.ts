@@ -2,9 +2,11 @@ import {
   CreateProjectDto,
   UpdateProjectDto,
   ProjectDto,
+  ActionDto,
+  AuditActionDto,
+  AuditResourceDto,
 } from '@agoracloud/common';
 import { ExceptionDto } from '@agoracloud/common';
-import { Action } from './../authorization/schemas/permission.schema';
 import { Auth } from '../../decorators/auth.decorator';
 import {
   ApiTags,
@@ -39,15 +41,11 @@ import { ProjectDocument } from './schemas/project.schema';
 import { Permissions } from '../../decorators/permissions.decorator';
 import { IsAdmin } from '../../decorators/is-admin.decorator';
 import { Audit } from '../../decorators/audit.decorator';
-import {
-  AuditAction,
-  AuditResource,
-} from '../auditing/schemas/audit-log.schema';
 import { Transform } from '../../decorators/transform.decorator';
 
 @ApiCookieAuth()
 @ApiTags('Projects')
-@Auth(Action.ReadWorkspace)
+@Auth(ActionDto.ReadWorkspace)
 @Controller('api/workspaces/:workspaceId/projects')
 @UseInterceptors(WorkspaceInterceptor)
 @Transform(ProjectDto)
@@ -61,8 +59,8 @@ export class ProjectsController {
    * @param createProjectDto the project to create
    */
   @Post()
-  @Permissions(Action.CreateProject)
-  @Audit(AuditAction.Create, AuditResource.Project)
+  @Permissions(ActionDto.CreateProject)
+  @Audit(AuditActionDto.Create, AuditResourceDto.Project)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiOperation({ summary: 'Create a new project' })
   @ApiCreatedResponse({
@@ -93,8 +91,8 @@ export class ProjectsController {
    * @param workspaceId the workspace id
    */
   @Get()
-  @Permissions(Action.ReadProject)
-  @Audit(AuditAction.Read, AuditResource.Project)
+  @Permissions(ActionDto.ReadProject)
+  @Audit(AuditActionDto.Read, AuditResourceDto.Project)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiOperation({ summary: 'Get all projects' })
   @ApiOkResponse({
@@ -129,8 +127,8 @@ export class ProjectsController {
    * @param projectId the project id
    */
   @Get(':id')
-  @Permissions(Action.ReadProject)
-  @Audit(AuditAction.Read, AuditResource.Project)
+  @Permissions(ActionDto.ReadProject)
+  @Audit(AuditActionDto.Read, AuditResourceDto.Project)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'id', description: 'The project id' })
   @ApiOperation({ summary: 'Get a project' })
@@ -168,8 +166,8 @@ export class ProjectsController {
    * @param updateProjectDto the updated project
    */
   @Put(':id')
-  @Permissions(Action.UpdateProject)
-  @Audit(AuditAction.Update, AuditResource.Project)
+  @Permissions(ActionDto.UpdateProject)
+  @Audit(AuditActionDto.Update, AuditResourceDto.Project)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'id', description: 'The project id' })
   @ApiOperation({ summary: 'Update a project' })
@@ -217,8 +215,8 @@ export class ProjectsController {
    * @param projectId the project id
    */
   @Delete(':id')
-  @Permissions(Action.DeleteProject)
-  @Audit(AuditAction.Delete, AuditResource.Project)
+  @Permissions(ActionDto.DeleteProject)
+  @Audit(AuditActionDto.Delete, AuditResourceDto.Project)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'id', description: 'The project id' })
   @ApiOperation({ summary: 'Delete a project' })

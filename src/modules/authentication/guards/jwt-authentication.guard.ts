@@ -42,23 +42,19 @@ export class JwtAuthenticationGuard extends AuthGuard('jwt') {
       // Check the refresh token
       const refreshToken: string = request.cookies?.jwt_refresh;
       if (!refreshToken) throw new UnauthorizedException();
-      const decodedRefreshToken: TokenPayload = this.authenticationService.validateJwtRefreshToken(
-        refreshToken,
-      );
+      const decodedRefreshToken: TokenPayload =
+        this.authenticationService.validateJwtRefreshToken(refreshToken);
       if (!decodedRefreshToken) throw new UnauthorizedException();
 
       // Check if the user has the refresh token
       const email: string = decodedRefreshToken.email;
-      const user: UserDocument = await this.userService.findByEmailAndRefreshToken(
-        email,
-        refreshToken,
-      );
+      const user: UserDocument =
+        await this.userService.findByEmailAndRefreshToken(email, refreshToken);
       if (!user) throw new UnauthorizedException();
 
       // Generate and set the new access token
-      const newAccessToken: string = this.authenticationService.generateAccessToken(
-        email,
-      );
+      const newAccessToken: string =
+        this.authenticationService.generateAccessToken(email);
       request.cookies[accessTokenConstants.name] = newAccessToken;
       response.cookie(
         accessTokenConstants.name,

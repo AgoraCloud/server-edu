@@ -17,9 +17,7 @@ export class KubernetesPersistentVolumeClaimsService {
    * @param namespace the Kubernetes namespace
    * @returns a list of all Kubernetes persistent volume claims
    */
-  getAllPersistentVolumeClaims(
-    namespace: string,
-  ): Promise<{
+  getAllPersistentVolumeClaims(namespace: string): Promise<{
     response: http.IncomingMessage;
     body: k8s.V1PersistentVolumeClaimList;
   }> {

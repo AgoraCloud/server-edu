@@ -161,10 +161,8 @@ describe('UsersService', () => {
     it('should not return the user if the user with the given email and refresh token is not found', async () => {
       // Generate a random refresh token
       const refreshToken: string = Types.ObjectId().toHexString();
-      const retrievedUser: UserDocument = await service.findByEmailAndRefreshToken(
-        user.email,
-        refreshToken,
-      );
+      const retrievedUser: UserDocument =
+        await service.findByEmailAndRefreshToken(user.email, refreshToken);
       expect(retrievedUser).not.toBeTruthy();
     });
 
@@ -172,10 +170,8 @@ describe('UsersService', () => {
       // Create a refresh token and update the user
       const refreshToken: string = Types.ObjectId().toHexString();
       await service.updateRefreshToken(user.email, refreshToken);
-      const retrievedUser: UserDocument = await service.findByEmailAndRefreshToken(
-        user.email,
-        refreshToken,
-      );
+      const retrievedUser: UserDocument =
+        await service.findByEmailAndRefreshToken(user.email, refreshToken);
       expect(retrievedUser).toBeTruthy();
       expect(retrievedUser.email).toBe(user.email);
       user = retrievedUser;

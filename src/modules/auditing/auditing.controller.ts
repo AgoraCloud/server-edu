@@ -1,11 +1,15 @@
-import { AuditResource } from './schemas/audit-log.schema';
-import { ExceptionDto, AuditLogDto } from '@agoracloud/common';
-import { AuditAction, AuditLogDocument } from './schemas/audit-log.schema';
+import {
+  ExceptionDto,
+  AuditLogDto,
+  ActionDto,
+  AuditActionDto,
+  AuditResourceDto,
+} from '@agoracloud/common';
+import { AuditLogDocument } from './schemas/audit-log.schema';
 import { WorkspaceInterceptor } from './../../interceptors/workspace.interceptor';
 import { Controller, Get, Param, Query, UseInterceptors } from '@nestjs/common';
 import { Auth } from '../../decorators/auth.decorator';
 import { Permissions } from '../../decorators/permissions.decorator';
-import { Action } from '../authorization/schemas/permission.schema';
 import { AuditingService } from './auditing.service';
 import {
   ApiBadRequestResponse,
@@ -36,8 +40,8 @@ export class AuditingController {
    * @param userId the users id
    */
   @Get('audit')
-  @Permissions(Action.ManageUser)
-  @Audit(AuditAction.Read, AuditResource.AuditLog)
+  @Permissions(ActionDto.ManageUser)
+  @Audit(AuditActionDto.Read, AuditResourceDto.AuditLog)
   @ApiQuery({
     name: 'isSuccessful',
     description: 'The isSuccessful paramter in the audit log',
@@ -48,13 +52,13 @@ export class AuditingController {
     name: 'action',
     description: 'The action in the audit log',
     required: false,
-    enum: AuditAction,
+    enum: AuditActionDto,
   })
   @ApiQuery({
     name: 'resource',
     description: 'The resource in the audit log',
     required: false,
-    enum: AuditResource,
+    enum: AuditResourceDto,
   })
   @ApiQuery({
     name: 'userAgent',
@@ -112,10 +116,10 @@ export class AuditingController {
    * @param userId the users id
    * @param workspaceId the workspace id
    */
-  @Permissions(Action.ManageWorkspace)
+  @Permissions(ActionDto.ManageWorkspace)
   @Get('workspaces/:workspaceId/audit')
   @UseInterceptors(WorkspaceInterceptor)
-  @Audit(AuditAction.Read, AuditResource.AuditLog)
+  @Audit(AuditActionDto.Read, AuditResourceDto.AuditLog)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiQuery({
     name: 'isSuccessful',
@@ -127,13 +131,13 @@ export class AuditingController {
     name: 'action',
     description: 'The action in the audit log',
     required: false,
-    enum: AuditAction,
+    enum: AuditActionDto,
   })
   @ApiQuery({
     name: 'resource',
     description: 'The resource in the audit log',
     required: false,
-    enum: AuditResource,
+    enum: AuditResourceDto,
   })
   @ApiQuery({
     name: 'userAgent',

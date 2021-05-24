@@ -143,10 +143,8 @@ describe('AuthenticationService', () => {
         Promise<TokenDocument>,
         [tokenId: string, type: TokenType]
       > = jest.spyOn(tokensService, 'findOneAndRemove');
-      const usersServiceSpy: jest.SpyInstance<
-        Promise<void>,
-        [userId: string]
-      > = jest.spyOn(usersService, 'verify');
+      const usersServiceSpy: jest.SpyInstance<Promise<void>, [userId: string]> =
+        jest.spyOn(usersService, 'verify');
       await service.verifyAccount(verifyAccountDto);
       expect(tokensServiceSpy).toHaveBeenCalledTimes(1);
       expect(usersServiceSpy).toHaveBeenCalledTimes(1);
@@ -219,10 +217,8 @@ describe('AuthenticationService', () => {
 
   describe('clearRefreshToken', () => {
     it('should clear the users refresh token', async () => {
-      const usersServiceSpy: jest.SpyInstance<
-        Promise<void>,
-        [email: string]
-      > = jest.spyOn(usersService, 'clearRefreshToken');
+      const usersServiceSpy: jest.SpyInstance<Promise<void>, [email: string]> =
+        jest.spyOn(usersService, 'clearRefreshToken');
       await service.clearRefreshToken(user.email);
       expect(usersServiceSpy).toHaveBeenCalledTimes(1);
     });
@@ -260,9 +256,8 @@ describe('AuthenticationService', () => {
     });
 
     it('should return the decoded refresh token', () => {
-      const decodedToken: TokenPayload = service.validateJwtRefreshToken(
-        refreshToken,
-      );
+      const decodedToken: TokenPayload =
+        service.validateJwtRefreshToken(refreshToken);
       expect(decodedToken).toBeTruthy();
       expect(decodedToken.email).toBe(user.email);
     });

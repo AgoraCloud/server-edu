@@ -1,4 +1,4 @@
-import { Role } from '../modules/authorization/schemas/permission.schema';
+import { RoleDto } from '@agoracloud/common';
 import { UserDocument } from '../modules/users/schemas/user.schema';
 
 /**
@@ -7,12 +7,12 @@ import { UserDocument } from '../modules/users/schemas/user.schema';
 export class UserCreatedEvent {
   user: UserDocument;
   token: string;
-  role: Role.SuperAdmin | Role.User;
+  role: RoleDto.SuperAdmin | RoleDto.User;
 
   constructor(
     user: UserDocument,
     token: string,
-    role: Role.SuperAdmin | Role.User,
+    role: RoleDto.SuperAdmin | RoleDto.User,
   ) {
     this.user = user;
     this.token = token;

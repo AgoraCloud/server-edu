@@ -13,17 +13,15 @@ import { EnvironmentConfig } from './config/configuration.interface';
 declare const module: any;
 
 async function bootstrap() {
-  const app: NestExpressApplication = await NestFactory.create<NestExpressApplication>(
-    AppModule,
-  );
+  const app: NestExpressApplication =
+    await NestFactory.create<NestExpressApplication>(AppModule);
   // Use the custom LoggerService for logging
   app.useLogger(app.get(LoggerService));
   // Get configuration values
   const configService: ConfigService = app.get(ConfigService);
   const port: number = configService.get<number>('port');
-  const environment: EnvironmentConfig = configService.get<EnvironmentConfig>(
-    'environment',
-  );
+  const environment: EnvironmentConfig =
+    configService.get<EnvironmentConfig>('environment');
   const version: number = configService.get<number>('version');
 
   app.useGlobalPipes(

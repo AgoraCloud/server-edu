@@ -35,9 +35,8 @@ export class WikiSectionsService {
     const wikiSection: WikiSection = new WikiSection(createWikiSectionDto);
     wikiSection.user = user;
     wikiSection.workspace = workspace;
-    const createdWikiSection: WikiSectionDocument = await this.wikiSectionModel.create(
-      wikiSection,
-    );
+    const createdWikiSection: WikiSectionDocument =
+      await this.wikiSectionModel.create(wikiSection);
     return createdWikiSection;
   }
 
@@ -51,10 +50,8 @@ export class WikiSectionsService {
     workspaceId: string,
     userId?: string,
   ): Promise<WikiSectionDocument[]> {
-    let wikiSectionsQuery: Query<
-      WikiSectionDocument[],
-      WikiSectionDocument
-    > = this.wikiSectionModel.find().where('workspace').equals(workspaceId);
+    let wikiSectionsQuery: Query<WikiSectionDocument[], WikiSectionDocument> =
+      this.wikiSectionModel.find().where('workspace').equals(workspaceId);
     if (userId) {
       wikiSectionsQuery = wikiSectionsQuery.where('user').equals(userId);
     }
@@ -75,15 +72,13 @@ export class WikiSectionsService {
     wikiSectionId: string,
     userId?: string,
   ): Promise<WikiSectionDocument> {
-    let wikiSectionQuery: Query<
-      WikiSectionDocument,
-      WikiSectionDocument
-    > = this.wikiSectionModel
-      .findOne()
-      .where('_id')
-      .equals(wikiSectionId)
-      .where('workspace')
-      .equals(workspaceId);
+    let wikiSectionQuery: Query<WikiSectionDocument, WikiSectionDocument> =
+      this.wikiSectionModel
+        .findOne()
+        .where('_id')
+        .equals(wikiSectionId)
+        .where('workspace')
+        .equals(workspaceId);
     if (userId) {
       wikiSectionQuery = wikiSectionQuery.where('user').equals(userId);
     }
@@ -107,15 +102,13 @@ export class WikiSectionsService {
     updateWikiSectionDto: UpdateWikiSectionDto,
     userId?: string,
   ): Promise<WikiSectionDocument> {
-    let wikiSectionQuery: Query<
-      WikiSectionDocument,
-      WikiSectionDocument
-    > = this.wikiSectionModel
-      .findOneAndUpdate(null, updateWikiSectionDto, { new: true })
-      .where('_id')
-      .equals(wikiSectionId)
-      .where('workspace')
-      .equals(workspaceId);
+    let wikiSectionQuery: Query<WikiSectionDocument, WikiSectionDocument> =
+      this.wikiSectionModel
+        .findOneAndUpdate(null, updateWikiSectionDto, { new: true })
+        .where('_id')
+        .equals(wikiSectionId)
+        .where('workspace')
+        .equals(workspaceId);
     if (userId) {
       wikiSectionQuery = wikiSectionQuery.where('user').equals(userId);
     }
@@ -136,15 +129,13 @@ export class WikiSectionsService {
     wikiSectionId: string,
     userId?: string,
   ): Promise<void> {
-    let wikiSectionQuery: Query<
-      WikiSectionDocument,
-      WikiSectionDocument
-    > = this.wikiSectionModel
-      .findOneAndDelete()
-      .where('_id')
-      .equals(wikiSectionId)
-      .where('workspace')
-      .equals(workspaceId);
+    let wikiSectionQuery: Query<WikiSectionDocument, WikiSectionDocument> =
+      this.wikiSectionModel
+        .findOneAndDelete()
+        .where('_id')
+        .equals(wikiSectionId)
+        .where('workspace')
+        .equals(workspaceId);
     if (userId) {
       wikiSectionQuery = wikiSectionQuery.where('user').equals(userId);
     }

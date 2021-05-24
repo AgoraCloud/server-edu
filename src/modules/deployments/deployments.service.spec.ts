@@ -118,7 +118,8 @@ describe('DeploymentsService', () => {
 
   describe('findAllImages', () => {
     it('should find all deployment images', () => {
-      const retrievedDeploymentImages: DeploymentImage[] = service.findAllImages();
+      const retrievedDeploymentImages: DeploymentImage[] =
+        service.findAllImages();
       expect(retrievedDeploymentImages).toBe(deploymentImages);
     });
   });
@@ -207,9 +208,8 @@ describe('DeploymentsService', () => {
     });
 
     it('should throw an error if the deployment status is not running or failed', async () => {
-      const expectedErrorMessage: string = new DeploymentCannotBeUpdatedException(
-        deploymentId,
-      ).message;
+      const expectedErrorMessage: string =
+        new DeploymentCannotBeUpdatedException(deploymentId).message;
       try {
         await service.update(
           workspace._id,

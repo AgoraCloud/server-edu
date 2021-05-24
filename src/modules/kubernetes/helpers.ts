@@ -16,9 +16,7 @@ function toBase64(value: string): string {
  * @param deploymentId the deployment id
  * @returns the generated deployment labels
  */
-function generateDeploymentLabels(
-  deploymentId: string,
-): {
+function generateDeploymentLabels(deploymentId: string): {
   [key: string]: string;
 } {
   return { app: resourcePrefix, deployment: deploymentId };
@@ -29,9 +27,7 @@ function generateDeploymentLabels(
  * @param workspaceId the workspace id
  * @returns the generated workspace labels
  */
-function generateWorkspaceLabels(
-  workspaceId: string,
-): {
+function generateWorkspaceLabels(workspaceId: string): {
   [key: string]: string;
 } {
   return { app: resourcePrefix, workspace: workspaceId };

@@ -7,11 +7,7 @@ import { DeploymentUpdatedEvent } from './../../events/deployment-updated.event'
 import { DeploymentCreatedEvent } from './../../events/deployment-created.event';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { InjectModel } from '@nestjs/mongoose';
-import {
-  Deployment,
-  DeploymentImage,
-  DeploymentStatus,
-} from './schemas/deployment.schema';
+import { Deployment, DeploymentImage } from './schemas/deployment.schema';
 import { DeploymentNotFoundException } from './../../exceptions/deployment-not-found.exception';
 import { WorkspaceDocument } from './../workspaces/schemas/workspace.schema';
 import { UserDocument } from '../users/schemas/user.schema';
@@ -20,6 +16,7 @@ import { Model, Query } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import {
   CreateDeploymentDto,
+  DeploymentStatusDto,
   UpdateDeploymentDto,
   UpdateDeploymentResourcesDto,
 } from '@agoracloud/common';
@@ -52,15 +49,12 @@ export class DeploymentsService {
     const sudoPassword: string = createDeploymentDto.properties.sudoPassword;
     // Remove the sudoPassword field
     delete createDeploymentDto.properties.sudoPassword;
-    const deployment: Deployment = new Deployment(
-      Deployment.fromCreateDeploymentDto(createDeploymentDto),
-    );
+    const deployment: Deployment = new Deployment(createDeploymentDto);
     deployment.user = user;
     deployment.workspace = workspace;
 
-    const createdDeployment: DeploymentDocument = await this.deploymentModel.create(
-      deployment,
-    );
+    const createdDeployment: DeploymentDocument =
+      await this.deploymentModel.create(deployment);
     this.eventEmitter.emit(
       Event.DeploymentCreated,
       new DeploymentCreatedEvent(sudoPassword, createdDeployment),
@@ -86,10 +80,8 @@ export class DeploymentsService {
     workspaceId: string,
     userId?: string,
   ): Promise<DeploymentDocument[]> {
-    let deploymentsQuery: Query<
-      DeploymentDocument[],
-      DeploymentDocument
-    > = this.deploymentModel.find().where('workspace').equals(workspaceId);
+    let deploymentsQuery: Query<DeploymentDocument[], DeploymentDocument> =
+      this.deploymentModel.find().where('workspace').equals(workspaceId);
     if (userId) {
       deploymentsQuery = deploymentsQuery.where('user').equals(userId);
     }
@@ -110,10 +102,8 @@ export class DeploymentsService {
     userId?: string,
     workspaceId?: string,
   ): Promise<DeploymentDocument> {
-    let deploymentQuery: Query<
-      DeploymentDocument,
-      DeploymentDocument
-    > = this.deploymentModel.findOne().where('_id').equals(deploymentId);
+    let deploymentQuery: Query<DeploymentDocument, DeploymentDocument> =
+      this.deploymentModel.findOne().where('_id').equals(deploymentId);
     if (userId) {
       deploymentQuery = deploymentQuery.where('user').equals(userId);
     }
@@ -145,9 +135,9 @@ export class DeploymentsService {
       userId,
       workspaceId,
     );
-    const allowedStatuses: DeploymentStatus[] = [
-      DeploymentStatus.Running,
-      DeploymentStatus.Failed,
+    const allowedStatuses: DeploymentStatusDto[] = [
+      DeploymentStatusDto.Running,
+      DeploymentStatusDto.Failed,
     ];
     if (!allowedStatuses.includes(deployment.status)) {
       throw new DeploymentCannotBeUpdatedException(deploymentId);
@@ -207,7 +197,7 @@ export class DeploymentsService {
    */
   async updateStatus(
     deploymentId: string,
-    status: DeploymentStatus,
+    status: DeploymentStatusDto,
     failureReason?: string,
   ): Promise<void> {
     await this.deploymentModel
@@ -226,15 +216,13 @@ export class DeploymentsService {
     deploymentId: string,
     userId?: string,
   ): Promise<void> {
-    let deploymentQuery: Query<
-      DeploymentDocument,
-      DeploymentDocument
-    > = this.deploymentModel
-      .findOneAndDelete()
-      .where('_id')
-      .equals(deploymentId)
-      .where('workspace')
-      .equals(workspaceId);
+    let deploymentQuery: Query<DeploymentDocument, DeploymentDocument> =
+      this.deploymentModel
+        .findOneAndDelete()
+        .where('_id')
+        .equals(deploymentId)
+        .where('workspace')
+        .equals(workspaceId);
     if (userId) {
       deploymentQuery = deploymentQuery.where('user').equals(userId);
     }

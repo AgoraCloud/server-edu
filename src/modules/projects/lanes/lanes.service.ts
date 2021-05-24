@@ -39,9 +39,8 @@ export class ProjectLanesService {
     projectLane.user = user;
     projectLane.workspace = workspace;
     projectLane.project = project;
-    const createdProjectLane: ProjectLaneDocument = await this.projectLaneModel.create(
-      projectLane,
-    );
+    const createdProjectLane: ProjectLaneDocument =
+      await this.projectLaneModel.create(projectLane);
     return createdProjectLane;
   }
 
@@ -57,10 +56,8 @@ export class ProjectLanesService {
     userId?: string,
     workspaceId?: string,
   ): Promise<ProjectLaneDocument[]> {
-    let projectLanesQuery: Query<
-      ProjectLaneDocument[],
-      ProjectLaneDocument
-    > = this.projectLaneModel.find().where('project').equals(projectId);
+    let projectLanesQuery: Query<ProjectLaneDocument[], ProjectLaneDocument> =
+      this.projectLaneModel.find().where('project').equals(projectId);
     if (userId) {
       projectLanesQuery = projectLanesQuery.where('user').equals(userId);
     }
@@ -88,17 +85,15 @@ export class ProjectLanesService {
     projectLaneId: string,
     userId?: string,
   ): Promise<ProjectLaneDocument> {
-    let projectLaneQuery: Query<
-      ProjectLaneDocument,
-      ProjectLaneDocument
-    > = this.projectLaneModel
-      .findOne()
-      .where('_id')
-      .equals(projectLaneId)
-      .where('workspace')
-      .equals(workspaceId)
-      .where('project')
-      .equals(projectId);
+    let projectLaneQuery: Query<ProjectLaneDocument, ProjectLaneDocument> =
+      this.projectLaneModel
+        .findOne()
+        .where('_id')
+        .equals(projectLaneId)
+        .where('workspace')
+        .equals(workspaceId)
+        .where('project')
+        .equals(projectId);
     if (userId) {
       projectLaneQuery = projectLaneQuery.where('user').equals(userId);
     }
@@ -124,17 +119,15 @@ export class ProjectLanesService {
     updateProjectLaneDto: UpdateProjectLaneDto,
     userId?: string,
   ): Promise<ProjectLaneDocument> {
-    let projectLaneQuery: Query<
-      ProjectLaneDocument,
-      ProjectLaneDocument
-    > = this.projectLaneModel
-      .findOneAndUpdate(null, updateProjectLaneDto, { new: true })
-      .where('_id')
-      .equals(projectLaneId)
-      .where('workspace')
-      .equals(workspaceId)
-      .where('project')
-      .equals(projectId);
+    let projectLaneQuery: Query<ProjectLaneDocument, ProjectLaneDocument> =
+      this.projectLaneModel
+        .findOneAndUpdate(null, updateProjectLaneDto, { new: true })
+        .where('_id')
+        .equals(projectLaneId)
+        .where('workspace')
+        .equals(workspaceId)
+        .where('project')
+        .equals(projectId);
     if (userId) {
       projectLaneQuery = projectLaneQuery.where('user').equals(userId);
     }
@@ -157,17 +150,15 @@ export class ProjectLanesService {
     projectLaneId: string,
     userId?: string,
   ): Promise<void> {
-    let projectLaneQuery: Query<
-      ProjectLaneDocument,
-      ProjectLaneDocument
-    > = this.projectLaneModel
-      .findOneAndDelete()
-      .where('_id')
-      .equals(projectLaneId)
-      .where('workspace')
-      .equals(workspaceId)
-      .where('project')
-      .equals(projectId);
+    let projectLaneQuery: Query<ProjectLaneDocument, ProjectLaneDocument> =
+      this.projectLaneModel
+        .findOneAndDelete()
+        .where('_id')
+        .equals(projectLaneId)
+        .where('workspace')
+        .equals(workspaceId)
+        .where('project')
+        .equals(projectId);
     if (userId) {
       projectLaneQuery = projectLaneQuery.where('user').equals(userId);
     }

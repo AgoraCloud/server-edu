@@ -3,6 +3,9 @@ import { UserNotInWorkspaceException } from './../../exceptions/user-not-in-work
 import {
   UpdateWorkspaceUserPermissionsDto,
   UpdateUserPermissionsDto,
+  RoleDto,
+  InWorkspaceActionsDto,
+  ActionDto,
 } from '@agoracloud/common';
 import { UserDocument } from './../users/schemas/user.schema';
 import { WorkspaceDocument } from './../workspaces/schemas/workspace.schema';
@@ -14,13 +17,8 @@ import { UserCreatedEvent } from './../../events/user-created.event';
 import { InjectModel } from '@nestjs/mongoose';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import {
-  Action,
-  fromActionsDto,
-  fromRolesDto,
-  InWorkspaceActions,
   Permission,
   PermissionDocument,
-  Role,
   WorkspaceRolesAndPermissions,
 } from './schemas/permission.schema';
 import { Model } from 'mongoose';
@@ -41,9 +39,8 @@ export class AuthorizationService {
    * @returns the created permissions document
    */
   private async create(permission: Permission): Promise<PermissionDocument> {
-    const createdPermission: PermissionDocument = await this.permissionModel.create(
-      permission,
-    );
+    const createdPermission: PermissionDocument =
+      await this.permissionModel.create(permission);
     return createdPermission;
   }
 
@@ -53,9 +50,8 @@ export class AuthorizationService {
    * @returns an array of permission documents
    */
   private async findAll(workspaceId: string): Promise<PermissionDocument[]> {
-    const retrievedPermissions: PermissionDocument[] = await this.permissionModel
-      .find()
-      .exec();
+    const retrievedPermissions: PermissionDocument[] =
+      await this.permissionModel.find().exec();
     return retrievedPermissions.filter((p) => p.workspaces.has(workspaceId));
   }
 
@@ -87,9 +83,8 @@ export class AuthorizationService {
     workspaceId: string,
   ): Promise<WorkspaceRolesAndPermissions> {
     const permissions: PermissionDocument = await this.findOne(userId);
-    const workspaceRolesAndPermissions: WorkspaceRolesAndPermissions = permissions.workspaces.get(
-      workspaceId,
-    );
+    const workspaceRolesAndPermissions: WorkspaceRolesAndPermissions =
+      permissions.workspaces.get(workspaceId);
     if (!workspaceRolesAndPermissions) {
       throw new UserNotInWorkspaceException(userId, workspaceId);
     }
@@ -109,7 +104,7 @@ export class AuthorizationService {
       .where(`workspaces.${workspaceId}`)
       .exists(true)
       .where(`workspaces.${workspaceId}.roles`)
-      .in([Role.WorkspaceAdmin])
+      .in([RoleDto.WorkspaceAdmin])
       .exec();
   }
 
@@ -140,14 +135,12 @@ export class AuthorizationService {
     updateUserPermissionsDto: UpdateUserPermissionsDto,
   ): Promise<PermissionDocument> {
     let permissions: PermissionDocument = await this.findOne(userId);
-    permissions.roles = fromRolesDto(updateUserPermissionsDto.roles);
+    permissions.roles = updateUserPermissionsDto.roles;
     // For now, a users roles can only contain one role
-    if (permissions.roles[0] === Role.SuperAdmin) {
+    if (permissions.roles[0] === RoleDto.SuperAdmin) {
       permissions.permissions = [];
     } else {
-      permissions.permissions = fromActionsDto(
-        updateUserPermissionsDto.permissions,
-      );
+      permissions.permissions = updateUserPermissionsDto.permissions;
     }
     permissions = await this.update(permissions);
     return permissions;
@@ -167,23 +160,20 @@ export class AuthorizationService {
     updateWorkspaceUserPermissionsDto: UpdateWorkspaceUserPermissionsDto,
   ): Promise<WorkspaceRolesAndPermissions> {
     const permissions: PermissionDocument = await this.findOne(userId);
-    const workspaceRolesAndPermissions: WorkspaceRolesAndPermissions = permissions.workspaces.get(
-      workspaceId,
-    );
+    const workspaceRolesAndPermissions: WorkspaceRolesAndPermissions =
+      permissions.workspaces.get(workspaceId);
     if (!workspaceRolesAndPermissions) {
       throw new UserNotInWorkspaceException(userId, workspaceId);
     }
 
-    workspaceRolesAndPermissions.roles = fromRolesDto(
-      updateWorkspaceUserPermissionsDto.roles,
-    );
+    workspaceRolesAndPermissions.roles =
+      updateWorkspaceUserPermissionsDto.roles;
     // For now, a users roles can only contain one role
-    if (workspaceRolesAndPermissions.roles[0] === Role.WorkspaceAdmin) {
+    if (workspaceRolesAndPermissions.roles[0] === RoleDto.WorkspaceAdmin) {
       workspaceRolesAndPermissions.permissions = [];
     } else {
-      workspaceRolesAndPermissions.permissions = fromActionsDto(
-        updateWorkspaceUserPermissionsDto.permissions,
-      );
+      workspaceRolesAndPermissions.permissions =
+        updateWorkspaceUserPermissionsDto.permissions;
     }
     permissions.workspaces.set(workspaceId, workspaceRolesAndPermissions);
     await this.update(permissions);
@@ -206,12 +196,12 @@ export class AuthorizationService {
   private async handleUserCreatedEvent(
     payload: UserCreatedEvent,
   ): Promise<void> {
-    const userRole: Role = payload.role;
+    const userRole: RoleDto = payload.role;
     const permission: Permission = new Permission({
       user: payload.user,
       roles: [userRole],
     });
-    if (userRole === Role.SuperAdmin) {
+    if (userRole === RoleDto.SuperAdmin) {
       permission.permissions = [];
     }
     await this.create(permission);
@@ -243,7 +233,7 @@ export class AuthorizationService {
     permission.workspaces.set(
       workspace._id,
       new WorkspaceRolesAndPermissions({
-        roles: [Role.WorkspaceAdmin],
+        roles: [RoleDto.WorkspaceAdmin],
         permissions: [],
       }),
     );
@@ -259,12 +249,12 @@ export class AuthorizationService {
     payload: WorkspaceUserAddedEvent,
   ): Promise<void> {
     const permission: PermissionDocument = await this.findOne(payload.userId);
-    if (permission.roles[0] === Role.SuperAdmin) return;
+    if (permission.roles[0] === RoleDto.SuperAdmin) return;
     permission.workspaces.set(
       payload.workspaceId,
       new WorkspaceRolesAndPermissions({
-        roles: [Role.User],
-        permissions: InWorkspaceActions,
+        roles: [RoleDto.User],
+        permissions: InWorkspaceActionsDto,
       }),
     );
     await this.update(permission);
@@ -309,11 +299,11 @@ export class AuthorizationService {
    */
   async can(
     user: UserDocument,
-    neededPermissions: Action[],
+    neededPermissions: ActionDto[],
     workspaceId?: string,
   ): Promise<{ canActivate: boolean; isAdmin: boolean }> {
     const permission: PermissionDocument = await this.findOne(user._id);
-    const grantedPermissions: Action[] = permission.permissions;
+    const grantedPermissions: ActionDto[] = permission.permissions;
 
     /**
      * Checks whether the users granted permissions contain the needed permissions
@@ -321,8 +311,8 @@ export class AuthorizationService {
      * @param neededPermissions the users needed permissions
      */
     const hasPermissions = (
-      grantedPermissions: Action[],
-      neededPermissions: Action[],
+      grantedPermissions: ActionDto[],
+      neededPermissions: ActionDto[],
     ): boolean => {
       if (!grantedPermissions.length || !neededPermissions.length) return false;
       let hasPermissions = true;
@@ -334,7 +324,7 @@ export class AuthorizationService {
     };
 
     // A super admin can perform any action application-wide and workspace-wide
-    if (permission.roles.includes(Role.SuperAdmin)) {
+    if (permission.roles.includes(RoleDto.SuperAdmin)) {
       return { canActivate: true, isAdmin: true };
     }
     // User is not a super admin, check application-wide permissions
@@ -345,34 +335,33 @@ export class AuthorizationService {
       };
     }
 
-    const workspaceRolesAndPermissions: WorkspaceRolesAndPermissions = permission.workspaces.get(
-      workspaceId,
-    );
+    const workspaceRolesAndPermissions: WorkspaceRolesAndPermissions =
+      permission.workspaces.get(workspaceId);
     if (!workspaceRolesAndPermissions) {
       throw new WorkspaceNotFoundException(workspaceId);
     }
     // A workspace admin can perform any action workspace-wide
-    if (workspaceRolesAndPermissions.roles.includes(Role.WorkspaceAdmin)) {
+    if (workspaceRolesAndPermissions.roles.includes(RoleDto.WorkspaceAdmin)) {
       return { canActivate: true, isAdmin: true };
     }
     // User is not a workspace admin, check workspace-wide permissions
-    const workspacePermissions: Action[] =
+    const workspacePermissions: ActionDto[] =
       workspaceRolesAndPermissions.permissions;
-    if (workspacePermissions.includes(Action.CreateWiki)) {
-      workspacePermissions.push(Action.CreateWikiSection);
-      workspacePermissions.push(Action.CreateWikiPage);
+    if (workspacePermissions.includes(ActionDto.CreateWiki)) {
+      workspacePermissions.push(ActionDto.CreateWikiSection);
+      workspacePermissions.push(ActionDto.CreateWikiPage);
     }
-    if (workspacePermissions.includes(Action.ReadWiki)) {
-      workspacePermissions.push(Action.ReadWikiSection);
-      workspacePermissions.push(Action.ReadWikiPage);
+    if (workspacePermissions.includes(ActionDto.ReadWiki)) {
+      workspacePermissions.push(ActionDto.ReadWikiSection);
+      workspacePermissions.push(ActionDto.ReadWikiPage);
     }
-    if (workspacePermissions.includes(Action.UpdateWiki)) {
-      workspacePermissions.push(Action.UpdateWikiSection);
-      workspacePermissions.push(Action.UpdateWikiPage);
+    if (workspacePermissions.includes(ActionDto.UpdateWiki)) {
+      workspacePermissions.push(ActionDto.UpdateWikiSection);
+      workspacePermissions.push(ActionDto.UpdateWikiPage);
     }
-    if (workspacePermissions.includes(Action.DeleteWiki)) {
-      workspacePermissions.push(Action.DeleteWikiSection);
-      workspacePermissions.push(Action.DeleteWikiPage);
+    if (workspacePermissions.includes(ActionDto.DeleteWiki)) {
+      workspacePermissions.push(ActionDto.DeleteWikiSection);
+      workspacePermissions.push(ActionDto.DeleteWikiPage);
     }
     return {
       canActivate: hasPermissions(

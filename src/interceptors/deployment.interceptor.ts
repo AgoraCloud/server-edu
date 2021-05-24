@@ -1,8 +1,5 @@
 import { DeploymentNotRunningException } from './../exceptions/deployment-not-running.exception';
-import {
-  DeploymentDocument,
-  DeploymentStatus,
-} from './../modules/deployments/schemas/deployment.schema';
+import { DeploymentDocument } from './../modules/deployments/schemas/deployment.schema';
 import { InvalidMongoIdException } from './../exceptions/invalid-mongo-id.exception';
 import { WorkspaceDocument } from './../modules/workspaces/schemas/workspace.schema';
 import { UserDocument } from './../modules/users/schemas/user.schema';
@@ -16,6 +13,7 @@ import {
   NestInterceptor,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
+import { DeploymentStatusDto } from '@agoracloud/common';
 
 /**
  * An interceptor that extracts the deployment id from the request, fetches it from
@@ -40,12 +38,13 @@ export class DeploymentInterceptor implements NestInterceptor {
     const user: UserDocument = request.user;
     const workspace: WorkspaceDocument = request.workspace;
     const isAdmin = request.isAdmin;
-    const deployment: DeploymentDocument = await this.deploymentsService.findOne(
-      deploymentId,
-      isAdmin ? undefined : user._id,
-      workspace._id,
-    );
-    if (deployment.status !== DeploymentStatus.Running) {
+    const deployment: DeploymentDocument =
+      await this.deploymentsService.findOne(
+        deploymentId,
+        isAdmin ? undefined : user._id,
+        workspace._id,
+      );
+    if (deployment.status !== DeploymentStatusDto.Running) {
       throw new DeploymentNotRunningException(deploymentId);
     }
     request.deployment = deployment;

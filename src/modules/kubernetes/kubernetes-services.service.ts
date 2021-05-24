@@ -14,9 +14,7 @@ export class KubernetesServicesService {
    * @param namespace the Kubernetes namespace
    * @returns a list of all Kubernetes services
    */
-  getAllServices(
-    namespace: string,
-  ): Promise<{
+  getAllServices(namespace: string): Promise<{
     response: http.IncomingMessage;
     body: k8s.V1ServiceList;
   }> {
@@ -43,9 +41,8 @@ export class KubernetesServicesService {
     response: http.IncomingMessage;
     body: k8s.V1Service;
   }> {
-    const labels: { [key: string]: string } = generateDeploymentLabels(
-      deploymentId,
-    );
+    const labels: { [key: string]: string } =
+      generateDeploymentLabels(deploymentId);
     return this.k8sCoreV1Api.createNamespacedService(namespace, {
       apiVersion: 'v1',
       kind: 'Service',

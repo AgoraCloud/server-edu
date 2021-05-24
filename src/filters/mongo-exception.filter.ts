@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { HttpArgumentsHost } from '@nestjs/common/interfaces';
 import { Request, Response } from 'express';
-import { MongoError } from 'mongoose/node_modules/mongodb';
+import { MongoError } from 'mongodb';
 
 /**
  * A filter that catches and handles any Mongoose exceptions

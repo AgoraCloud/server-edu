@@ -3,11 +3,12 @@ import {
   WikiPageDto,
   CreateWikiPageDto,
   UpdateWikiPageDto,
+  ActionDto,
+  AuditActionDto,
+  AuditResourceDto,
 } from '@agoracloud/common';
-import { AuditResource } from './../../auditing/schemas/audit-log.schema';
 import { IsAdmin } from '../../../decorators/is-admin.decorator';
 import { Permissions } from './../../../decorators/permissions.decorator';
-import { Action } from './../../authorization/schemas/permission.schema';
 import { Auth } from '../../../decorators/auth.decorator';
 import {
   ApiTags,
@@ -43,12 +44,11 @@ import { Workspace } from '../../../decorators/workspace.decorator';
 import { WikiSection } from '../../../decorators/wiki-section.decorator';
 import { WikiPageDocument } from './schemas/page.schema';
 import { Audit } from '../../../decorators/audit.decorator';
-import { AuditAction } from '../../auditing/schemas/audit-log.schema';
 import { Transform } from '../../../decorators/transform.decorator';
 
 @ApiCookieAuth()
 @ApiTags('Wiki Pages')
-@Auth(Action.ReadWorkspace, Action.ReadWikiSection)
+@Auth(ActionDto.ReadWorkspace, ActionDto.ReadWikiSection)
 @Controller('api/workspaces/:workspaceId/sections/:sectionId/pages')
 @UseInterceptors(WorkspaceInterceptor, WikiSectionInterceptor)
 @Transform(WikiPageDto)
@@ -63,8 +63,8 @@ export class WikiPagesController {
    * @param createWikiPageDto the wiki page to create
    */
   @Post()
-  @Permissions(Action.CreateWikiPage)
-  @Audit(AuditAction.Create, AuditResource.WikiPage)
+  @Permissions(ActionDto.CreateWikiPage)
+  @Audit(AuditActionDto.Create, AuditResourceDto.WikiPage)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'sectionId', description: 'The wiki section id' })
   @ApiOperation({ summary: 'Create a wiki page' })
@@ -105,8 +105,8 @@ export class WikiPagesController {
    * @param wikiSectionId the wiki section id
    */
   @Get()
-  @Permissions(Action.ReadWikiPage)
-  @Audit(AuditAction.Read, AuditResource.WikiPage)
+  @Permissions(ActionDto.ReadWikiPage)
+  @Audit(AuditActionDto.Read, AuditResourceDto.WikiPage)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'sectionId', description: 'The wiki section id' })
   @ApiOperation({ summary: 'Get all wiki pages' })
@@ -145,8 +145,8 @@ export class WikiPagesController {
    * @param wikiPageId the wiki page id
    */
   @Get(':id')
-  @Permissions(Action.ReadWikiPage)
-  @Audit(AuditAction.Read, AuditResource.WikiPage)
+  @Permissions(ActionDto.ReadWikiPage)
+  @Audit(AuditActionDto.Read, AuditResourceDto.WikiPage)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'sectionId', description: 'The wiki section id' })
   @ApiParam({ name: 'id', description: 'The wiki page id' })
@@ -198,8 +198,8 @@ export class WikiPagesController {
    * @param updateWikiPageDto the updated wiki page
    */
   @Put(':id')
-  @Permissions(Action.UpdateWikiPage)
-  @Audit(AuditAction.Update, AuditResource.WikiPage)
+  @Permissions(ActionDto.UpdateWikiPage)
+  @Audit(AuditActionDto.Update, AuditResourceDto.WikiPage)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'sectionId', description: 'The wiki section id' })
   @ApiParam({ name: 'id', description: 'The wiki page id' })
@@ -253,8 +253,8 @@ export class WikiPagesController {
    * @param wikiPageId the wiki page id
    */
   @Delete(':id')
-  @Permissions(Action.DeleteWikiPage)
-  @Audit(AuditAction.Delete, AuditResource.WikiPage)
+  @Permissions(ActionDto.DeleteWikiPage)
+  @Audit(AuditActionDto.Delete, AuditResourceDto.WikiPage)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'sectionId', description: 'The wiki section id' })
   @ApiParam({ name: 'id', description: 'The wiki page id' })

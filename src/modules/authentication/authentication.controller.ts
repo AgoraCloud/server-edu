@@ -6,6 +6,8 @@ import {
   ChangePasswordDto,
   VerifyAccountDto,
   ForgotPasswordDto,
+  AuditActionDto,
+  AuditResourceDto,
 } from '@agoracloud/common';
 import { MongoExceptionFilter } from './../../filters/mongo-exception.filter';
 import { accessTokenConstants, refreshTokenConstants } from './constants';
@@ -38,10 +40,6 @@ import {
 } from '@nestjs/swagger';
 import { Auth } from '../../decorators/auth.decorator';
 import { Audit } from '../../decorators/audit.decorator';
-import {
-  AuditAction,
-  AuditResource,
-} from '../auditing/schemas/audit-log.schema';
 import { Transform } from '../../decorators/transform.decorator';
 
 @Controller('api/auth')
@@ -75,7 +73,7 @@ export class AuthenticationController {
   @Post('login')
   @ApiCookieAuth()
   @UseGuards(LocalAuthenticationGuard)
-  @Audit(AuditAction.LogIn, AuditResource.User)
+  @Audit(AuditActionDto.LogIn, AuditResourceDto.User)
   @ApiOperation({ summary: 'Log in' })
   @Transform(UserDto)
   @ApiCreatedResponse({
@@ -102,9 +100,8 @@ export class AuthenticationController {
     const accessToken: string = this.authenticationService.generateAccessToken(
       user.email,
     );
-    const refreshToken: string = await this.authenticationService.generateRefreshToken(
-      user.email,
-    );
+    const refreshToken: string =
+      await this.authenticationService.generateRefreshToken(user.email);
     request.res.cookie(
       accessTokenConstants.name,
       accessToken,
@@ -125,7 +122,7 @@ export class AuthenticationController {
    */
   @HttpCode(200)
   @Post('logout')
-  @Audit(AuditAction.LogOut, AuditResource.User)
+  @Audit(AuditActionDto.LogOut, AuditResourceDto.User)
   @ApiCookieAuth()
   @Auth()
   @ApiOperation({ summary: 'Sign out' })
@@ -164,9 +161,8 @@ export class AuthenticationController {
     @Request() request: Req,
     @User() user: UserDocument,
   ): Promise<void> {
-    const refreshToken: string = await this.authenticationService.generateRefreshToken(
-      user.email,
-    );
+    const refreshToken: string =
+      await this.authenticationService.generateRefreshToken(user.email);
     request.res.cookie(
       refreshTokenConstants.name,
       refreshToken,

@@ -20,9 +20,7 @@ export class KubernetesPodsService {
    * @param namespace the Kubernetes namespace
    * @returns a list of all Kubernetes pods
    */
-  async getAllPods(
-    namespace: string,
-  ): Promise<{
+  async getAllPods(namespace: string): Promise<{
     response: http.IncomingMessage;
     body: k8s.V1PodList;
   }> {
@@ -142,9 +140,7 @@ export class KubernetesPodsService {
    * @param namespace the Kubernetes namespace
    * @returns the created namespaced pod list function
    */
-  makeNamespacedPodListFunction(
-    namespace: string,
-  ): () => Promise<{
+  makeNamespacedPodListFunction(namespace: string): () => Promise<{
     response: http.IncomingMessage;
     body: k8s.V1PodList;
   }> {

@@ -30,14 +30,12 @@ export class AuditingService {
   async findAll(
     auditLogQueryParamsDto: AuditLogQueryParamsDto,
   ): Promise<AuditLogDocument[]> {
-    let auditLogQuery: Query<
-      AuditLogDocument[],
-      AuditLogDocument
-    > = this.auditLogModel
-      .find()
-      .populate('user')
-      .populate('workspace')
-      .sort({ createdAt: -1 });
+    let auditLogQuery: Query<AuditLogDocument[], AuditLogDocument> =
+      this.auditLogModel
+        .find()
+        .populate('user')
+        .populate('workspace')
+        .sort({ createdAt: -1 });
     if (auditLogQueryParamsDto.isSuccessful) {
       auditLogQuery = auditLogQuery
         .where('isSuccessful')

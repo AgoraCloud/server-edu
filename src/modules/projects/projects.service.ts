@@ -56,10 +56,8 @@ export class ProjectsService {
     workspaceId: string,
     userId?: string,
   ): Promise<ProjectDocument[]> {
-    let projectsQuery: Query<
-      ProjectDocument[],
-      ProjectDocument
-    > = this.projectModel.find().where('workspace').equals(workspaceId);
+    let projectsQuery: Query<ProjectDocument[], ProjectDocument> =
+      this.projectModel.find().where('workspace').equals(workspaceId);
     if (userId) {
       projectsQuery = projectsQuery.where('user').equals(userId);
     }
@@ -80,15 +78,13 @@ export class ProjectsService {
     projectId: string,
     userId?: string,
   ): Promise<ProjectDocument> {
-    let projectQuery: Query<
-      ProjectDocument,
-      ProjectDocument
-    > = this.projectModel
-      .findOne()
-      .where('_id')
-      .equals(projectId)
-      .where('workspace')
-      .equals(workspaceId);
+    let projectQuery: Query<ProjectDocument, ProjectDocument> =
+      this.projectModel
+        .findOne()
+        .where('_id')
+        .equals(projectId)
+        .where('workspace')
+        .equals(workspaceId);
     if (userId) {
       projectQuery = projectQuery.where('user').equals(userId);
     }
@@ -112,15 +108,13 @@ export class ProjectsService {
     updateProjectDto: UpdateProjectDto,
     userId?: string,
   ): Promise<ProjectDocument> {
-    let projectQuery: Query<
-      ProjectDocument,
-      ProjectDocument
-    > = this.projectModel
-      .findOneAndUpdate(null, updateProjectDto, { new: true })
-      .where('_id')
-      .equals(projectId)
-      .where('workspace')
-      .equals(workspaceId);
+    let projectQuery: Query<ProjectDocument, ProjectDocument> =
+      this.projectModel
+        .findOneAndUpdate(null, updateProjectDto, { new: true })
+        .where('_id')
+        .equals(projectId)
+        .where('workspace')
+        .equals(workspaceId);
     if (userId) {
       projectQuery = projectQuery.where('user').equals(userId);
     }
@@ -141,15 +135,13 @@ export class ProjectsService {
     projectId: string,
     userId?: string,
   ): Promise<void> {
-    let projectQuery: Query<
-      ProjectDocument,
-      ProjectDocument
-    > = this.projectModel
-      .findOneAndDelete()
-      .where('_id')
-      .equals(projectId)
-      .where('workspace')
-      .equals(workspaceId);
+    let projectQuery: Query<ProjectDocument, ProjectDocument> =
+      this.projectModel
+        .findOneAndDelete()
+        .where('_id')
+        .equals(projectId)
+        .where('workspace')
+        .equals(workspaceId);
     if (userId) {
       projectQuery = projectQuery.where('user').equals(userId);
     }

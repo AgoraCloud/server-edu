@@ -54,9 +54,7 @@ export class KubernetesNamespacesService {
    * @param name The name of the namespace
    * @returns the deleted Kubernetes namespace
    */
-  deleteNamespace(
-    name: string,
-  ): Promise<{
+  deleteNamespace(name: string): Promise<{
     response: http.IncomingMessage;
     body: k8s.V1Status;
   }> {

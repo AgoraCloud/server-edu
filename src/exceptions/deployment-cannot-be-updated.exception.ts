@@ -1,4 +1,4 @@
-import { DeploymentStatus } from '../modules/deployments/schemas/deployment.schema';
+import { DeploymentStatusDto } from '@agoracloud/common';
 import { BadRequestException } from '@nestjs/common';
 
 /**
@@ -8,7 +8,7 @@ import { BadRequestException } from '@nestjs/common';
 export class DeploymentCannotBeUpdatedException extends BadRequestException {
   constructor(deploymentId: string) {
     super(
-      `Deployment with id ${deploymentId} can not be updated. Deployments can be updated only when they are in the ${DeploymentStatus.Running} or ${DeploymentStatus.Failed} state.`,
+      `Deployment with id ${deploymentId} can not be updated. Deployments can be updated only when they are in the ${DeploymentStatusDto.Running} or ${DeploymentStatusDto.Failed} state.`,
     );
   }
 }

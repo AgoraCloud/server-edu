@@ -84,18 +84,15 @@ describe('WikiSectionsService', () => {
 
   describe('findAll', () => {
     it('should find all wiki sections in the given workspace', async () => {
-      const retrievedWikiSections: WikiSectionDocument[] = await service.findAll(
-        workspace._id,
-      );
+      const retrievedWikiSections: WikiSectionDocument[] =
+        await service.findAll(workspace._id);
       expect(retrievedWikiSections).toBeTruthy();
       expect(retrievedWikiSections[0].workspace._id).toEqual(workspace._id);
     });
 
     it('should find all wiki sections in the given workspace for the given user', async () => {
-      const retrievedWikiSections: WikiSectionDocument[] = await service.findAll(
-        workspace._id,
-        user._id,
-      );
+      const retrievedWikiSections: WikiSectionDocument[] =
+        await service.findAll(workspace._id, user._id);
       expect(retrievedWikiSections).toBeTruthy();
       expect(retrievedWikiSections[0].workspace._id).toEqual(workspace._id);
       expect(retrievedWikiSections[0].user._id).toEqual(user._id);

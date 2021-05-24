@@ -340,9 +340,8 @@ describe('WorkspacesService', () => {
       // Re-add user2 temporarily
       workspace = await service.addUser(workspace, { id: user2._id });
 
-      const expectedErrorMessage: string = new MinOneAdminUserInWorkspaceException(
-        workspace._id,
-      ).message;
+      const expectedErrorMessage: string =
+        new MinOneAdminUserInWorkspaceException(workspace._id).message;
       try {
         await service.removeUser(workspace, user._id);
         fail('It should throw an error');

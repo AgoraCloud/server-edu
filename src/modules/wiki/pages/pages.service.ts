@@ -55,15 +55,13 @@ export class WikiPagesService {
     wikiSectionId: string,
     userId?: string,
   ): Promise<WikiPageDocument[]> {
-    let wikiPagesQuery: Query<
-      WikiPageDocument[],
-      WikiPageDocument
-    > = this.wikiPageModel
-      .find()
-      .where('workspace')
-      .equals(workspaceId)
-      .where('section')
-      .equals(wikiSectionId);
+    let wikiPagesQuery: Query<WikiPageDocument[], WikiPageDocument> =
+      this.wikiPageModel
+        .find()
+        .where('workspace')
+        .equals(workspaceId)
+        .where('section')
+        .equals(wikiSectionId);
     if (userId) {
       wikiPagesQuery = wikiPagesQuery.where('user').equals(userId);
     }
@@ -86,17 +84,15 @@ export class WikiPagesService {
     wikiPageId: string,
     userId?: string,
   ): Promise<WikiPageDocument> {
-    let wikiPageQuery: Query<
-      WikiPageDocument,
-      WikiPageDocument
-    > = this.wikiPageModel
-      .findOne()
-      .where('_id')
-      .equals(wikiPageId)
-      .where('workspace')
-      .equals(workspaceId)
-      .where('section')
-      .equals(wikiSectionId);
+    let wikiPageQuery: Query<WikiPageDocument, WikiPageDocument> =
+      this.wikiPageModel
+        .findOne()
+        .where('_id')
+        .equals(wikiPageId)
+        .where('workspace')
+        .equals(workspaceId)
+        .where('section')
+        .equals(wikiSectionId);
     if (userId) {
       wikiPageQuery = wikiPageQuery.where('user').equals(userId);
     }
@@ -122,17 +118,15 @@ export class WikiPagesService {
     updateWikiPageDto: UpdateWikiPageDto,
     userId?: string,
   ): Promise<WikiPageDocument> {
-    let wikiPageQuery: Query<
-      WikiPageDocument,
-      WikiPageDocument
-    > = this.wikiPageModel
-      .findOneAndUpdate(null, updateWikiPageDto, { new: true })
-      .where('_id')
-      .equals(wikiPageId)
-      .where('workspace')
-      .equals(workspaceId)
-      .where('section')
-      .equals(wikiSectionId);
+    let wikiPageQuery: Query<WikiPageDocument, WikiPageDocument> =
+      this.wikiPageModel
+        .findOneAndUpdate(null, updateWikiPageDto, { new: true })
+        .where('_id')
+        .equals(wikiPageId)
+        .where('workspace')
+        .equals(workspaceId)
+        .where('section')
+        .equals(wikiSectionId);
     if (userId) {
       wikiPageQuery = wikiPageQuery.where('user').equals(userId);
     }
@@ -155,17 +149,15 @@ export class WikiPagesService {
     wikiPageId: string,
     userId?: string,
   ): Promise<void> {
-    let wikiPageQuery: Query<
-      WikiPageDocument,
-      WikiPageDocument
-    > = this.wikiPageModel
-      .findOneAndDelete()
-      .where('_id')
-      .equals(wikiPageId)
-      .where('workspace')
-      .equals(workspaceId)
-      .where('section')
-      .equals(wikiSectionId);
+    let wikiPageQuery: Query<WikiPageDocument, WikiPageDocument> =
+      this.wikiPageModel
+        .findOneAndDelete()
+        .where('_id')
+        .equals(wikiPageId)
+        .where('workspace')
+        .equals(workspaceId)
+        .where('section')
+        .equals(wikiSectionId);
     if (userId) {
       wikiPageQuery = wikiPageQuery.where('user').equals(userId);
     }

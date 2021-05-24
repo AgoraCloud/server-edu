@@ -1,9 +1,9 @@
-import {
-  DeploymentImage,
-  DeploymentType,
-} from './../deployments/schemas/deployment.schema';
+import { DeploymentImage } from './../deployments/schemas/deployment.schema';
 import { DeploymentProperties } from '../deployments/schemas/deployment.schema';
-import { UpdateDeploymentResourcesDto } from '@agoracloud/common';
+import {
+  DeploymentTypeDto,
+  UpdateDeploymentResourcesDto,
+} from '@agoracloud/common';
 import { Inject, Injectable } from '@nestjs/common';
 import * as k8s from '@kubernetes/client-node';
 import * as http from 'http';
@@ -20,9 +20,7 @@ export class KubernetesDeploymentsService {
    * @param namespace the Kubernetes namespace
    * @returns a list of all Kubernetes deployments
    */
-  getAllDeployments(
-    namespace: string,
-  ): Promise<{
+  getAllDeployments(namespace: string): Promise<{
     response: http.IncomingMessage;
     body: k8s.V1DeploymentList;
   }> {
@@ -51,9 +49,8 @@ export class KubernetesDeploymentsService {
     response: http.IncomingMessage;
     body: k8s.V1Deployment;
   }> {
-    const labels: { [key: string]: string } = generateDeploymentLabels(
-      deploymentId,
-    );
+    const labels: { [key: string]: string } =
+      generateDeploymentLabels(deploymentId);
     const resourceName: string = generateResourceName(deploymentId);
     const volumes: k8s.V1Volume[] = [];
     const volumeMounts: k8s.V1VolumeMount[] = [];
@@ -150,7 +147,8 @@ export class KubernetesDeploymentsService {
     body: k8s.V1Deployment;
   }> {
     const resourceName: string = generateResourceName(deploymentId);
-    const resources: k8s.V1ResourceRequirements = new k8s.V1ResourceRequirements();
+    const resources: k8s.V1ResourceRequirements =
+      new k8s.V1ResourceRequirements();
     resources.limits = {};
     if (updatedResources.cpuCount) {
       resources.limits.cpu = `${updatedResources.cpuCount}`;
@@ -213,7 +211,7 @@ export class KubernetesDeploymentsService {
    * @returns the generated container image
    */
   private generateContainerImage(deploymentImage: DeploymentImage): string {
-    if (deploymentImage.type === DeploymentType.VSCode) {
+    if (deploymentImage.type === DeploymentTypeDto.VSCode) {
       return `linuxserver/code-server:version-v${deploymentImage.version}`;
     }
   }

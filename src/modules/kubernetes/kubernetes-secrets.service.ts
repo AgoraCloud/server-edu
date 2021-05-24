@@ -18,9 +18,7 @@ export class KubernetesSecretsService {
    * @param namespace the Kubernetes namespace
    * @returns a list of all Kubernetes secrets
    */
-  getAllSecrets(
-    namespace: string,
-  ): Promise<{
+  getAllSecrets(namespace: string): Promise<{
     response: http.IncomingMessage;
     body: k8s.V1SecretList;
   }> {
