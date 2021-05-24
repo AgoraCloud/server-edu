@@ -3,8 +3,8 @@ import { SchemaFactory, Prop, Schema } from '@nestjs/mongoose';
 import {
   RoleDto,
   ActionDto,
-  InWorkspaceActionsDto,
-  WorkspaceActionsDto,
+  IN_WORKSPACE_ACTIONS_DTO,
+  WORKSPACE_ACTIONS_DTO,
 } from '@agoracloud/common';
 import * as mongoose from 'mongoose';
 
@@ -20,8 +20,8 @@ export class WorkspaceRolesAndPermissions {
   @Prop({
     required: true,
     type: [String],
-    enum: InWorkspaceActionsDto,
-    default: InWorkspaceActionsDto,
+    enum: IN_WORKSPACE_ACTIONS_DTO,
+    default: IN_WORKSPACE_ACTIONS_DTO,
   })
   permissions: ActionDto[];
 
@@ -54,8 +54,8 @@ export class Permission {
   @Prop({
     required: true,
     type: [String],
-    enum: WorkspaceActionsDto,
-    default: WorkspaceActionsDto,
+    enum: WORKSPACE_ACTIONS_DTO,
+    default: WORKSPACE_ACTIONS_DTO,
   })
   permissions: ActionDto[];
 

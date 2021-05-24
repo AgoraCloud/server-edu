@@ -1,8 +1,6 @@
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ProjectLanesService } from './../lanes/lanes.service';
-import { UpdateProjectTaskDto } from './dto/update-task.dto';
 import { ProjectTaskNotFoundException } from './../../../exceptions/project-task-not-found.exception';
-import { CreateProjectTaskDto } from './dto/create-task.dto';
 import {
   ProjectLane,
   ProjectLaneDocument,
@@ -24,6 +22,7 @@ import {
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProjectTasksService } from './tasks.service';
 import { Connection, Types } from 'mongoose';
+import { CreateProjectTaskDto, UpdateProjectTaskDto } from '@agoracloud/common';
 
 const user: UserDocument = {
   _id: Types.ObjectId(),

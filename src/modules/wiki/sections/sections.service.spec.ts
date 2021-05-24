@@ -1,8 +1,6 @@
-import { UpdateWikiSectionDto } from './dto/update-section.dto';
 import { WikiSectionNotFoundException } from './../../../exceptions/wiki-section-not-found.exception';
 import { WorkspaceDocument } from './../../workspaces/schemas/workspace.schema';
 import { UserDocument } from './../../users/schemas/user.schema';
-import { CreateWikiSectionDto } from './dto/create-section.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   WikiSection,
@@ -17,6 +15,7 @@ import {
 import { Test, TestingModule } from '@nestjs/testing';
 import { WikiSectionsService } from './sections.service';
 import { Connection, Types } from 'mongoose';
+import { CreateWikiSectionDto, UpdateWikiSectionDto } from '@agoracloud/common';
 
 const user: UserDocument = {
   _id: Types.ObjectId(),

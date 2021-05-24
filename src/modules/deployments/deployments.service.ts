@@ -1,13 +1,12 @@
 import { DeploymentCannotBeUpdatedException } from '../../exceptions/deployment-cannot-be-updated.exception';
 import { WorkspaceUserRemovedEvent } from './../../events/workspace-user-removed.event';
 import { WorkspaceDeletedEvent } from './../../events/workspace-deleted.event';
-import { deploymentImages } from './deployment-images';
 import { DeploymentDeletedEvent } from './../../events/deployment-deleted.event';
 import { DeploymentUpdatedEvent } from './../../events/deployment-updated.event';
 import { DeploymentCreatedEvent } from './../../events/deployment-created.event';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { InjectModel } from '@nestjs/mongoose';
-import { Deployment, DeploymentImage } from './schemas/deployment.schema';
+import { Deployment } from './schemas/deployment.schema';
 import { DeploymentNotFoundException } from './../../exceptions/deployment-not-found.exception';
 import { WorkspaceDocument } from './../workspaces/schemas/workspace.schema';
 import { UserDocument } from '../users/schemas/user.schema';
@@ -19,20 +18,18 @@ import {
   DeploymentStatusDto,
   UpdateDeploymentDto,
   UpdateDeploymentResourcesDto,
+  DEPLOYMENT_IMAGES_DTO,
+  DeploymentImageDto,
 } from '@agoracloud/common';
 import { Event } from '../../events/events.enum';
 
 @Injectable()
 export class DeploymentsService {
-  private readonly deploymentImages: DeploymentImage[];
-
   constructor(
     @InjectModel(Deployment.name)
     private readonly deploymentModel: Model<DeploymentDocument>,
     private readonly eventEmitter: EventEmitter2,
-  ) {
-    this.deploymentImages = deploymentImages;
-  }
+  ) {}
 
   /**
    * Create a deployment
@@ -66,8 +63,8 @@ export class DeploymentsService {
    * Find all deployment images
    * @returns all deployment images
    */
-  findAllImages(): DeploymentImage[] {
-    return this.deploymentImages;
+  findAllImages(): DeploymentImageDto[] {
+    return DEPLOYMENT_IMAGES_DTO;
   }
 
   /**

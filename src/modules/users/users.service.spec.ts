@@ -2,9 +2,7 @@ import { UserWithIdNotFoundException } from './../../exceptions/user-not-found.e
 import { AccountNotVerifiedException } from './../../exceptions/account-not-verified.exception';
 import { AccountDisabledException } from './../../exceptions/account-disabled.exception';
 import { UserNotFoundException } from '../../exceptions/user-not-found.exception';
-import { UpdateUserDto, AdminUpdateUserDto } from './dto/update-user.dto';
 import { User, UserDocument } from './../users/schemas/user.schema';
-import { CreateUserDto } from './dto/create-user.dto';
 import { Token, TokenSchema } from './../tokens/schemas/token.schema';
 import { TokensService } from './../tokens/tokens.service';
 import { ConfigService } from '@nestjs/config';
@@ -22,6 +20,11 @@ import {
 import { Connection, Model, Types } from 'mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
+import {
+  AdminUpdateUserDto,
+  CreateUserDto,
+  UpdateUserDto,
+} from '@agoracloud/common';
 
 let user: UserDocument;
 

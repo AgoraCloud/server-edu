@@ -1,15 +1,11 @@
 import { DeploymentCannotBeUpdatedException } from '../../exceptions/deployment-cannot-be-updated.exception';
-import { UpdateDeploymentDto } from './dto/update-deployment.dto';
 import { DeploymentNotFoundException } from './../../exceptions/deployment-not-found.exception';
-import { CreateDeploymentDto } from './dto/create-deployment.dto';
 import { WorkspaceDocument } from './../workspaces/schemas/workspace.schema';
 import { UserDocument } from '../users/schemas/user.schema';
-import { deploymentImages } from './deployment-images';
 import {
   DeploymentSchema,
   DeploymentImage,
   DeploymentDocument,
-  DeploymentStatus,
   Deployment,
 } from './schemas/deployment.schema';
 import { MongooseModule, getConnectionToken } from '@nestjs/mongoose';
@@ -21,6 +17,12 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Connection, Types } from 'mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
 import { DeploymentsService } from './deployments.service';
+import {
+  CreateDeploymentDto,
+  DeploymentStatusDto,
+  UpdateDeploymentDto,
+  DEPLOYMENT_IMAGES_DTO,
+} from '@agoracloud/common';
 
 const user: UserDocument = {
   _id: Types.ObjectId(),
@@ -77,8 +79,8 @@ describe('DeploymentsService', () => {
         name: 'Test Deployment',
         properties: {
           image: {
-            name: deploymentImages[0].name,
-            tag: deploymentImages[0].tag,
+            type: DEPLOYMENT_IMAGES_DTO[0].type,
+            version: DEPLOYMENT_IMAGES_DTO[0].version,
           },
           resources: {
             cpuCount: 1,
@@ -97,11 +99,11 @@ describe('DeploymentsService', () => {
       expect(createDeploymentDto.properties.sudoPassword).toBe(
         createDeploymentDto.properties.sudoPassword,
       );
-      expect(createDeploymentDto.properties.image.name).toBe(
-        createDeploymentDto.properties.image.name,
+      expect(createDeploymentDto.properties.image.type).toBe(
+        createDeploymentDto.properties.image.type,
       );
-      expect(createDeploymentDto.properties.image.tag).toBe(
-        createDeploymentDto.properties.image.tag,
+      expect(createDeploymentDto.properties.image.version).toBe(
+        createDeploymentDto.properties.image.version,
       );
       expect(createDeploymentDto.properties.resources.cpuCount).toBe(
         createDeploymentDto.properties.resources.cpuCount,
@@ -120,7 +122,7 @@ describe('DeploymentsService', () => {
     it('should find all deployment images', () => {
       const retrievedDeploymentImages: DeploymentImage[] =
         service.findAllImages();
-      expect(retrievedDeploymentImages).toBe(deploymentImages);
+      expect(retrievedDeploymentImages).toBe(DEPLOYMENT_IMAGES_DTO);
     });
   });
 
@@ -225,7 +227,7 @@ describe('DeploymentsService', () => {
 
     it('should update the deployment', async () => {
       // Update the deployment status to running
-      await service.updateStatus(deploymentId, DeploymentStatus.Running);
+      await service.updateStatus(deploymentId, DeploymentStatusDto.Running);
       const eventEmitterSpy: jest.SpyInstance<boolean, any[]> = jest.spyOn(
         eventEmitter,
         'emit',
@@ -270,7 +272,7 @@ describe('DeploymentsService', () => {
 
   describe('updateStatus', () => {
     it('should update the deployments status', async () => {
-      const updatedStatus: DeploymentStatus = DeploymentStatus.Deleting;
+      const updatedStatus: DeploymentStatusDto = DeploymentStatusDto.Deleting;
       await service.updateStatus(deploymentId, updatedStatus);
       const retrievedDeployment = await service.findOne(
         deploymentId,

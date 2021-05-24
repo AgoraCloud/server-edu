@@ -4,7 +4,7 @@ import {
   UpdateWorkspaceUserPermissionsDto,
   UpdateUserPermissionsDto,
   RoleDto,
-  InWorkspaceActionsDto,
+  IN_WORKSPACE_ACTIONS_DTO,
   ActionDto,
 } from '@agoracloud/common';
 import { UserDocument } from './../users/schemas/user.schema';
@@ -254,7 +254,7 @@ export class AuthorizationService {
       payload.workspaceId,
       new WorkspaceRolesAndPermissions({
         roles: [RoleDto.User],
-        permissions: InWorkspaceActionsDto,
+        permissions: IN_WORKSPACE_ACTIONS_DTO,
       }),
     );
     await this.update(permission);

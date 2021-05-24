@@ -9,8 +9,6 @@ import {
   AuditLog,
   AuditLogSchema,
   AuditLogDocument,
-  AuditAction,
-  AuditResource,
 } from './schemas/audit-log.schema';
 import {
   getConnectionToken,
@@ -24,6 +22,7 @@ import {
 import { Connection, Model } from 'mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuditingService } from './auditing.service';
+import { AuditActionDto, AuditResourceDto } from '@agoracloud/common';
 
 let user: UserDocument;
 let workspace: WorkspaceDocument;
@@ -86,8 +85,8 @@ describe('AuditingService', () => {
     it('should create an audit log', async () => {
       const auditLogEntry: AuditLog = new AuditLog({
         isSuccessful: true,
-        action: AuditAction.Create,
-        resource: AuditResource.Deployment,
+        action: AuditActionDto.Create,
+        resource: AuditResourceDto.Deployment,
         userAgent: 'PostmanRuntime/7.26.10',
         ip: '::1',
         user,

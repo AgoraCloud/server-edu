@@ -5,9 +5,7 @@ import { Token, TokenSchema } from './../tokens/schemas/token.schema';
 import { User, UserSchema } from './../users/schemas/user.schema';
 import { UsersService } from './../users/users.service';
 import { ExistingWorkspaceUserException } from './../../exceptions/existing-workspace-user.exception';
-import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
 import { WorkspaceNotFoundException } from './../../exceptions/workspace-not-found.exception';
-import { CreateWorkspaceDto } from './dto/create-workspace.dto';
 import { UserDocument } from '../users/schemas/user.schema';
 import {
   MongooseMockModule,
@@ -33,10 +31,14 @@ import {
   Permission,
   PermissionDocument,
   PermissionSchema,
-  Role,
   WorkspaceRolesAndPermissions,
 } from '../authorization/schemas/permission.schema';
 import { MinOneAdminUserInWorkspaceException } from './../../exceptions/min-one-admin-user-in-workspace.exception';
+import {
+  CreateWorkspaceDto,
+  RoleDto,
+  UpdateWorkspaceDto,
+} from '@agoracloud/common';
 
 const jwtConfig: JwtConfig = {
   access: {
@@ -287,14 +289,14 @@ describe('WorkspacesService', () => {
       // Create permissions for user
       const userPermission: Permission = new Permission({
         user,
-        roles: [Role.User],
+        roles: [RoleDto.User],
       });
       userPermission.workspaces = new Map<
         string,
         WorkspaceRolesAndPermissions
       >();
       userPermission.workspaces.set(workspace._id, {
-        roles: [Role.WorkspaceAdmin],
+        roles: [RoleDto.WorkspaceAdmin],
         permissions: [],
       });
       await permissionsModel.create(userPermission);
@@ -302,14 +304,14 @@ describe('WorkspacesService', () => {
       // Create permissions for user2
       const user2Permission = new Permission({
         user: user2,
-        roles: [Role.User],
+        roles: [RoleDto.User],
       });
       user2Permission.workspaces = new Map<
         string,
         WorkspaceRolesAndPermissions
       >();
       user2Permission.workspaces.set(workspace._id, {
-        roles: [Role.User],
+        roles: [RoleDto.User],
         permissions: [],
       });
       await permissionsModel.create(user2Permission);

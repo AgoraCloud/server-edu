@@ -1,6 +1,4 @@
-import { UpdateProjectLaneDto } from './dto/update-lane.dto';
 import { ProjectLaneNotFoundException } from './../../../exceptions/project-lane-not-found.exception';
-import { CreateProjectLaneDto } from './dto/create-lane.dto';
 import { ProjectDocument } from './../schemas/project.schema';
 import { WorkspaceDocument } from './../../workspaces/schemas/workspace.schema';
 import { UserDocument } from './../../users/schemas/user.schema';
@@ -18,6 +16,7 @@ import {
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProjectLanesService } from './lanes.service';
 import { Connection, Types } from 'mongoose';
+import { CreateProjectLaneDto, UpdateProjectLaneDto } from '@agoracloud/common';
 
 const user: UserDocument = {
   _id: Types.ObjectId(),

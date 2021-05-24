@@ -93,7 +93,6 @@ export class DeploymentsController {
    * Get all allowed deployment images
    */
   @Get('images')
-  @Transform(DeploymentImageDto)
   @Audit(AuditActionDto.ReadImages, AuditResourceDto.Deployment)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiOperation({ summary: 'Get all allowed deployment images' })
@@ -111,7 +110,7 @@ export class DeploymentsController {
     description: 'The workspace with the given id was not found',
     type: ExceptionDto,
   })
-  findAllImages(): DeploymentImage[] {
+  findAllImages(): DeploymentImageDto[] {
     return this.deploymentsService.findAllImages();
   }
 
