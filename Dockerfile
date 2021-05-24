@@ -2,7 +2,7 @@
 FROM node:12.13-alpine as development
 WORKDIR /agoracloud
 COPY package*.json ./
-RUN npm ci
+RUN npm i
 COPY . .
 RUN npm i rimraf
 RUN npm run build
@@ -12,7 +12,7 @@ ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
 WORKDIR /agoracloud
 COPY package*.json ./
-RUN npm install
+RUN npm i
 COPY . .
 COPY --from=development /agoracloud/dist ./dist
 CMD ["npm", "run", "start:prod"]
