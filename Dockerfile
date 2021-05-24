@@ -2,6 +2,7 @@
 FROM node:12.13-alpine as development
 WORKDIR /agoracloud
 COPY package*.json ./
+ARG NODE_AUTH_TOKEN=${NODE_AUTH_TOKEN}
 RUN npm i
 COPY . .
 RUN npm i rimraf
@@ -12,6 +13,7 @@ ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
 WORKDIR /agoracloud
 COPY package*.json ./
+ARG NODE_AUTH_TOKEN=${NODE_AUTH_TOKEN}
 RUN npm i
 COPY . .
 COPY --from=development /agoracloud/dist ./dist
