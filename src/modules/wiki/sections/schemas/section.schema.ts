@@ -8,7 +8,7 @@ import * as mongoose from 'mongoose';
 
 export type WikiSectionDocument = WikiSection & mongoose.Document;
 
-@Schema({ collection: 'wiki_sections' })
+@Schema({ collection: 'wiki_sections', timestamps: true })
 export class WikiSection {
   @Prop({ required: true, minlength: 1 })
   name: string;

@@ -1,5 +1,5 @@
 import { DeploymentDocument } from './../deployments/schemas/deployment.schema';
-import { MetricsDto } from './dto/metrics.dto';
+import { MetricsDto } from '@agoracloud/common';
 import { DeploymentPodMetricsNotAvailableException } from '../../exceptions/deployment-pod-metrics-not-available.exception';
 import { DeploymentPodNotAvailableException } from '../../exceptions/deployment-pod-not-available.exception';
 import { Inject, Injectable } from '@nestjs/common';
@@ -18,10 +18,9 @@ export class KubernetesPodsService {
   /**
    * Get all Kubernetes pods
    * @param namespace the Kubernetes namespace
+   * @returns a list of all Kubernetes pods
    */
-  async getAllPods(
-    namespace: string,
-  ): Promise<{
+  async getAllPods(namespace: string): Promise<{
     response: http.IncomingMessage;
     body: k8s.V1PodList;
   }> {
@@ -39,6 +38,7 @@ export class KubernetesPodsService {
    * Get a Kubernetes pod
    * @param namespace the Kubernetes namespace
    * @param deploymentId the pods deployment id
+   * @returns a Kubernetes pod
    */
   async getPod(namespace: string, deploymentId: string): Promise<k8s.V1Pod> {
     // Get all pods
@@ -60,6 +60,7 @@ export class KubernetesPodsService {
    * Get a Kubernetes pod logs
    * @param workspaceId the pods workspace id
    * @param deploymentId the pods deployment id
+   * @returns a Kubernetes pod logs
    */
   async getPodLogs(workspaceId: string, deploymentId: string): Promise<string> {
     const namespace: string = generateResourceName(workspaceId);
@@ -75,6 +76,7 @@ export class KubernetesPodsService {
    * Get a Kubernetes pod metrics
    * @param workspaceId the pods workspace id
    * @param deployment the pods deployment
+   * @returns the metrics of the Kubernetes pod
    */
   async getPodMetrics(
     workspaceId: string,
@@ -117,16 +119,16 @@ export class KubernetesPodsService {
     if (containerIndex === -1) {
       throw new DeploymentPodMetricsNotAvailableException(deploymentId);
     }
-    const containerMetrics: MetricsDto = new MetricsDto(
-      toPercentage(
+    const containerMetrics: MetricsDto = new MetricsDto({
+      cpu: toPercentage(
         containers[containerIndex].usage?.cpu,
         deployment.properties.resources.cpuCount,
       ),
-      toPercentage(
+      memory: toPercentage(
         containers[containerIndex].usage?.memory,
         deployment.properties.resources.memoryCount,
       ),
-    );
+    });
     if (!containerMetrics?.cpu && !containerMetrics?.memory) {
       throw new DeploymentPodMetricsNotAvailableException(deploymentId);
     }
@@ -136,10 +138,9 @@ export class KubernetesPodsService {
   /**
    * Creates a namespaced pod list function for use with a Kubernetes informer
    * @param namespace the Kubernetes namespace
+   * @returns the created namespaced pod list function
    */
-  makeNamespacedPodListFunction(
-    namespace: string,
-  ): () => Promise<{
+  makeNamespacedPodListFunction(namespace: string): () => Promise<{
     response: http.IncomingMessage;
     body: k8s.V1PodList;
   }> {

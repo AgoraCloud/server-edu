@@ -5,35 +5,7 @@ import {
 } from '../../workspaces/schemas/workspace.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
-
-export enum AuditAction {
-  Create = 'CREATE',
-  Read = 'READ',
-  ReadImages = 'READ_IMAGES',
-  ReadLogs = 'READ_LOGS',
-  ReadMetrics = 'READ_METRICS',
-  Proxy = 'PROXY',
-  Update = 'UPDATE',
-  Delete = 'DELETE',
-  LogIn = 'LOG_IN',
-  LogOut = 'LOG_OUT',
-  ReadUsers = 'READ_USERS',
-  AddUser = 'ADD_USER',
-  RemoveUser = 'REMOVE_USER',
-}
-
-export enum AuditResource {
-  User = 'USER',
-  Permission = 'PERMISSION',
-  AuditLog = 'AUDIT_LOG',
-  Workspace = 'WORKSPACE',
-  Deployment = 'DEPLOYMENT',
-  Project = 'PROJECT',
-  ProjectLane = 'PROJECT_LANE',
-  ProjectTask = 'PROJECT_TASK',
-  WikiSection = 'WIKI_SECTION',
-  WikiPage = 'WIKI_PAGE',
-}
+import { AuditActionDto, AuditResourceDto } from '@agoracloud/common';
 
 export type AuditLogDocument = AuditLog & mongoose.Document;
 
@@ -48,39 +20,39 @@ export class AuditLog {
   @Prop({
     required: true,
     enum: [
-      AuditAction.Create,
-      AuditAction.Read,
-      AuditAction.ReadImages,
-      AuditAction.ReadLogs,
-      AuditAction.ReadMetrics,
-      AuditAction.Proxy,
-      AuditAction.Update,
-      AuditAction.Delete,
-      AuditAction.LogIn,
-      AuditAction.LogOut,
-      AuditAction.ReadUsers,
-      AuditAction.AddUser,
-      AuditAction.RemoveUser,
+      AuditActionDto.Create,
+      AuditActionDto.Read,
+      AuditActionDto.ReadImages,
+      AuditActionDto.ReadLogs,
+      AuditActionDto.ReadMetrics,
+      AuditActionDto.Proxy,
+      AuditActionDto.Update,
+      AuditActionDto.Delete,
+      AuditActionDto.LogIn,
+      AuditActionDto.LogOut,
+      AuditActionDto.ReadUsers,
+      AuditActionDto.AddUser,
+      AuditActionDto.RemoveUser,
     ],
   })
-  action: AuditAction;
+  action: AuditActionDto;
 
   @Prop({
     required: true,
     enum: [
-      AuditResource.User,
-      AuditResource.Permission,
-      AuditResource.AuditLog,
-      AuditResource.Workspace,
-      AuditResource.Deployment,
-      AuditResource.Project,
-      AuditResource.ProjectLane,
-      AuditResource.ProjectTask,
-      AuditResource.WikiSection,
-      AuditResource.WikiPage,
+      AuditResourceDto.User,
+      AuditResourceDto.Permission,
+      AuditResourceDto.AuditLog,
+      AuditResourceDto.Workspace,
+      AuditResourceDto.Deployment,
+      AuditResourceDto.Project,
+      AuditResourceDto.ProjectLane,
+      AuditResourceDto.ProjectTask,
+      AuditResourceDto.WikiSection,
+      AuditResourceDto.WikiPage,
     ],
   })
-  resource: AuditResource;
+  resource: AuditResourceDto;
 
   @Prop({ required: true })
   userAgent: string;

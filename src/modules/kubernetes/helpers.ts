@@ -1,9 +1,11 @@
-import { isDefined } from './../../utils/dto-validators';
+import { isDefined } from 'class-validator';
+
 const resourcePrefix = 'agoracloud';
 
 /**
  * Convert a string to a base64 string
  * @param value the value to convert
+ * @returns a base64 string
  */
 function toBase64(value: string): string {
   return Buffer.from(value).toString('base64');
@@ -12,10 +14,9 @@ function toBase64(value: string): string {
 /**
  * Generates labels for all Kubernetes resources for an AgoraCloud deployment
  * @param deploymentId the deployment id
+ * @returns the generated deployment labels
  */
-function generateDeploymentLabels(
-  deploymentId: string,
-): {
+function generateDeploymentLabels(deploymentId: string): {
   [key: string]: string;
 } {
   return { app: resourcePrefix, deployment: deploymentId };
@@ -24,10 +25,9 @@ function generateDeploymentLabels(
 /**
  * Generates labels for all Kubernetes resources for an AgoraCloud workspace
  * @param workspaceId the workspace id
+ * @returns the generated workspace labels
  */
-function generateWorkspaceLabels(
-  workspaceId: string,
-): {
+function generateWorkspaceLabels(workspaceId: string): {
   [key: string]: string;
 } {
   return { app: resourcePrefix, workspace: workspaceId };
@@ -36,6 +36,7 @@ function generateWorkspaceLabels(
 /**
  * Generates the name for any Kubernetes resource
  * @param id the id of the resource
+ * @returns the generated resource name
  */
 function generateResourceName(id: string): string {
   return `${resourcePrefix}-${id}`;
@@ -45,6 +46,7 @@ function generateResourceName(id: string): string {
  * Converts a Kubernetes metrics value to a percentage
  * @param val the current value
  * @param max the maximum value
+ * @returns the calculated percentage
  */
 function toPercentage(val: string, max: number): number {
   if (!val || !isDefined(max)) return;

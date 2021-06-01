@@ -13,6 +13,10 @@ import {
 } from '@nestjs/common';
 import { RequestWithWorkspaceUserProjectAndIsAdmin } from '../utils/requests.interface';
 
+/**
+ * An interceptor that extracts the project id from the request, fetches it from
+ * the database and attaches it to the request
+ */
 @Injectable()
 export class ProjectInterceptor implements NestInterceptor {
   constructor(private readonly projectsService: ProjectsService) {}

@@ -2,10 +2,6 @@ import {
   AUDIT_ACTION_KEY,
   AUDIT_RESOURCE_KEY,
 } from './../decorators/audit.decorator';
-import {
-  AuditAction,
-  AuditResource,
-} from './../modules/auditing/schemas/audit-log.schema';
 import { AuditLog } from '../modules/auditing/schemas/audit-log.schema';
 import { AuditingService } from './../modules/auditing/auditing.service';
 import { Reflector } from '@nestjs/core';
@@ -19,7 +15,11 @@ import { Response } from 'express';
 import { Observable, throwError } from 'rxjs';
 import { RequestWithWorkspaceUserAndIsAdmin } from '../utils/requests.interface';
 import { catchError, tap } from 'rxjs/operators';
+import { AuditActionDto, AuditResourceDto } from '@agoracloud/common';
 
+/**
+ * An interceptor that records every action performed by every user
+ */
 @Injectable()
 export class AuditingInterceptor implements NestInterceptor {
   constructor(
@@ -28,14 +28,15 @@ export class AuditingInterceptor implements NestInterceptor {
   ) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    const auditAction: AuditAction = this.reflector.get<AuditAction>(
+    const auditAction: AuditActionDto = this.reflector.get<AuditActionDto>(
       AUDIT_ACTION_KEY,
       context.getHandler(),
     );
-    const auditResource: AuditResource = this.reflector.get<AuditResource>(
-      AUDIT_RESOURCE_KEY,
-      context.getHandler(),
-    );
+    const auditResource: AuditResourceDto =
+      this.reflector.get<AuditResourceDto>(
+        AUDIT_RESOURCE_KEY,
+        context.getHandler(),
+      );
     const request: RequestWithWorkspaceUserAndIsAdmin = context
       .switchToHttp()
       .getRequest();

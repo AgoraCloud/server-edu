@@ -12,7 +12,7 @@ ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
 WORKDIR /agoracloud
 COPY package*.json ./
-RUN npm install
+RUN npm i
 COPY . .
 COPY --from=development /agoracloud/dist ./dist
 CMD ["npm", "run", "start:prod"]

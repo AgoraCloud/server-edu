@@ -1,12 +1,7 @@
-import { Role } from './../authorization/schemas/permission.schema';
-import { ChangePasswordDto } from './dto/change-password.dto';
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { TokenPayload } from './interfaces/token-payload.interface';
 import { InvalidCredentialsException } from './../../exceptions/invalid-credentials.exception';
 import { TokenExpiredException } from './../../exceptions/token-expired.exception';
 import { User, UserDocument } from './../users/schemas/user.schema';
-import { VerifyAccountDto } from './dto/verify-account.dto';
-import { CreateUserDto } from './../users/dto/create-user.dto';
 import {
   TokenSchema,
   TokenDocument,
@@ -33,6 +28,13 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthenticationService } from './authentication.service';
 import { Connection, Model } from 'mongoose';
 import { JwtConfig } from '../../config/configuration.interface';
+import {
+  ChangePasswordDto,
+  CreateUserDto,
+  ForgotPasswordDto,
+  RoleDto,
+  VerifyAccountDto,
+} from '@agoracloud/common';
 
 let user: UserDocument;
 const createUserDto: CreateUserDto = {
@@ -121,7 +123,7 @@ describe('AuthenticationService', () => {
         Promise<UserDocument>,
         [
           createUserDto: CreateUserDto,
-          role?: Role.User | Role.SuperAdmin,
+          role?: RoleDto.User | RoleDto.SuperAdmin,
           verify?: boolean,
         ]
       > = jest.spyOn(usersService, 'create');
@@ -143,10 +145,8 @@ describe('AuthenticationService', () => {
         Promise<TokenDocument>,
         [tokenId: string, type: TokenType]
       > = jest.spyOn(tokensService, 'findOneAndRemove');
-      const usersServiceSpy: jest.SpyInstance<
-        Promise<void>,
-        [userId: string]
-      > = jest.spyOn(usersService, 'verify');
+      const usersServiceSpy: jest.SpyInstance<Promise<void>, [userId: string]> =
+        jest.spyOn(usersService, 'verify');
       await service.verifyAccount(verifyAccountDto);
       expect(tokensServiceSpy).toHaveBeenCalledTimes(1);
       expect(usersServiceSpy).toHaveBeenCalledTimes(1);
@@ -219,10 +219,8 @@ describe('AuthenticationService', () => {
 
   describe('clearRefreshToken', () => {
     it('should clear the users refresh token', async () => {
-      const usersServiceSpy: jest.SpyInstance<
-        Promise<void>,
-        [email: string]
-      > = jest.spyOn(usersService, 'clearRefreshToken');
+      const usersServiceSpy: jest.SpyInstance<Promise<void>, [email: string]> =
+        jest.spyOn(usersService, 'clearRefreshToken');
       await service.clearRefreshToken(user.email);
       expect(usersServiceSpy).toHaveBeenCalledTimes(1);
     });
@@ -260,9 +258,8 @@ describe('AuthenticationService', () => {
     });
 
     it('should return the decoded refresh token', () => {
-      const decodedToken: TokenPayload = service.validateJwtRefreshToken(
-        refreshToken,
-      );
+      const decodedToken: TokenPayload =
+        service.validateJwtRefreshToken(refreshToken);
       expect(decodedToken).toBeTruthy();
       expect(decodedToken.email).toBe(user.email);
     });

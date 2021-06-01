@@ -1,9 +1,15 @@
-import { AuditResource } from './../../auditing/schemas/audit-log.schema';
+import {
+  ExceptionDto,
+  WikiSectionDto,
+  CreateWikiSectionDto,
+  UpdateWikiSectionDto,
+  ActionDto,
+  AuditActionDto,
+  AuditResourceDto,
+} from '@agoracloud/common';
 import { IsAdmin } from '../../../decorators/is-admin.decorator';
 import { Permissions } from './../../../decorators/permissions.decorator';
-import { Action } from './../../authorization/schemas/permission.schema';
 import { Auth } from '../../../decorators/auth.decorator';
-import { ExceptionDto } from './../../../utils/base.dto';
 import {
   ApiTags,
   ApiCookieAuth,
@@ -19,8 +25,6 @@ import {
 import { WorkspaceDocument } from './../../workspaces/schemas/workspace.schema';
 import { FindOneParams } from './../../../utils/find-one-params';
 import { UserDocument } from './../../users/schemas/user.schema';
-import { WikiSectionDto } from './dto/section.dto';
-import { TransformInterceptor } from './../../../interceptors/transform.interceptor';
 import {
   Controller,
   Get,
@@ -32,20 +36,19 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { WikiSectionsService } from './sections.service';
-import { CreateWikiSectionDto } from './dto/create-section.dto';
-import { UpdateWikiSectionDto } from './dto/update-section.dto';
 import { WorkspaceInterceptor } from '../../../interceptors/workspace.interceptor';
 import { User } from '../../../decorators/user.decorator';
 import { Workspace } from '../../../decorators/workspace.decorator';
 import { WikiSectionDocument } from './schemas/section.schema';
 import { Audit } from '../../../decorators/audit.decorator';
-import { AuditAction } from '../../auditing/schemas/audit-log.schema';
+import { Transform } from '../../../decorators/transform.decorator';
 
 @ApiCookieAuth()
 @ApiTags('Wiki Sections')
-@Auth(Action.ReadWorkspace)
+@Auth(ActionDto.ReadWorkspace)
 @Controller('api/workspaces/:workspaceId/sections')
-@UseInterceptors(WorkspaceInterceptor, new TransformInterceptor(WikiSectionDto))
+@UseInterceptors(WorkspaceInterceptor)
+@Transform(WikiSectionDto)
 export class WikiSectionsController {
   constructor(private readonly wikiSectionsService: WikiSectionsService) {}
 
@@ -56,8 +59,8 @@ export class WikiSectionsController {
    * @param createWikiSectionDto the wiki section to create
    */
   @Post()
-  @Permissions(Action.CreateWikiSection)
-  @Audit(AuditAction.Create, AuditResource.WikiSection)
+  @Permissions(ActionDto.CreateWikiSection)
+  @Audit(AuditActionDto.Create, AuditResourceDto.WikiSection)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiOperation({ summary: 'Create a wiki section' })
   @ApiCreatedResponse({
@@ -92,8 +95,8 @@ export class WikiSectionsController {
    * @param workspaceId the workspace id
    */
   @Get()
-  @Permissions(Action.ReadWikiSection)
-  @Audit(AuditAction.Read, AuditResource.WikiSection)
+  @Permissions(ActionDto.ReadWikiSection)
+  @Audit(AuditActionDto.Read, AuditResourceDto.WikiSection)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiOperation({ summary: 'Get all wiki sections' })
   @ApiOkResponse({
@@ -128,8 +131,8 @@ export class WikiSectionsController {
    * @param wikiSectionId the wiki section id
    */
   @Get(':id')
-  @Permissions(Action.ReadWikiSection)
-  @Audit(AuditAction.Read, AuditResource.WikiSection)
+  @Permissions(ActionDto.ReadWikiSection)
+  @Audit(AuditActionDto.Read, AuditResourceDto.WikiSection)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'id', description: 'The section id' })
   @ApiOperation({ summary: 'Get a wiki section' })
@@ -168,8 +171,8 @@ export class WikiSectionsController {
    * @param updateWikiSectionDto the updated wiki section
    */
   @Put(':id')
-  @Permissions(Action.UpdateWikiSection)
-  @Audit(AuditAction.Update, AuditResource.WikiSection)
+  @Permissions(ActionDto.UpdateWikiSection)
+  @Audit(AuditActionDto.Update, AuditResourceDto.WikiSection)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'id', description: 'The section id' })
   @ApiOperation({ summary: 'Update a wiki section' })
@@ -218,8 +221,8 @@ export class WikiSectionsController {
    * @param wikiSectionId the wiki section id
    */
   @Delete(':id')
-  @Permissions(Action.DeleteWikiSection)
-  @Audit(AuditAction.Delete, AuditResource.WikiSection)
+  @Permissions(ActionDto.DeleteWikiSection)
+  @Audit(AuditActionDto.Delete, AuditResourceDto.WikiSection)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'id', description: 'The section id' })
   @ApiOperation({ summary: 'Delete a wiki section' })

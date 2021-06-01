@@ -8,8 +8,7 @@ import { UserDocument } from './../users/schemas/user.schema';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
-import { CreateProjectDto } from './dto/create-project.dto';
-import { UpdateProjectDto } from './dto/update-project.dto';
+import { CreateProjectDto, UpdateProjectDto } from '@agoracloud/common';
 import { Project, ProjectDocument } from './schemas/project.schema';
 import { Model, Query } from 'mongoose';
 import { Event } from '../../events/events.enum';
@@ -27,6 +26,7 @@ export class ProjectsService {
    * @param user the user
    * @param workspace the workspace
    * @param createProjectDto the project to create
+   * @returns the created project document
    */
   async create(
     user: UserDocument,
@@ -50,15 +50,14 @@ export class ProjectsService {
    * Find all projects
    * @param workspaceId the workspace id
    * @param userId the users id
+   * @returns an array of project documents
    */
   async findAll(
     workspaceId: string,
     userId?: string,
   ): Promise<ProjectDocument[]> {
-    let projectsQuery: Query<
-      ProjectDocument[],
-      ProjectDocument
-    > = this.projectModel.find().where('workspace').equals(workspaceId);
+    let projectsQuery: Query<ProjectDocument[], ProjectDocument> =
+      this.projectModel.find().where('workspace').equals(workspaceId);
     if (userId) {
       projectsQuery = projectsQuery.where('user').equals(userId);
     }
@@ -71,21 +70,21 @@ export class ProjectsService {
    * @param workspaceId the workspace id
    * @param projectId the project id
    * @param userId the users id
+   * @throws ProjectNotFoundException
+   * @returns a project document
    */
   async findOne(
     workspaceId: string,
     projectId: string,
     userId?: string,
   ): Promise<ProjectDocument> {
-    let projectQuery: Query<
-      ProjectDocument,
-      ProjectDocument
-    > = this.projectModel
-      .findOne()
-      .where('_id')
-      .equals(projectId)
-      .where('workspace')
-      .equals(workspaceId);
+    let projectQuery: Query<ProjectDocument, ProjectDocument> =
+      this.projectModel
+        .findOne()
+        .where('_id')
+        .equals(projectId)
+        .where('workspace')
+        .equals(workspaceId);
     if (userId) {
       projectQuery = projectQuery.where('user').equals(userId);
     }
@@ -100,6 +99,8 @@ export class ProjectsService {
    * @param projectId the project id
    * @param updateProjectDto the updated project
    * @param userId the users id
+   * @throws ProjectNotFoundException
+   * @returns the updated project document
    */
   async update(
     workspaceId: string,
@@ -107,15 +108,13 @@ export class ProjectsService {
     updateProjectDto: UpdateProjectDto,
     userId?: string,
   ): Promise<ProjectDocument> {
-    let projectQuery: Query<
-      ProjectDocument,
-      ProjectDocument
-    > = this.projectModel
-      .findOneAndUpdate(null, updateProjectDto, { new: true })
-      .where('_id')
-      .equals(projectId)
-      .where('workspace')
-      .equals(workspaceId);
+    let projectQuery: Query<ProjectDocument, ProjectDocument> =
+      this.projectModel
+        .findOneAndUpdate(null, updateProjectDto, { new: true })
+        .where('_id')
+        .equals(projectId)
+        .where('workspace')
+        .equals(workspaceId);
     if (userId) {
       projectQuery = projectQuery.where('user').equals(userId);
     }
@@ -129,21 +128,20 @@ export class ProjectsService {
    * @param workspaceId the workspace id
    * @param projectId the project id
    * @param userId the users id
+   * @throws ProjectNotFoundException
    */
   async remove(
     workspaceId: string,
     projectId: string,
     userId?: string,
   ): Promise<void> {
-    let projectQuery: Query<
-      ProjectDocument,
-      ProjectDocument
-    > = this.projectModel
-      .findOneAndDelete()
-      .where('_id')
-      .equals(projectId)
-      .where('workspace')
-      .equals(workspaceId);
+    let projectQuery: Query<ProjectDocument, ProjectDocument> =
+      this.projectModel
+        .findOneAndDelete()
+        .where('_id')
+        .equals(projectId)
+        .where('workspace')
+        .equals(workspaceId);
     if (userId) {
       projectQuery = projectQuery.where('user').equals(userId);
     }

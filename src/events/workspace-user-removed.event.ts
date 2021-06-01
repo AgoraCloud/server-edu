@@ -1,3 +1,6 @@
+/**
+ * Payload of the workspace.user.removed event
+ */
 export class WorkspaceUserRemovedEvent {
   workspaceId: string;
   userId: string;

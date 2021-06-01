@@ -13,6 +13,10 @@ import {
 import { WikiSectionDocument } from './../modules/wiki/sections/schemas/section.schema';
 import { RequestWithWorkspaceUserWikiSectionAndIsAdmin } from '../utils/requests.interface';
 
+/**
+ * An interceptor that extracts the wiki section id from the request, fetches
+ * it from the database and attaches it to the request
+ */
 @Injectable()
 export class WikiSectionInterceptor implements NestInterceptor {
   constructor(private readonly wikiSectionsService: WikiSectionsService) {}
@@ -32,11 +36,12 @@ export class WikiSectionInterceptor implements NestInterceptor {
     const user: UserDocument = request.user;
     const workspace: WorkspaceDocument = request.workspace;
     const isAdmin: boolean = request.isAdmin;
-    const wikiSection: WikiSectionDocument = await this.wikiSectionsService.findOne(
-      workspace._id,
-      wikiSectionId,
-      isAdmin ? undefined : user._id,
-    );
+    const wikiSection: WikiSectionDocument =
+      await this.wikiSectionsService.findOne(
+        workspace._id,
+        wikiSectionId,
+        isAdmin ? undefined : user._id,
+      );
     request.wikiSection = wikiSection;
     return next.handle();
   }

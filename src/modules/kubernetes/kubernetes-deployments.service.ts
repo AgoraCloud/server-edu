@@ -1,5 +1,9 @@
+import { DeploymentImage } from './../deployments/schemas/deployment.schema';
 import { DeploymentProperties } from '../deployments/schemas/deployment.schema';
-import { UpdateDeploymentResourcesDto } from '../deployments/dto/update-deployment.dto';
+import {
+  DeploymentTypeDto,
+  UpdateDeploymentResourcesDto,
+} from '@agoracloud/common';
 import { Inject, Injectable } from '@nestjs/common';
 import * as k8s from '@kubernetes/client-node';
 import * as http from 'http';
@@ -14,10 +18,9 @@ export class KubernetesDeploymentsService {
   /**
    * Get all Kubernetes deployments
    * @param namespace the Kubernetes namespace
+   * @returns a list of all Kubernetes deployments
    */
-  getAllDeployments(
-    namespace: string,
-  ): Promise<{
+  getAllDeployments(namespace: string): Promise<{
     response: http.IncomingMessage;
     body: k8s.V1DeploymentList;
   }> {
@@ -36,6 +39,7 @@ export class KubernetesDeploymentsService {
    * @param namespace the Kubernetes namespace
    * @param deploymentId the deployment id
    * @param deploymentProperties the deployment properties
+   * @returns the created Kubernetes deployment
    */
   createDeployment(
     namespace: string,
@@ -45,9 +49,8 @@ export class KubernetesDeploymentsService {
     response: http.IncomingMessage;
     body: k8s.V1Deployment;
   }> {
-    const labels: { [key: string]: string } = generateDeploymentLabels(
-      deploymentId,
-    );
+    const labels: { [key: string]: string } =
+      generateDeploymentLabels(deploymentId);
     const resourceName: string = generateResourceName(deploymentId);
     const volumes: k8s.V1Volume[] = [];
     const volumeMounts: k8s.V1VolumeMount[] = [];
@@ -88,7 +91,7 @@ export class KubernetesDeploymentsService {
             containers: [
               {
                 name: resourceName,
-                image: `${deploymentProperties.image.name}:${deploymentProperties.image.tag}`,
+                image: this.generateContainerImage(deploymentProperties.image),
                 imagePullPolicy: 'Always',
                 resources: {
                   limits: {
@@ -133,6 +136,7 @@ export class KubernetesDeploymentsService {
    * @param namespace the Kubernetes namespace
    * @param deploymentId the deployment id
    * @param updatedResources the updated deployment resources
+   * @returns the updated Kubernetes deployment
    */
   updateDeployment(
     namespace: string,
@@ -143,7 +147,8 @@ export class KubernetesDeploymentsService {
     body: k8s.V1Deployment;
   }> {
     const resourceName: string = generateResourceName(deploymentId);
-    const resources: k8s.V1ResourceRequirements = new k8s.V1ResourceRequirements();
+    const resources: k8s.V1ResourceRequirements =
+      new k8s.V1ResourceRequirements();
     resources.limits = {};
     if (updatedResources.cpuCount) {
       resources.limits.cpu = `${updatedResources.cpuCount}`;
@@ -185,6 +190,7 @@ export class KubernetesDeploymentsService {
    * Delete a Kubernetes deployment
    * @param namespace the Kubernetes namespace
    * @param deploymentId the deployment id
+   * @returns the deleted Kubernetes deployment
    */
   deleteDeployment(
     namespace: string,
@@ -197,5 +203,16 @@ export class KubernetesDeploymentsService {
       generateResourceName(deploymentId),
       namespace,
     );
+  }
+
+  /**
+   * Generates a container image from the given deployment type and version
+   * @param deploymentImage the deployment image to convert
+   * @returns the generated container image
+   */
+  private generateContainerImage(deploymentImage: DeploymentImage): string {
+    if (deploymentImage.type === DeploymentTypeDto.VSCode) {
+      return `linuxserver/code-server:version-v${deploymentImage.version}`;
+    }
   }
 }

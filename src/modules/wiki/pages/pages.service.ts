@@ -7,8 +7,7 @@ import { WikiSectionDeletedEvent } from './../../../events/wiki-section-deleted.
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Event } from '../../../events/events.enum';
-import { CreateWikiPageDto } from './dto/create-page.dto';
-import { UpdateWikiPageDto } from './dto/update-page.dto';
+import { CreateWikiPageDto, UpdateWikiPageDto } from '@agoracloud/common';
 import { WikiPageDocument } from './schemas/page.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Query } from 'mongoose';
@@ -26,6 +25,7 @@ export class WikiPagesService {
    * @param workspace the workspace
    * @param wikiSection the wiki section to create the wiki page in
    * @param createWikiPageDto the wiki page to create
+   * @returns the created wiki page document
    */
   async create(
     user: UserDocument,
@@ -48,21 +48,20 @@ export class WikiPagesService {
    * @param workspaceId the workspace id
    * @param wikiSectionId the wiki section id
    * @param userId the users id
+   * @returns an array of wiki page documents
    */
   async findAll(
     workspaceId: string,
     wikiSectionId: string,
     userId?: string,
   ): Promise<WikiPageDocument[]> {
-    let wikiPagesQuery: Query<
-      WikiPageDocument[],
-      WikiPageDocument
-    > = this.wikiPageModel
-      .find()
-      .where('workspace')
-      .equals(workspaceId)
-      .where('section')
-      .equals(wikiSectionId);
+    let wikiPagesQuery: Query<WikiPageDocument[], WikiPageDocument> =
+      this.wikiPageModel
+        .find()
+        .where('workspace')
+        .equals(workspaceId)
+        .where('section')
+        .equals(wikiSectionId);
     if (userId) {
       wikiPagesQuery = wikiPagesQuery.where('user').equals(userId);
     }
@@ -76,6 +75,8 @@ export class WikiPagesService {
    * @param wikiSectionId the wiki section id
    * @param wikiPageId the wiki page id
    * @param userId the users id
+   * @throws WikiPageNotFoundException
+   * @returns the wiki page document
    */
   async findOne(
     workspaceId: string,
@@ -83,17 +84,15 @@ export class WikiPagesService {
     wikiPageId: string,
     userId?: string,
   ): Promise<WikiPageDocument> {
-    let wikiPageQuery: Query<
-      WikiPageDocument,
-      WikiPageDocument
-    > = this.wikiPageModel
-      .findOne()
-      .where('_id')
-      .equals(wikiPageId)
-      .where('workspace')
-      .equals(workspaceId)
-      .where('section')
-      .equals(wikiSectionId);
+    let wikiPageQuery: Query<WikiPageDocument, WikiPageDocument> =
+      this.wikiPageModel
+        .findOne()
+        .where('_id')
+        .equals(wikiPageId)
+        .where('workspace')
+        .equals(workspaceId)
+        .where('section')
+        .equals(wikiSectionId);
     if (userId) {
       wikiPageQuery = wikiPageQuery.where('user').equals(userId);
     }
@@ -109,6 +108,8 @@ export class WikiPagesService {
    * @param wikiPageId the wiki page id
    * @param updateWikiPageDto the updated wiki page
    * @param userId the users id
+   * @throws WikiPageNotFoundException
+   * @returns the updated wiki page document
    */
   async update(
     workspaceId: string,
@@ -117,17 +118,15 @@ export class WikiPagesService {
     updateWikiPageDto: UpdateWikiPageDto,
     userId?: string,
   ): Promise<WikiPageDocument> {
-    let wikiPageQuery: Query<
-      WikiPageDocument,
-      WikiPageDocument
-    > = this.wikiPageModel
-      .findOneAndUpdate(null, updateWikiPageDto, { new: true })
-      .where('_id')
-      .equals(wikiPageId)
-      .where('workspace')
-      .equals(workspaceId)
-      .where('section')
-      .equals(wikiSectionId);
+    let wikiPageQuery: Query<WikiPageDocument, WikiPageDocument> =
+      this.wikiPageModel
+        .findOneAndUpdate(null, updateWikiPageDto, { new: true })
+        .where('_id')
+        .equals(wikiPageId)
+        .where('workspace')
+        .equals(workspaceId)
+        .where('section')
+        .equals(wikiSectionId);
     if (userId) {
       wikiPageQuery = wikiPageQuery.where('user').equals(userId);
     }
@@ -142,6 +141,7 @@ export class WikiPagesService {
    * @param wikiSectionId the wiki section id
    * @param wikiPageId the wiki page id
    * @param userId the users id
+   * @throws WikiPageNotFoundException
    */
   async remove(
     workspaceId: string,
@@ -149,17 +149,15 @@ export class WikiPagesService {
     wikiPageId: string,
     userId?: string,
   ): Promise<void> {
-    let wikiPageQuery: Query<
-      WikiPageDocument,
-      WikiPageDocument
-    > = this.wikiPageModel
-      .findOneAndDelete()
-      .where('_id')
-      .equals(wikiPageId)
-      .where('workspace')
-      .equals(workspaceId)
-      .where('section')
-      .equals(wikiSectionId);
+    let wikiPageQuery: Query<WikiPageDocument, WikiPageDocument> =
+      this.wikiPageModel
+        .findOneAndDelete()
+        .where('_id')
+        .equals(wikiPageId)
+        .where('workspace')
+        .equals(workspaceId)
+        .where('section')
+        .equals(wikiSectionId);
     if (userId) {
       wikiPageQuery = wikiPageQuery.where('user').equals(userId);
     }

@@ -1,6 +1,4 @@
-import { UpdateWikiPageDto } from './dto/update-page.dto';
 import { WikiPageNotFoundException } from './../../../exceptions/wiki-page-not-found.exception';
-import { CreateWikiPageDto } from './dto/create-page.dto';
 import { WikiSectionDocument } from './../sections/schemas/section.schema';
 import { WorkspaceDocument } from './../../workspaces/schemas/workspace.schema';
 import { UserDocument } from './../../users/schemas/user.schema';
@@ -17,6 +15,7 @@ import {
 import { Test, TestingModule } from '@nestjs/testing';
 import { Connection, Types } from 'mongoose';
 import { WikiPagesService } from './pages.service';
+import { CreateWikiPageDto, UpdateWikiPageDto } from '@agoracloud/common';
 
 const user: UserDocument = {
   _id: Types.ObjectId(),

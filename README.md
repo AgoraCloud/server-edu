@@ -1,6 +1,9 @@
-# AgoraCloud
+<div style="text-align: center">
+  <p><img src="https://user-images.githubusercontent.com/35788699/116828155-ed3ccd00-ab6a-11eb-9327-4d99bd169bdc.png" alt="Logo Cropped"></p>
+  <p><a href="https://github.com/AgoraCloud/server/issues"><img src="https://img.shields.io/github/issues/AgoraCloud/server" alt="GitHub issues"></a> <a href="https://github.com/AgoraCloud/server/blob/main/LICENSE"><img src="https://img.shields.io/github/license/AgoraCloud/server" alt="GitHub license"></a> <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/AgoraCloud/server"> <img src="https://img.shields.io/github/release-date/AgoraCloud/server" alt="GitHub Release Date"> <img alt="Docker Pulls" src="https://img.shields.io/docker/pulls/agoracloud/server"> <img src="https://img.shields.io/github/workflow/status/AgoraCloud/server/main_versioned_push" alt="GitHub Workflow Status"> <img src="https://img.shields.io/github/contributors/AgoraCloud/server" alt="GitHub contributors"> <img src="https://img.shields.io/github/commit-activity/m/AgoraCloud/server" alt="GitHub commit activity"></p>
+</div>
 
-AgoraCloud is an open source and self hosted cloud coding platform that runs in Kubernetes.
+AgoraCloud is an open source and self hosted cloud development platform that runs in Kubernetes.
 
 ## Installation
 

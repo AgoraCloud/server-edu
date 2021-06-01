@@ -1,6 +1,4 @@
-import { UpdateProjectLaneDto } from './dto/update-lane.dto';
 import { ProjectLaneNotFoundException } from './../../../exceptions/project-lane-not-found.exception';
-import { CreateProjectLaneDto } from './dto/create-lane.dto';
 import { ProjectDocument } from './../schemas/project.schema';
 import { WorkspaceDocument } from './../../workspaces/schemas/workspace.schema';
 import { UserDocument } from './../../users/schemas/user.schema';
@@ -18,6 +16,7 @@ import {
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProjectLanesService } from './lanes.service';
 import { Connection, Types } from 'mongoose';
+import { CreateProjectLaneDto, UpdateProjectLaneDto } from '@agoracloud/common';
 
 const user: UserDocument = {
   _id: Types.ObjectId(),
@@ -94,29 +93,23 @@ describe('ProjectLanesService', () => {
 
   describe('findAll', () => {
     it('should find all project lanes in the given project', async () => {
-      const retrievedProjectLanes: ProjectLaneDocument[] = await service.findAll(
-        project._id,
-      );
+      const retrievedProjectLanes: ProjectLaneDocument[] =
+        await service.findAll(project._id);
       expect(retrievedProjectLanes).toBeTruthy();
       expect(retrievedProjectLanes[0].project._id).toEqual(project._id);
     });
 
     it('should find all project lanes in the given project for the given user', async () => {
-      const retrievedProjectLanes: ProjectLaneDocument[] = await service.findAll(
-        project._id,
-        user._id,
-      );
+      const retrievedProjectLanes: ProjectLaneDocument[] =
+        await service.findAll(project._id, user._id);
       expect(retrievedProjectLanes).toBeTruthy();
       expect(retrievedProjectLanes[0].user._id).toEqual(user._id);
       expect(retrievedProjectLanes[0].project._id).toEqual(project._id);
     });
 
     it('should find all project lanes in the given workspace and project for the given user', async () => {
-      const retrievedProjectLanes: ProjectLaneDocument[] = await service.findAll(
-        project._id,
-        user._id,
-        workspace._id,
-      );
+      const retrievedProjectLanes: ProjectLaneDocument[] =
+        await service.findAll(project._id, user._id, workspace._id);
       expect(retrievedProjectLanes).toBeTruthy();
       expect(retrievedProjectLanes[0].user._id).toEqual(user._id);
       expect(retrievedProjectLanes[0].workspace._id).toEqual(workspace._id);

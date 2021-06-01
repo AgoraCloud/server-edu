@@ -1,9 +1,15 @@
-import { AuditResource } from './../../auditing/schemas/audit-log.schema';
+import {
+  CreateProjectTaskDto,
+  UpdateProjectTaskDto,
+  ExceptionDto,
+  ProjectTaskDto,
+  ActionDto,
+  AuditActionDto,
+  AuditResourceDto,
+} from '@agoracloud/common';
 import { IsAdmin } from '../../../decorators/is-admin.decorator';
 import { Permissions } from './../../../decorators/permissions.decorator';
 import { Auth } from '../../../decorators/auth.decorator';
-import { Action } from './../../authorization/schemas/permission.schema';
-import { ExceptionDto } from './../../../utils/base.dto';
 import {
   ApiTags,
   ApiCookieAuth,
@@ -22,8 +28,6 @@ import { ProjectDocument } from './../schemas/project.schema';
 import { WorkspaceDocument } from './../../workspaces/schemas/workspace.schema';
 import { UserDocument } from './../../users/schemas/user.schema';
 import { ProjectTaskDocument } from './schemas/task.schema';
-import { TransformInterceptor } from './../../../interceptors/transform.interceptor';
-import { ProjectTaskDto } from './dto/task.dto';
 import { ProjectLaneInterceptor } from './../../../interceptors/project-lane.interceptor';
 import { ProjectInterceptor } from './../../../interceptors/project.interceptor';
 import { WorkspaceInterceptor } from './../../../interceptors/workspace.interceptor';
@@ -38,18 +42,16 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ProjectTasksService } from './tasks.service';
-import { CreateProjectTaskDto } from './dto/create-task.dto';
-import { UpdateProjectTaskDto } from './dto/update-task.dto';
 import { User } from '../../../decorators/user.decorator';
 import { Workspace } from '../../../decorators/workspace.decorator';
 import { Project } from '../../../decorators/project.decorator';
 import { ProjectLane } from '../../../decorators/project-lane.decorator';
 import { Audit } from '../../../decorators/audit.decorator';
-import { AuditAction } from '../../auditing/schemas/audit-log.schema';
+import { Transform } from '../../../decorators/transform.decorator';
 
 @ApiCookieAuth()
 @ApiTags('Project Tasks')
-@Auth(Action.ReadWorkspace, Action.ReadProject, Action.ReadProjectLane)
+@Auth(ActionDto.ReadWorkspace, ActionDto.ReadProject, ActionDto.ReadProjectLane)
 @Controller(
   'api/workspaces/:workspaceId/projects/:projectId/lanes/:laneId/tasks',
 )
@@ -57,8 +59,8 @@ import { AuditAction } from '../../auditing/schemas/audit-log.schema';
   WorkspaceInterceptor,
   ProjectInterceptor,
   ProjectLaneInterceptor,
-  new TransformInterceptor(ProjectTaskDto),
 )
+@Transform(ProjectTaskDto)
 export class ProjectTasksController {
   constructor(private readonly projectTasksService: ProjectTasksService) {}
 
@@ -71,8 +73,8 @@ export class ProjectTasksController {
    * @param createProjectTaskDto the project task to create
    */
   @Post()
-  @Permissions(Action.CreateProjectTask)
-  @Audit(AuditAction.Create, AuditResource.ProjectTask)
+  @Permissions(ActionDto.CreateProjectTask)
+  @Audit(AuditActionDto.Create, AuditResourceDto.ProjectTask)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'projectId', description: 'The project id' })
   @ApiParam({ name: 'laneId', description: 'The project lane id' })
@@ -117,8 +119,8 @@ export class ProjectTasksController {
    * @param projectLaneId the project lane id
    */
   @Get()
-  @Permissions(Action.ReadProjectTask)
-  @Audit(AuditAction.Read, AuditResource.ProjectTask)
+  @Permissions(ActionDto.ReadProjectTask)
+  @Audit(AuditActionDto.Read, AuditResourceDto.ProjectTask)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'projectId', description: 'The project id' })
   @ApiParam({ name: 'laneId', description: 'The project lane id' })
@@ -171,8 +173,8 @@ export class ProjectTasksController {
    * @param projectTaskId the project task id
    */
   @Get(':id')
-  @Permissions(Action.ReadProjectTask)
-  @Audit(AuditAction.Read, AuditResource.ProjectTask)
+  @Permissions(ActionDto.ReadProjectTask)
+  @Audit(AuditActionDto.Read, AuditResourceDto.ProjectTask)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'projectId', description: 'The project id' })
   @ApiParam({ name: 'laneId', description: 'The project lane id' })
@@ -229,8 +231,8 @@ export class ProjectTasksController {
    * @param updateProjectTaskDto the updated project task
    */
   @Put(':id')
-  @Permissions(Action.UpdateProjectTask)
-  @Audit(AuditAction.Update, AuditResource.ProjectTask)
+  @Permissions(ActionDto.UpdateProjectTask)
+  @Audit(AuditActionDto.Update, AuditResourceDto.ProjectTask)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'projectId', description: 'The project id' })
   @ApiParam({ name: 'laneId', description: 'The project lane id' })
@@ -289,8 +291,8 @@ export class ProjectTasksController {
    * @param projectTaskId the project task id
    */
   @Delete(':id')
-  @Permissions(Action.DeleteProjectTask)
-  @Audit(AuditAction.Delete, AuditResource.ProjectTask)
+  @Permissions(ActionDto.DeleteProjectTask)
+  @Audit(AuditActionDto.Delete, AuditResourceDto.ProjectTask)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'projectId', description: 'The project id' })
   @ApiParam({ name: 'laneId', description: 'The project lane id' })

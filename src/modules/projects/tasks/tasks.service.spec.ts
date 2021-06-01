@@ -1,8 +1,6 @@
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ProjectLanesService } from './../lanes/lanes.service';
-import { UpdateProjectTaskDto } from './dto/update-task.dto';
 import { ProjectTaskNotFoundException } from './../../../exceptions/project-task-not-found.exception';
-import { CreateProjectTaskDto } from './dto/create-task.dto';
 import {
   ProjectLane,
   ProjectLaneDocument,
@@ -24,6 +22,7 @@ import {
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProjectTasksService } from './tasks.service';
 import { Connection, Types } from 'mongoose';
+import { CreateProjectTaskDto, UpdateProjectTaskDto } from '@agoracloud/common';
 
 const user: UserDocument = {
   _id: Types.ObjectId(),
@@ -124,29 +123,23 @@ describe('ProjectTasksService', () => {
 
   describe('findAll', () => {
     it('should find all project tasks in the given project lane', async () => {
-      const retrievedProjectTasks: ProjectTaskDocument[] = await service.findAll(
-        projectLane._id,
-      );
+      const retrievedProjectTasks: ProjectTaskDocument[] =
+        await service.findAll(projectLane._id);
       expect(retrievedProjectTasks).toBeTruthy();
       expect(retrievedProjectTasks[0].lane._id).toEqual(projectLane._id);
     });
 
     it('should find all project tasks in the given project lane for the given user', async () => {
-      const retrievedProjectTasks: ProjectTaskDocument[] = await service.findAll(
-        projectLane._id,
-        user._id,
-      );
+      const retrievedProjectTasks: ProjectTaskDocument[] =
+        await service.findAll(projectLane._id, user._id);
       expect(retrievedProjectTasks).toBeTruthy();
       expect(retrievedProjectTasks[0].user._id).toEqual(user._id);
       expect(retrievedProjectTasks[0].lane._id).toEqual(projectLane._id);
     });
 
     it('should find all project tasks in the given workspace and project lane for the given user', async () => {
-      const retrievedProjectTasks: ProjectTaskDocument[] = await service.findAll(
-        projectLane._id,
-        user._id,
-        workspace._id,
-      );
+      const retrievedProjectTasks: ProjectTaskDocument[] =
+        await service.findAll(projectLane._id, user._id, workspace._id);
       expect(retrievedProjectTasks).toBeTruthy();
       expect(retrievedProjectTasks[0].user._id).toEqual(user._id);
       expect(retrievedProjectTasks[0].workspace._id).toEqual(workspace._id);
@@ -154,12 +147,13 @@ describe('ProjectTasksService', () => {
     });
 
     it('should find all project tasks in the given workspace, project and project lane for the given user', async () => {
-      const retrievedProjectTasks: ProjectTaskDocument[] = await service.findAll(
-        projectLane._id,
-        user._id,
-        workspace._id,
-        project._id,
-      );
+      const retrievedProjectTasks: ProjectTaskDocument[] =
+        await service.findAll(
+          projectLane._id,
+          user._id,
+          workspace._id,
+          project._id,
+        );
       expect(retrievedProjectTasks).toBeTruthy();
       expect(retrievedProjectTasks[0].user._id).toEqual(user._id);
       expect(retrievedProjectTasks[0].workspace._id).toEqual(workspace._id);
@@ -259,12 +253,13 @@ describe('ProjectTasksService', () => {
         user._id,
       );
       // Make sure that the project task has been deleted
-      const retrievedProjectTasks: ProjectTaskDocument[] = await service.findAll(
-        projectLane2._id,
-        user._id,
-        workspace._id,
-        project._id,
-      );
+      const retrievedProjectTasks: ProjectTaskDocument[] =
+        await service.findAll(
+          projectLane2._id,
+          user._id,
+          workspace._id,
+          project._id,
+        );
       expect(retrievedProjectTasks.length).toBe(0);
     });
   });

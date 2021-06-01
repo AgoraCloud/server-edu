@@ -1,9 +1,15 @@
+/**
+ * The server Kubernetes configuration
+ */
 interface KubernetesConfig {
   namespace: string;
   storageClass: string;
   serviceAccount: string;
 }
 
+/**
+ * The server access and refresh token configuration
+ */
 interface JwtConfig {
   access: {
     secret: string;
@@ -13,11 +19,17 @@ interface JwtConfig {
   };
 }
 
+/**
+ * The server environment configuration
+ */
 enum EnvironmentConfig {
   Development = 'development',
   Production = 'production',
 }
 
+/**
+ * The server log level configuration
+ */
 enum LogLevel {
   Log = 'log',
   Error = 'error',
@@ -26,6 +38,9 @@ enum LogLevel {
   Verbose = 'verbose',
 }
 
+/**
+ * The server admin credentials configuration
+ */
 interface AdminConfig {
   email: string;
   password: string;

@@ -1,9 +1,13 @@
+import {
+  CreateWorkspaceDto,
+  UpdateWorkspaceDto,
+  UpdateWorkspaceResourcesDto,
+  AddWorkspaceUserDto,
+} from '@agoracloud/common';
 import { WorkspaceUserAddedEvent } from './../../events/workspace-user-added.event';
 import { MinOneUserInWorkspaceException } from './../../exceptions/min-one-user-in-workspace.exception';
 import { ExistingWorkspaceUserException } from './../../exceptions/existing-workspace-user.exception';
 import { UsersService } from './../users/users.service';
-import { AddWorkspaceUserDto } from './dto/add-workspace-user.dto';
-import { isDefined } from './../../utils/dto-validators';
 import { WorkspaceCreatedEvent } from './../../events/workspace-created.event';
 import { WorkspaceUserRemovedEvent } from './../../events/workspace-user-removed.event';
 import { UserDeletedEvent } from './../../events/user-deleted.event';
@@ -13,15 +17,14 @@ import { WorkspaceNotFoundException } from './../../exceptions/workspace-not-fou
 import { InjectModel } from '@nestjs/mongoose';
 import { Workspace, WorkspaceDocument } from './schemas/workspace.schema';
 import { Injectable } from '@nestjs/common';
-import { CreateWorkspaceDto } from './dto/create-workspace.dto';
-import {
-  UpdateWorkspaceDto,
-  UpdateWorkspaceResourcesDto,
-} from './dto/update-workspace.dto';
 import { UserDocument } from '../users/schemas/user.schema';
 import { Model, Query } from 'mongoose';
 import { Event } from '../../events/events.enum';
 import { WorkspaceUpdatedEvent } from '../../events/workspace-updated.event';
+import { AuthorizationService } from '../authorization/authorization.service';
+import { MinOneAdminUserInWorkspaceException } from '../../exceptions/min-one-admin-user-in-workspace.exception';
+import { PermissionDocument } from '../authorization/schemas/permission.schema';
+import { isDefined } from 'class-validator';
 
 @Injectable()
 export class WorkspacesService {
@@ -29,6 +32,7 @@ export class WorkspacesService {
     @InjectModel(Workspace.name)
     private readonly workspaceModel: Model<WorkspaceDocument>,
     private readonly usersService: UsersService,
+    private readonly authorizationService: AuthorizationService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -36,6 +40,7 @@ export class WorkspacesService {
    * Create a workspace
    * @param user the user
    * @param createWorkspaceDto the workspace to create
+   * @returns the created workspace document
    */
   async create(
     user: UserDocument,
@@ -43,9 +48,8 @@ export class WorkspacesService {
   ): Promise<WorkspaceDocument> {
     const workspace: Workspace = new Workspace(createWorkspaceDto);
     workspace.users = [user._id];
-    const createdWorkspace: WorkspaceDocument = await this.workspaceModel.create(
-      workspace,
-    );
+    const createdWorkspace: WorkspaceDocument =
+      await this.workspaceModel.create(workspace);
     this.eventEmitter.emit(
       Event.WorkspaceCreated,
       new WorkspaceCreatedEvent(createdWorkspace),
@@ -56,12 +60,11 @@ export class WorkspacesService {
   /**
    * Find all workspaces
    * @param userId the users id
+   * @returns an array of workspace documents
    */
   async findAll(userId?: string): Promise<WorkspaceDocument[]> {
-    let workspacesQuery: Query<
-      WorkspaceDocument[],
-      WorkspaceDocument
-    > = this.workspaceModel.find();
+    let workspacesQuery: Query<WorkspaceDocument[], WorkspaceDocument> =
+      this.workspaceModel.find();
     if (userId) {
       workspacesQuery = workspacesQuery.where('users').in([userId]);
     }
@@ -72,15 +75,15 @@ export class WorkspacesService {
    * Find a workspace
    * @param workspaceId the workspace id
    * @param userId the users id
+   * @throws WorkspaceNotFoundException
+   * @returns the workspace document
    */
   async findOne(
     workspaceId: string,
     userId?: string,
   ): Promise<WorkspaceDocument> {
-    let workspaceQuery: Query<
-      WorkspaceDocument,
-      WorkspaceDocument
-    > = this.workspaceModel.findOne().where('_id').equals(workspaceId);
+    let workspaceQuery: Query<WorkspaceDocument, WorkspaceDocument> =
+      this.workspaceModel.findOne().where('_id').equals(workspaceId);
     if (userId) {
       workspaceQuery = workspaceQuery.where('users').in([userId]);
     }
@@ -92,6 +95,8 @@ export class WorkspacesService {
   /**
    * Find the users in a workspace
    * @param workspaceId the workspace id
+   * @throws WorkspaceNotFoundException
+   * @returns the workspace document
    */
   async findOneUsers(workspaceId: string): Promise<WorkspaceDocument> {
     const workspace: WorkspaceDocument = await this.workspaceModel
@@ -110,6 +115,7 @@ export class WorkspacesService {
    * @param workspaceId the workspace id
    * @param updateWorkspaceDto the updated workspace
    * @param userId the users id
+   * @returns the updated workspace
    */
   async update(
     workspaceId: string,
@@ -186,12 +192,11 @@ export class WorkspacesService {
    * Delete a workspace
    * @param workspaceId the workspace id
    * @param userId the users id
+   * @throws WorkspaceNotFoundException
    */
   async remove(workspaceId: string, userId?: string): Promise<void> {
-    let workspaceQuery: Query<
-      WorkspaceDocument,
-      WorkspaceDocument
-    > = this.workspaceModel.findOneAndDelete().where('_id').equals(workspaceId);
+    let workspaceQuery: Query<WorkspaceDocument, WorkspaceDocument> =
+      this.workspaceModel.findOneAndDelete().where('_id').equals(workspaceId);
     if (userId) {
       workspaceQuery = workspaceQuery.where('users').in([userId]);
     }
@@ -207,6 +212,8 @@ export class WorkspacesService {
    * Add a user to a workspace
    * @param workspace the workspace
    * @param addWorkspaceUserDto the user to add
+   * @throws ExistingWorkspaceUserException
+   * @returns the updated workspace document
    */
   async addUser(
     workspace: WorkspaceDocument,
@@ -232,6 +239,9 @@ export class WorkspacesService {
    * Remove a user from a workspace
    * @param workspace the workspace
    * @param userId the id of the user to remove
+   * @throws MinOneUserInWorkspaceException
+   * @throws MinOneAdminUserInWorkspaceException
+   * @returns the updated workspace document
    */
   async removeUser(
     workspace: WorkspaceDocument,
@@ -239,12 +249,26 @@ export class WorkspacesService {
   ): Promise<WorkspaceDocument> {
     const workspaceId: string = workspace._id;
     // Remove the user from the workspace
-    workspace.users = workspace.users.filter((u) => u._id.toString() != userId);
+    const workspaceUsers: UserDocument[] = workspace.users.filter(
+      (u) => u._id.toString() != userId,
+    );
     // Check if the workspace has at-least one member after removing the user
-    if (workspace.users.length === 0) {
+    if (workspaceUsers.length === 0) {
       throw new MinOneUserInWorkspaceException(workspaceId);
     }
-    await this.updateUsers(workspaceId, workspace.users);
+    // Check if the workspace has at-least one admin member left after removing the user
+    const workspaceAdminPermissions: PermissionDocument[] =
+      await this.authorizationService.findAllWorkspaceAdminPermissions(
+        workspace._id,
+      );
+    if (
+      !workspaceAdminPermissions.filter((p) => p.user._id.toString() != userId)
+        .length
+    ) {
+      throw new MinOneAdminUserInWorkspaceException(workspace._id);
+    }
+    await this.updateUsers(workspaceId, workspaceUsers);
+    workspace.users = workspaceUsers;
     this.eventEmitter.emit(
       Event.WorkspaceUserRemoved,
       new WorkspaceUserRemovedEvent(workspaceId, userId),

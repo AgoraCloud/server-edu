@@ -1,10 +1,10 @@
 import { AuthorizationService } from './../authorization.service';
-import { Action } from './../schemas/permission.schema';
 import { UserDocument } from './../../users/schemas/user.schema';
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PERMISSIONS_KEY } from '../../../decorators/permissions.decorator';
 import { RequestWithUserAndIsAdmin } from '../../../utils/requests.interface';
+import { ActionDto } from '@agoracloud/common';
 
 @Injectable()
 export class AuthorizationGuard implements CanActivate {
@@ -14,8 +14,8 @@ export class AuthorizationGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const permissions: Action[] =
-      this.reflector.getAllAndMerge<Action[]>(PERMISSIONS_KEY, [
+    const permissions: ActionDto[] =
+      this.reflector.getAllAndMerge<ActionDto[]>(PERMISSIONS_KEY, [
         context.getClass(),
         context.getHandler(),
       ]) || [];

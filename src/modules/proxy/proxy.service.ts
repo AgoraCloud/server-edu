@@ -14,6 +14,7 @@ import * as HttpProxy from 'http-proxy';
 import { Server } from 'http';
 import { Socket } from 'net';
 import { resourcePrefix } from '../kubernetes/helpers';
+import { IncomingMessage, ServerResponse } from 'http';
 
 @Injectable()
 export class ProxyService implements OnModuleInit {
@@ -32,16 +33,23 @@ export class ProxyService implements OnModuleInit {
    * Handle proxy errors
    */
   private onProxyError(): void {
-    this.httpProxy.on('error', (err: Error, req: Request, res: Response) => {
-      const exception: InternalServerErrorException = new InternalServerErrorException(
-        `Proxy Error`,
-      );
-      res.status(exception.getStatus()).json(exception.getResponse());
-    });
+    this.httpProxy.on(
+      'error',
+      (err: Error, req: IncomingMessage, res: ServerResponse) => {
+        const exception: InternalServerErrorException =
+          new InternalServerErrorException(`Proxy Error`);
+        res
+          .writeHead(exception.getStatus(), {
+            'Content-Type': 'application/json',
+          })
+          .end(JSON.stringify(exception.getResponse()));
+      },
+    );
   }
 
   /**
    * Proxy all deployment websockets
+   * @throws InvalidMongoIdException
    */
   private proxyWebsockets(): void {
     const httpServer: Server = this.httpAdapterHost.httpAdapter.getHttpServer();
@@ -52,9 +60,8 @@ export class ProxyService implements OnModuleInit {
         if (!isMongoId(deploymentId)) {
           throw new InvalidMongoIdException('deploymentId');
         }
-        const deployment: DeploymentDocument = await this.deploymentsService.findOne(
-          deploymentId,
-        );
+        const deployment: DeploymentDocument =
+          await this.deploymentsService.findOne(deploymentId);
         req.url = this.removeProxyUrlPrefix(req.url, deploymentId);
         this.httpProxy.ws(
           req,
@@ -86,6 +93,7 @@ export class ProxyService implements OnModuleInit {
    * Dynamically creates configuration options for the proxy
    * @param workspaceId the deployments workspace id
    * @param deploymentId the deployment id
+   * @returns the http-proxy server options
    */
   private makeProxyOptions(
     workspaceId: string,
@@ -101,6 +109,7 @@ export class ProxyService implements OnModuleInit {
    * Removes the /proxy/:deploymentId prefix from request urls
    * @param requestUrl the request url
    * @param deploymentId the deployment id
+   * @returns the modified request url
    */
   private removeProxyUrlPrefix(
     requestUrl: string,

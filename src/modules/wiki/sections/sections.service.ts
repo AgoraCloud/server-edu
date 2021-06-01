@@ -1,3 +1,4 @@
+import { UpdateWikiSectionDto, CreateWikiSectionDto } from '@agoracloud/common';
 import { WikiSectionDeletedEvent } from './../../../events/wiki-section-deleted.event';
 import { WikiSectionNotFoundException } from './../../../exceptions/wiki-section-not-found.exception';
 import { WorkspaceUserRemovedEvent } from './../../../events/workspace-user-removed.event';
@@ -8,8 +9,6 @@ import { UserDocument } from './../../users/schemas/user.schema';
 import { WikiSection, WikiSectionDocument } from './schemas/section.schema';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { CreateWikiSectionDto } from './dto/create-section.dto';
-import { UpdateWikiSectionDto } from './dto/update-section.dto';
 import { Model, Query } from 'mongoose';
 import { Event } from '../../../events/events.enum';
 
@@ -26,6 +25,7 @@ export class WikiSectionsService {
    * @param user the user
    * @param workspace the workspace
    * @param createWikiSectionDto the wiki section to create
+   * @returns the created wiki section document
    */
   async create(
     user: UserDocument,
@@ -35,9 +35,8 @@ export class WikiSectionsService {
     const wikiSection: WikiSection = new WikiSection(createWikiSectionDto);
     wikiSection.user = user;
     wikiSection.workspace = workspace;
-    const createdWikiSection: WikiSectionDocument = await this.wikiSectionModel.create(
-      wikiSection,
-    );
+    const createdWikiSection: WikiSectionDocument =
+      await this.wikiSectionModel.create(wikiSection);
     return createdWikiSection;
   }
 
@@ -45,15 +44,14 @@ export class WikiSectionsService {
    * Find all wiki sections
    * @param workspaceId the workspace id
    * @param userId the users id
+   * @returns an array of wiki section documents
    */
   async findAll(
     workspaceId: string,
     userId?: string,
   ): Promise<WikiSectionDocument[]> {
-    let wikiSectionsQuery: Query<
-      WikiSectionDocument[],
-      WikiSectionDocument
-    > = this.wikiSectionModel.find().where('workspace').equals(workspaceId);
+    let wikiSectionsQuery: Query<WikiSectionDocument[], WikiSectionDocument> =
+      this.wikiSectionModel.find().where('workspace').equals(workspaceId);
     if (userId) {
       wikiSectionsQuery = wikiSectionsQuery.where('user').equals(userId);
     }
@@ -66,21 +64,21 @@ export class WikiSectionsService {
    * @param workspaceId the workspace id
    * @param wikiSectionId the wiki section id
    * @param userId the users id
+   * @throws WikiSectionNotFoundException
+   * @returns the wiki section document
    */
   async findOne(
     workspaceId: string,
     wikiSectionId: string,
     userId?: string,
   ): Promise<WikiSectionDocument> {
-    let wikiSectionQuery: Query<
-      WikiSectionDocument,
-      WikiSectionDocument
-    > = this.wikiSectionModel
-      .findOne()
-      .where('_id')
-      .equals(wikiSectionId)
-      .where('workspace')
-      .equals(workspaceId);
+    let wikiSectionQuery: Query<WikiSectionDocument, WikiSectionDocument> =
+      this.wikiSectionModel
+        .findOne()
+        .where('_id')
+        .equals(wikiSectionId)
+        .where('workspace')
+        .equals(workspaceId);
     if (userId) {
       wikiSectionQuery = wikiSectionQuery.where('user').equals(userId);
     }
@@ -95,6 +93,8 @@ export class WikiSectionsService {
    * @param wikiSectionId the wiki section id
    * @param updateWikiSectionDto the updated wiki section
    * @param userId the users id
+   * @throws WikiSectionNotFoundException
+   * @returns the updated wiki section document
    */
   async update(
     workspaceId: string,
@@ -102,15 +102,13 @@ export class WikiSectionsService {
     updateWikiSectionDto: UpdateWikiSectionDto,
     userId?: string,
   ): Promise<WikiSectionDocument> {
-    let wikiSectionQuery: Query<
-      WikiSectionDocument,
-      WikiSectionDocument
-    > = this.wikiSectionModel
-      .findOneAndUpdate(null, updateWikiSectionDto, { new: true })
-      .where('_id')
-      .equals(wikiSectionId)
-      .where('workspace')
-      .equals(workspaceId);
+    let wikiSectionQuery: Query<WikiSectionDocument, WikiSectionDocument> =
+      this.wikiSectionModel
+        .findOneAndUpdate(null, updateWikiSectionDto, { new: true })
+        .where('_id')
+        .equals(wikiSectionId)
+        .where('workspace')
+        .equals(workspaceId);
     if (userId) {
       wikiSectionQuery = wikiSectionQuery.where('user').equals(userId);
     }
@@ -124,21 +122,20 @@ export class WikiSectionsService {
    * @param workspaceId the workspace id
    * @param wikiSectionId the wiki section id
    * @param userId the users id
+   * @throws WikiSectionNotFoundException
    */
   async remove(
     workspaceId: string,
     wikiSectionId: string,
     userId?: string,
   ): Promise<void> {
-    let wikiSectionQuery: Query<
-      WikiSectionDocument,
-      WikiSectionDocument
-    > = this.wikiSectionModel
-      .findOneAndDelete()
-      .where('_id')
-      .equals(wikiSectionId)
-      .where('workspace')
-      .equals(workspaceId);
+    let wikiSectionQuery: Query<WikiSectionDocument, WikiSectionDocument> =
+      this.wikiSectionModel
+        .findOneAndDelete()
+        .where('_id')
+        .equals(wikiSectionId)
+        .where('workspace')
+        .equals(workspaceId);
     if (userId) {
       wikiSectionQuery = wikiSectionQuery.where('user').equals(userId);
     }

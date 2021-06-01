@@ -1,6 +1,4 @@
-import { UpdateProjectDto } from './dto/update-project.dto';
 import { ProjectNotFoundException } from './../../exceptions/project-not-found.exception';
-import { CreateProjectDto } from './dto/create-project.dto';
 import { WorkspaceDocument } from './../workspaces/schemas/workspace.schema';
 import { UserDocument } from './../users/schemas/user.schema';
 import {
@@ -17,6 +15,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Connection, Types } from 'mongoose';
 import { ProjectsService } from './projects.service';
+import { CreateProjectDto, UpdateProjectDto } from '@agoracloud/common';
 
 const user: UserDocument = {
   _id: Types.ObjectId(),

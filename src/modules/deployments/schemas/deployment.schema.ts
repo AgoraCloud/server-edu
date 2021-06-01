@@ -1,3 +1,4 @@
+import { DeploymentStatusDto, DeploymentTypeDto } from '@agoracloud/common';
 import {
   Workspace,
   WorkspaceDocument,
@@ -6,16 +7,6 @@ import { User, UserDocument } from '../../users/schemas/user.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import * as mongoose from 'mongoose';
-
-export enum DeploymentStatus {
-  Pending = 'PENDING',
-  Creating = 'CREATING',
-  Running = 'RUNNING',
-  Updating = 'UPDATING',
-  Deleting = 'DELETING',
-  Failed = 'FAILED',
-  Unknown = 'UNKNOWN',
-}
 
 export class DeploymentResources {
   @Prop({ required: true, min: 1 })
@@ -33,11 +24,14 @@ export class DeploymentResources {
 }
 
 export class DeploymentImage {
-  @Prop({ required: true })
-  name: string;
+  @Prop({
+    required: true,
+    enum: [DeploymentTypeDto.VSCode],
+  })
+  type: DeploymentTypeDto;
 
   @Prop({ required: true })
-  tag: string;
+  version: string;
 
   constructor(partial: Partial<DeploymentImage>) {
     Object.assign(this, partial);
@@ -45,6 +39,9 @@ export class DeploymentImage {
 }
 
 export class DeploymentProperties {
+  @Prop({ default: false })
+  isFavorite?: boolean;
+
   @Prop({ required: true, type: DeploymentImage })
   image: DeploymentImage;
 
@@ -66,16 +63,16 @@ export class Deployment {
   @Prop({
     required: true,
     enum: [
-      DeploymentStatus.Pending,
-      DeploymentStatus.Creating,
-      DeploymentStatus.Running,
-      DeploymentStatus.Updating,
-      DeploymentStatus.Failed,
-      DeploymentStatus.Unknown,
+      DeploymentStatusDto.Pending,
+      DeploymentStatusDto.Creating,
+      DeploymentStatusDto.Running,
+      DeploymentStatusDto.Updating,
+      DeploymentStatusDto.Failed,
+      DeploymentStatusDto.Unknown,
     ],
-    default: DeploymentStatus.Pending,
+    default: DeploymentStatusDto.Pending,
   })
-  status: DeploymentStatus;
+  status: DeploymentStatusDto;
 
   @Prop()
   failureReason?: string;

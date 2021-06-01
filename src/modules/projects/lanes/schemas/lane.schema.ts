@@ -9,7 +9,7 @@ import * as mongoose from 'mongoose';
 
 export type ProjectLaneDocument = ProjectLane & mongoose.Document;
 
-@Schema({ collection: 'project_lanes' })
+@Schema({ collection: 'project_lanes', timestamps: true })
 export class ProjectLane {
   @Prop({ required: true, minlength: 1 })
   name: string;

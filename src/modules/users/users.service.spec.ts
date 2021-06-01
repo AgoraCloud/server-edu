@@ -2,9 +2,7 @@ import { UserWithIdNotFoundException } from './../../exceptions/user-not-found.e
 import { AccountNotVerifiedException } from './../../exceptions/account-not-verified.exception';
 import { AccountDisabledException } from './../../exceptions/account-disabled.exception';
 import { UserNotFoundException } from '../../exceptions/user-not-found.exception';
-import { UpdateUserDto, AdminUpdateUserDto } from './dto/update-user.dto';
 import { User, UserDocument } from './../users/schemas/user.schema';
-import { CreateUserDto } from './dto/create-user.dto';
 import { Token, TokenSchema } from './../tokens/schemas/token.schema';
 import { TokensService } from './../tokens/tokens.service';
 import { ConfigService } from '@nestjs/config';
@@ -22,6 +20,11 @@ import {
 import { Connection, Model, Types } from 'mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
+import {
+  AdminUpdateUserDto,
+  CreateUserDto,
+  UpdateUserDto,
+} from '@agoracloud/common';
 
 let user: UserDocument;
 
@@ -161,10 +164,8 @@ describe('UsersService', () => {
     it('should not return the user if the user with the given email and refresh token is not found', async () => {
       // Generate a random refresh token
       const refreshToken: string = Types.ObjectId().toHexString();
-      const retrievedUser: UserDocument = await service.findByEmailAndRefreshToken(
-        user.email,
-        refreshToken,
-      );
+      const retrievedUser: UserDocument =
+        await service.findByEmailAndRefreshToken(user.email, refreshToken);
       expect(retrievedUser).not.toBeTruthy();
     });
 
@@ -172,10 +173,8 @@ describe('UsersService', () => {
       // Create a refresh token and update the user
       const refreshToken: string = Types.ObjectId().toHexString();
       await service.updateRefreshToken(user.email, refreshToken);
-      const retrievedUser: UserDocument = await service.findByEmailAndRefreshToken(
-        user.email,
-        refreshToken,
-      );
+      const retrievedUser: UserDocument =
+        await service.findByEmailAndRefreshToken(user.email, refreshToken);
       expect(retrievedUser).toBeTruthy();
       expect(retrievedUser.email).toBe(user.email);
       user = retrievedUser;

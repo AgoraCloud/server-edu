@@ -1,6 +1,10 @@
-import { Action } from './../authorization/schemas/permission.schema';
+import {
+  ActionDto,
+  AuditActionDto,
+  AuditResourceDto,
+  ExceptionDto,
+} from '@agoracloud/common';
 import { JwtAuthenticationGuard } from './../authentication/guards/jwt-authentication.guard';
-import { ExceptionDto } from './../../utils/base.dto';
 import {
   ApiTags,
   ApiCookieAuth,
@@ -17,10 +21,6 @@ import { Deployment } from '../../decorators/deployment.decorator';
 import { ProxyAuthorizationGuard } from '../authorization/guards/proxy-authorization.guard';
 import { Permissions } from '../../decorators/permissions.decorator';
 import { Audit } from '../../decorators/audit.decorator';
-import {
-  AuditAction,
-  AuditResource,
-} from '../auditing/schemas/audit-log.schema';
 
 @ApiCookieAuth()
 @ApiTags('Proxy')
@@ -37,11 +37,11 @@ export class ProxyController {
    */
   @All()
   @Permissions(
-    Action.ReadWorkspace,
-    Action.ReadDeployment,
-    Action.ProxyDeployment,
+    ActionDto.ReadWorkspace,
+    ActionDto.ReadDeployment,
+    ActionDto.ProxyDeployment,
   )
-  @Audit(AuditAction.Proxy, AuditResource.Deployment)
+  @Audit(AuditActionDto.Proxy, AuditResourceDto.Deployment)
   @ApiOperation({ summary: 'Proxy a deployment API request' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })

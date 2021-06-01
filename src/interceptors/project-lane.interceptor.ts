@@ -14,6 +14,10 @@ import {
 } from '@nestjs/common';
 import { RequestWithWorkspaceUserProjectProjectLaneAndIsAdmin } from '../utils/requests.interface';
 
+/**
+ * An interceptor that extracts the project lane id from the request, fetches
+ * it from the database and attaches it to the request
+ */
 @Injectable()
 export class ProjectLaneInterceptor implements NestInterceptor {
   constructor(private readonly projectLanesService: ProjectLanesService) {}
@@ -22,9 +26,8 @@ export class ProjectLaneInterceptor implements NestInterceptor {
     context: ExecutionContext,
     next: CallHandler,
   ): Promise<Observable<any>> {
-    const request: RequestWithWorkspaceUserProjectProjectLaneAndIsAdmin = context
-      .switchToHttp()
-      .getRequest();
+    const request: RequestWithWorkspaceUserProjectProjectLaneAndIsAdmin =
+      context.switchToHttp().getRequest();
     const projectLaneId: string = request.params.laneId;
     if (!isMongoId(projectLaneId)) {
       throw new InvalidMongoIdException('projectLaneId');
@@ -34,12 +37,13 @@ export class ProjectLaneInterceptor implements NestInterceptor {
     const workspace: WorkspaceDocument = request.workspace;
     const project: ProjectDocument = request.project;
     const isAdmin: boolean = request.isAdmin;
-    const projectLane: ProjectLaneDocument = await this.projectLanesService.findOne(
-      workspace._id,
-      project._id,
-      projectLaneId,
-      isAdmin ? undefined : user._id,
-    );
+    const projectLane: ProjectLaneDocument =
+      await this.projectLanesService.findOne(
+        workspace._id,
+        project._id,
+        projectLaneId,
+        isAdmin ? undefined : user._id,
+      );
     request.projectLane = projectLane;
     return next.handle();
   }

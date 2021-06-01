@@ -8,8 +8,7 @@ import { ProjectLaneDeletedEvent } from './../../../events/project-lane-deleted.
 import { ProjectTask, ProjectTaskDocument } from './schemas/task.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
-import { CreateProjectTaskDto } from './dto/create-task.dto';
-import { UpdateProjectTaskDto } from './dto/update-task.dto';
+import { CreateProjectTaskDto, UpdateProjectTaskDto } from '@agoracloud/common';
 import { Model, Query } from 'mongoose';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Event } from '../../../events/events.enum';
@@ -29,6 +28,7 @@ export class ProjectTasksService {
    * @param project the project
    * @param projectLane the project lane
    * @param createProjectTaskDto the project task to create
+   * @returns the created project task document
    */
   async create(
     user: UserDocument,
@@ -42,9 +42,8 @@ export class ProjectTasksService {
     projectTask.workspace = workspace;
     projectTask.project = project;
     projectTask.lane = projectLane;
-    const createdProjectTask: ProjectTaskDocument = await this.projectTasksModel.create(
-      projectTask,
-    );
+    const createdProjectTask: ProjectTaskDocument =
+      await this.projectTasksModel.create(projectTask);
     return createdProjectTask;
   }
 
@@ -54,6 +53,7 @@ export class ProjectTasksService {
    * @param userId the users id
    * @param workspaceId the workspace id
    * @param projectId the project id
+   * @returns an array of project task documents
    */
   async findAll(
     projectLaneId: string,
@@ -61,10 +61,8 @@ export class ProjectTasksService {
     workspaceId?: string,
     projectId?: string,
   ): Promise<ProjectTaskDocument[]> {
-    let projectTasksQuery: Query<
-      ProjectTaskDocument[],
-      ProjectTaskDocument
-    > = this.projectTasksModel.find().where('lane').equals(projectLaneId);
+    let projectTasksQuery: Query<ProjectTaskDocument[], ProjectTaskDocument> =
+      this.projectTasksModel.find().where('lane').equals(projectLaneId);
     if (userId) {
       projectTasksQuery = projectTasksQuery.where('user').equals(userId);
     }
@@ -87,6 +85,8 @@ export class ProjectTasksService {
    * @param projectLaneId the project lane id
    * @param projectTaskId the project task id
    * @param userId the users id
+   * @throws ProjectTaskNotFoundException
+   * @returns a project task document
    */
   async findOne(
     workspaceId: string,
@@ -95,19 +95,17 @@ export class ProjectTasksService {
     projectTaskId: string,
     userId?: string,
   ): Promise<ProjectTaskDocument> {
-    let projectTaskQuery: Query<
-      ProjectTaskDocument,
-      ProjectTaskDocument
-    > = this.projectTasksModel
-      .findOne()
-      .where('_id')
-      .equals(projectTaskId)
-      .where('workspace')
-      .equals(workspaceId)
-      .where('project')
-      .equals(projectId)
-      .where('lane')
-      .equals(projectLaneId);
+    let projectTaskQuery: Query<ProjectTaskDocument, ProjectTaskDocument> =
+      this.projectTasksModel
+        .findOne()
+        .where('_id')
+        .equals(projectTaskId)
+        .where('workspace')
+        .equals(workspaceId)
+        .where('project')
+        .equals(projectId)
+        .where('lane')
+        .equals(projectLaneId);
     if (userId) {
       projectTaskQuery = projectTaskQuery.where('user').equals(userId);
     }
@@ -124,6 +122,7 @@ export class ProjectTasksService {
    * @param projectTaskId the project task id
    * @param updateProjectTaskDto the updated project task
    * @param userId the users id
+   * @returns the updated project task document
    */
   async update(
     workspaceId: string,
@@ -146,12 +145,13 @@ export class ProjectTasksService {
       updateProjectTaskDto.description || projectTask.description;
     const newProjectLaneId: string = updateProjectTaskDto.lane?.id;
     if (newProjectLaneId && newProjectLaneId != projectLaneId) {
-      const newProjectLane: ProjectLaneDocument = await this.projectLanesService.findOne(
-        workspaceId,
-        projectId,
-        newProjectLaneId,
-        userId,
-      );
+      const newProjectLane: ProjectLaneDocument =
+        await this.projectLanesService.findOne(
+          workspaceId,
+          projectId,
+          newProjectLaneId,
+          userId,
+        );
       projectTask.lane = newProjectLane;
     }
 
@@ -182,6 +182,7 @@ export class ProjectTasksService {
    * @param projectLaneId the project lane id
    * @param projectTaskId the project task id
    * @param userId the users id
+   * @throws ProjectTaskNotFoundException
    */
   async remove(
     workspaceId: string,
@@ -190,19 +191,17 @@ export class ProjectTasksService {
     projectTaskId: string,
     userId?: string,
   ): Promise<void> {
-    let projectTaskQuery: Query<
-      ProjectTaskDocument,
-      ProjectTaskDocument
-    > = this.projectTasksModel
-      .findOneAndDelete()
-      .where('_id')
-      .equals(projectTaskId)
-      .where('workspace')
-      .equals(workspaceId)
-      .where('project')
-      .equals(projectId)
-      .where('lane')
-      .equals(projectLaneId);
+    let projectTaskQuery: Query<ProjectTaskDocument, ProjectTaskDocument> =
+      this.projectTasksModel
+        .findOneAndDelete()
+        .where('_id')
+        .equals(projectTaskId)
+        .where('workspace')
+        .equals(workspaceId)
+        .where('project')
+        .equals(projectId)
+        .where('lane')
+        .equals(projectLaneId);
     if (userId) {
       projectTaskQuery = projectTaskQuery.where('user').equals(userId);
     }

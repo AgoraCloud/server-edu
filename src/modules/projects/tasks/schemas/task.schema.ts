@@ -13,7 +13,7 @@ import * as mongoose from 'mongoose';
 
 export type ProjectTaskDocument = ProjectTask & mongoose.Document;
 
-@Schema({ collection: 'project_tasks' })
+@Schema({ collection: 'project_tasks', timestamps: true })
 export class ProjectTask {
   @Prop({ required: true, minlength: 1 })
   title: string;

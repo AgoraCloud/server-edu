@@ -16,10 +16,9 @@ export class KubernetesSecretsService {
   /**
    * Get all Kubernetes secrets
    * @param namespace the Kubernetes namespace
+   * @returns a list of all Kubernetes secrets
    */
-  getAllSecrets(
-    namespace: string,
-  ): Promise<{
+  getAllSecrets(namespace: string): Promise<{
     response: http.IncomingMessage;
     body: k8s.V1SecretList;
   }> {
@@ -38,6 +37,7 @@ export class KubernetesSecretsService {
    * @param namespace the Kubernetes namespace
    * @param deploymentId the deployment id
    * @param sudoPassword the deployment container sudo password
+   * @returns the created Kubernetes secret
    */
   createSecret(
     namespace: string,
@@ -64,6 +64,7 @@ export class KubernetesSecretsService {
    * Delete a Kubernetes secret
    * @param namespace the Kubernetes namespace
    * @param deploymentId the deployment id
+   * @returns the deleted Kubernetes secret
    */
   deleteSecret(
     namespace: string,

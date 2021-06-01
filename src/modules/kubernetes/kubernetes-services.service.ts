@@ -12,10 +12,9 @@ export class KubernetesServicesService {
   /**
    * Get all Kubernetes services
    * @param namespace the Kubernetes namespace
+   * @returns a list of all Kubernetes services
    */
-  getAllServices(
-    namespace: string,
-  ): Promise<{
+  getAllServices(namespace: string): Promise<{
     response: http.IncomingMessage;
     body: k8s.V1ServiceList;
   }> {
@@ -33,6 +32,7 @@ export class KubernetesServicesService {
    * Create a Kubernetes service
    * @param namespace the Kubernetes namespace
    * @param deploymentId the deployment id
+   * @returns the created Kubernetes service
    */
   createService(
     namespace: string,
@@ -41,9 +41,8 @@ export class KubernetesServicesService {
     response: http.IncomingMessage;
     body: k8s.V1Service;
   }> {
-    const labels: { [key: string]: string } = generateDeploymentLabels(
-      deploymentId,
-    );
+    const labels: { [key: string]: string } =
+      generateDeploymentLabels(deploymentId);
     return this.k8sCoreV1Api.createNamespacedService(namespace, {
       apiVersion: 'v1',
       kind: 'Service',
@@ -68,6 +67,7 @@ export class KubernetesServicesService {
    * Delete a Kubernetes service
    * @param namespace the Kubernetes namespace
    * @param deploymentId the deployment id
+   * @returns the deleted Kubernetes service
    */
   deleteService(
     namespace: string,

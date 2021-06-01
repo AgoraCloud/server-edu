@@ -1,4 +1,3 @@
-import { isDefined } from './../../utils/dto-validators';
 import {
   UserWithIdNotFoundException,
   UserNotFoundException,
@@ -17,12 +16,16 @@ import { User, UserDocument } from './schemas/user.schema';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto, AdminUpdateUserDto } from './dto/update-user.dto';
+import {
+  CreateUserDto,
+  UpdateUserDto,
+  AdminUpdateUserDto,
+  RoleDto,
+} from '@agoracloud/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import * as bcrypt from 'bcryptjs';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { Role } from '../authorization/schemas/permission.schema';
+import { isDefined } from 'class-validator';
 
 @Injectable()
 export class UsersService implements OnModuleInit {
@@ -42,9 +45,8 @@ export class UsersService implements OnModuleInit {
    * the admin user is created.
    */
   private async createAdminUser(): Promise<void> {
-    const adminConfig: AdminConfig = this.configService.get<AdminConfig>(
-      'admin',
-    );
+    const adminConfig: AdminConfig =
+      this.configService.get<AdminConfig>('admin');
     try {
       await this.findByEmail(adminConfig.email);
     } catch (err) {
@@ -55,7 +57,7 @@ export class UsersService implements OnModuleInit {
         password: adminConfig.password,
       };
       // Add an artificial delay, the event emitter does not emit any events on initialization
-      setTimeout(() => this.create(createUserDto, Role.SuperAdmin), 2000);
+      setTimeout(() => this.create(createUserDto, RoleDto.SuperAdmin), 2000);
     }
   }
 
@@ -64,10 +66,11 @@ export class UsersService implements OnModuleInit {
    * @param createUserDto the user to create
    * @param role the users role
    * @param verify verify the user
+   * @returns the created user document
    */
   async create(
     createUserDto: CreateUserDto,
-    role: Role.User | Role.SuperAdmin = Role.User,
+    role: RoleDto.User | RoleDto.SuperAdmin = RoleDto.User,
     verify = false,
   ): Promise<UserDocument> {
     const user: User = new User({
@@ -75,7 +78,7 @@ export class UsersService implements OnModuleInit {
       fullName: createUserDto.fullName,
       password: await this.hash(createUserDto.password),
     });
-    if (role === Role.SuperAdmin || verify) {
+    if (role === RoleDto.SuperAdmin || verify) {
       user.isVerified = true;
     }
     const createdUser: UserDocument = await this.userModel.create(user);
@@ -92,6 +95,7 @@ export class UsersService implements OnModuleInit {
 
   /**
    * Find all users
+   * @returns an array of user documents
    */
   async findAll(): Promise<UserDocument[]> {
     const users: UserDocument[] = await this.userModel.find().exec();
@@ -101,6 +105,8 @@ export class UsersService implements OnModuleInit {
   /**
    * Find a user by id
    * @param userId the users id
+   * @throws UserWithIdNotFoundException
+   * @returns a user document
    */
   async findOne(userId: string): Promise<UserDocument> {
     const user: UserDocument = await this.userModel
@@ -113,6 +119,10 @@ export class UsersService implements OnModuleInit {
   /**
    * Find a user by email
    * @param email the users email
+   * @throws UserNotFoundException
+   * @throws AccountDisabledException
+   * @throws AccountNotVerifiedException
+   * @returns a user document
    */
   async findByEmail(email: string): Promise<UserDocument> {
     const user: UserDocument = await this.userModel.findOne({ email }).exec();
@@ -126,6 +136,7 @@ export class UsersService implements OnModuleInit {
    * Find a user by email and refresh token
    * @param email the users email
    * @param refreshToken the users latest refresh token
+   * @returns a user document
    */
   async findByEmailAndRefreshToken(
     email: string,
@@ -143,6 +154,7 @@ export class UsersService implements OnModuleInit {
   /**
    * Checks whether a user exists or not
    * @param userId the users id
+   * @throws UserWithIdNotFoundException
    */
   async doesExist(userId: string): Promise<void> {
     const exists: boolean = await this.userModel.exists({ _id: userId });
@@ -153,6 +165,7 @@ export class UsersService implements OnModuleInit {
    * Update a user
    * @param userId the users id
    * @param updateUserDto the updated user
+   * @returns the updated user document
    */
   async update(
     userId: string,
@@ -168,6 +181,7 @@ export class UsersService implements OnModuleInit {
    * Update a user, accessible by super admins only
    * @param userId the users id
    * @param adminUpdateUserDto the updated user
+   * @returns the updated user document
    */
   async adminUpdate(
     userId: string,
@@ -247,6 +261,7 @@ export class UsersService implements OnModuleInit {
   /**
    * Create an account verification token
    * @param user the users details
+   * @returns the created token document
    */
   private createVerifyAccountToken(user: UserDocument): Promise<TokenDocument> {
     return this.tokensService.create({
@@ -259,6 +274,7 @@ export class UsersService implements OnModuleInit {
   /**
    * Generates a hash for the given value
    * @param value the value to hash
+   * @returns the hashed value of the given string
    */
   private async hash(value: string): Promise<string> {
     return bcrypt.hash(value, 10);

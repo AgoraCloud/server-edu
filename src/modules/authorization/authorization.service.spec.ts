@@ -1,13 +1,9 @@
-import { UpdateWorkspaceUserPermissionsDto } from './dto/update-workspace-user-permissions.dto';
-import { UpdateUserPermissionsDto } from './dto/update-user-permissions.dto';
 import { UserNotInWorkspaceException } from './../../exceptions/user-not-in-workspace.exception';
 import { UserDocument } from './../users/schemas/user.schema';
 import {
   Permission,
   PermissionSchema,
   PermissionDocument,
-  Action,
-  Role,
   WorkspaceRolesAndPermissions,
 } from './schemas/permission.schema';
 import {
@@ -23,6 +19,13 @@ import { Connection, Types, Model } from 'mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthorizationService } from './authorization.service';
 import { InternalServerErrorException } from '@nestjs/common';
+import { WorkspaceNotFoundException } from './../../exceptions/workspace-not-found.exception';
+import {
+  ActionDto,
+  RoleDto,
+  UpdateUserPermissionsDto,
+  UpdateWorkspaceUserPermissionsDto,
+} from '@agoracloud/common';
 
 const user: UserDocument = {
   _id: Types.ObjectId(),
@@ -62,12 +65,12 @@ describe('AuthorizationService', () => {
     // Create a permissions entry for the user
     const permission: Permission = new Permission({
       user,
-      roles: [Role.SuperAdmin],
+      roles: [RoleDto.SuperAdmin],
       permissions: [],
       workspaces: new Map(),
     });
     permission.workspaces.set(workspaceId, {
-      roles: [Role.WorkspaceAdmin],
+      roles: [RoleDto.WorkspaceAdmin],
       permissions: [],
     });
     permissions = await permissionsModel.create(permission);
@@ -118,10 +121,8 @@ describe('AuthorizationService', () => {
     });
 
     it('should find the permissions for the given workspace and user', async () => {
-      const workspaceRolesAndPermissions: WorkspaceRolesAndPermissions = await service.findOneWorkspacePermissions(
-        user._id,
-        workspaceId,
-      );
+      const workspaceRolesAndPermissions: WorkspaceRolesAndPermissions =
+        await service.findOneWorkspacePermissions(user._id, workspaceId);
       expect(workspaceRolesAndPermissions).toBeTruthy();
       expect(workspaceRolesAndPermissions.roles.length).toBe(1);
       expect(workspaceRolesAndPermissions.roles[0]).toBe(
@@ -134,10 +135,10 @@ describe('AuthorizationService', () => {
   describe('can', () => {
     it('should grant a super admin any permissions needed', async () => {
       const { canActivate, isAdmin } = await service.can(user, [
-        Action.CreateWorkspace,
-        Action.ReadWorkspace,
-        Action.ProxyDeployment,
-        Action.CreateDeployment,
+        ActionDto.CreateWorkspace,
+        ActionDto.ReadWorkspace,
+        ActionDto.ProxyDeployment,
+        ActionDto.CreateDeployment,
       ]);
       expect(canActivate).toBe(true);
       expect(isAdmin).toBe(true);
@@ -148,12 +149,12 @@ describe('AuthorizationService', () => {
       permissions = await permissionsModel
         .findOneAndUpdate(
           { _id: permissions._id },
-          { roles: [Role.User], permissions: [Action.ReadWorkspace] },
+          { roles: [RoleDto.User], permissions: [ActionDto.ReadWorkspace] },
           { new: true },
         )
         .exec();
       const { canActivate, isAdmin } = await service.can(user, [
-        Action.CreateWorkspace,
+        ActionDto.CreateWorkspace,
       ]);
       expect(canActivate).toBe(false);
       expect(isAdmin).toBe(false);
@@ -161,7 +162,7 @@ describe('AuthorizationService', () => {
 
     it('should grant a user application-wide permissions that they have', async () => {
       const { canActivate, isAdmin } = await service.can(user, [
-        Action.ReadWorkspace,
+        ActionDto.ReadWorkspace,
       ]);
       expect(canActivate).toBe(true);
       expect(isAdmin).toBe(false);
@@ -169,14 +170,13 @@ describe('AuthorizationService', () => {
 
     it('should throw an error if the permissions for the given workspace id and user were not found', async () => {
       const workspaceId: string = Types.ObjectId().toHexString();
-      const expectedErrorMessage: string = new UserNotInWorkspaceException(
-        user._id,
+      const expectedErrorMessage: string = new WorkspaceNotFoundException(
         workspaceId,
       ).message;
       try {
         await service.can(
           user,
-          [Action.ReadWorkspace, Action.ReadDeployment],
+          [ActionDto.ReadWorkspace, ActionDto.ReadDeployment],
           workspaceId,
         );
         fail('It should throw an error');
@@ -189,10 +189,10 @@ describe('AuthorizationService', () => {
       const { canActivate, isAdmin } = await service.can(
         user,
         [
-          Action.ReadWorkspace,
-          Action.ProxyDeployment,
-          Action.CreateProject,
-          Action.DeleteWikiSection,
+          ActionDto.ReadWorkspace,
+          ActionDto.ProxyDeployment,
+          ActionDto.CreateProject,
+          ActionDto.DeleteWikiSection,
         ],
         workspaceId,
       );
@@ -203,15 +203,15 @@ describe('AuthorizationService', () => {
     it('should not grant a workspace user any workspace-wide permissions they do not have', async () => {
       // Demote the user to the 'user' role workspace-wide
       permissions.workspaces.set(workspaceId, {
-        roles: [Role.User],
+        roles: [RoleDto.User],
         permissions: [
-          Action.CreateDeployment,
-          Action.ReadDeployment,
-          Action.ProxyDeployment,
-          Action.CreateWiki,
-          Action.ReadWiki,
-          Action.UpdateWiki,
-          Action.DeleteWiki,
+          ActionDto.CreateDeployment,
+          ActionDto.ReadDeployment,
+          ActionDto.ProxyDeployment,
+          ActionDto.CreateWiki,
+          ActionDto.ReadWiki,
+          ActionDto.UpdateWiki,
+          ActionDto.DeleteWiki,
         ],
       });
       permissions = await permissionsModel
@@ -220,7 +220,7 @@ describe('AuthorizationService', () => {
 
       const { canActivate, isAdmin } = await service.can(
         user,
-        [Action.ReadWorkspace, Action.DeleteDeployment],
+        [ActionDto.ReadWorkspace, ActionDto.DeleteDeployment],
         workspaceId,
       );
       expect(canActivate).toBe(false);
@@ -230,7 +230,7 @@ describe('AuthorizationService', () => {
     it('should grant a workspace user any workspace-wide permissions they have', async () => {
       const { canActivate, isAdmin } = await service.can(
         user,
-        [Action.ReadWorkspace, Action.CreateDeployment],
+        [ActionDto.ReadWorkspace, ActionDto.CreateDeployment],
         workspaceId,
       );
       expect(canActivate).toBe(true);
@@ -241,13 +241,11 @@ describe('AuthorizationService', () => {
   describe('updateUserPermissions', () => {
     it('should update the users application-wide roles and clear the users permissions if the users new role is super admin', async () => {
       const updateUserPermissionsDto: UpdateUserPermissionsDto = {
-        roles: [Role.SuperAdmin],
-        permissions: [Action.DeleteWorkspace],
+        roles: [RoleDto.SuperAdmin],
+        permissions: [ActionDto.DeleteWorkspace],
       };
-      const updatedPermissions: PermissionDocument = await service.updateUserPermissions(
-        user._id,
-        updateUserPermissionsDto,
-      );
+      const updatedPermissions: PermissionDocument =
+        await service.updateUserPermissions(user._id, updateUserPermissionsDto);
       expect(updatedPermissions.roles.length).toBe(1);
       expect(updatedPermissions.roles[0]).toBe(
         updateUserPermissionsDto.roles[0],
@@ -257,13 +255,11 @@ describe('AuthorizationService', () => {
 
     it('should update the users application-wide roles and permissions', async () => {
       const updateUserPermissionsDto: UpdateUserPermissionsDto = {
-        roles: [Role.User],
-        permissions: [Action.CreateWorkspace, Action.DeleteWorkspace],
+        roles: [RoleDto.User],
+        permissions: [ActionDto.CreateWorkspace, ActionDto.DeleteWorkspace],
       };
-      const updatedPermissions: PermissionDocument = await service.updateUserPermissions(
-        user._id,
-        updateUserPermissionsDto,
-      );
+      const updatedPermissions: PermissionDocument =
+        await service.updateUserPermissions(user._id, updateUserPermissionsDto);
       expect(updatedPermissions.roles.length).toBe(1);
       expect(updatedPermissions.roles[0]).toBe(
         updateUserPermissionsDto.roles[0],
@@ -275,10 +271,11 @@ describe('AuthorizationService', () => {
   describe('updateUsersWorkspacePermissions', () => {
     it('should throw an error if the permissions for the given user and workspace were not found', async () => {
       const workspaceId: string = Types.ObjectId().toHexString();
-      const updateWorkspaceUserPermissionsDto: UpdateWorkspaceUserPermissionsDto = {
-        roles: [Role.User],
-        permissions: [],
-      };
+      const updateWorkspaceUserPermissionsDto: UpdateWorkspaceUserPermissionsDto =
+        {
+          roles: [RoleDto.User],
+          permissions: [],
+        };
       const expectedErrorMessage: string = new UserNotInWorkspaceException(
         user._id,
         workspaceId,
@@ -296,15 +293,17 @@ describe('AuthorizationService', () => {
     });
 
     it('should update the users workspace-wide roles and permissions', async () => {
-      const updateWorkspaceUserPermissionsDto: UpdateWorkspaceUserPermissionsDto = {
-        roles: [Role.WorkspaceAdmin],
-        permissions: [Action.CreateWikiSection],
-      };
-      const updatedPermissions: WorkspaceRolesAndPermissions = await service.updateUsersWorkspacePermissions(
-        user._id,
-        workspaceId,
-        updateWorkspaceUserPermissionsDto,
-      );
+      const updateWorkspaceUserPermissionsDto: UpdateWorkspaceUserPermissionsDto =
+        {
+          roles: [RoleDto.WorkspaceAdmin],
+          permissions: [ActionDto.CreateWikiSection],
+        };
+      const updatedPermissions: WorkspaceRolesAndPermissions =
+        await service.updateUsersWorkspacePermissions(
+          user._id,
+          workspaceId,
+          updateWorkspaceUserPermissionsDto,
+        );
       expect(updatedPermissions.roles.length).toBe(1);
       expect(updatedPermissions.roles[0]).toBe(
         updateWorkspaceUserPermissionsDto.roles[0],

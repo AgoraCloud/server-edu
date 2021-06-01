@@ -1,5 +1,9 @@
 import { BadRequestException } from '@nestjs/common';
 
+/**
+ * An exception that is thrown when the user with the given id is not
+ * a member of the workspace with the given id
+ */
 export class UserNotInWorkspaceException extends BadRequestException {
   constructor(userId: string, workspaceId: string) {
     super(

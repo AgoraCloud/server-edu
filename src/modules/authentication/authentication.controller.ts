@@ -1,15 +1,18 @@
-import { ExceptionDto } from './../../utils/base.dto';
-import { SignInDto } from './dto/sign-in.dto';
-import { UserDto } from './../users/dto/user.dto';
-import { TransformInterceptor } from './../../interceptors/transform.interceptor';
+import {
+  ExceptionDto,
+  CreateUserDto,
+  SignInDto,
+  UserDto,
+  ChangePasswordDto,
+  VerifyAccountDto,
+  ForgotPasswordDto,
+  AuditActionDto,
+  AuditResourceDto,
+} from '@agoracloud/common';
 import { MongoExceptionFilter } from './../../filters/mongo-exception.filter';
-import { ChangePasswordDto } from './dto/change-password.dto';
-import { VerifyAccountDto } from './dto/verify-account.dto';
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { accessTokenConstants, refreshTokenConstants } from './constants';
 import { UserDocument } from '../users/schemas/user.schema';
 import { LocalAuthenticationGuard } from './guards/local-authentication.guard';
-import { CreateUserDto } from '../users/dto/create-user.dto';
 import {
   Controller,
   Post,
@@ -17,7 +20,6 @@ import {
   UseGuards,
   HttpCode,
   UseFilters,
-  UseInterceptors,
   Request,
 } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
@@ -38,10 +40,7 @@ import {
 } from '@nestjs/swagger';
 import { Auth } from '../../decorators/auth.decorator';
 import { Audit } from '../../decorators/audit.decorator';
-import {
-  AuditAction,
-  AuditResource,
-} from '../auditing/schemas/audit-log.schema';
+import { Transform } from '../../decorators/transform.decorator';
 
 @Controller('api/auth')
 @ApiTags('Authentication')
@@ -74,9 +73,9 @@ export class AuthenticationController {
   @Post('login')
   @ApiCookieAuth()
   @UseGuards(LocalAuthenticationGuard)
-  @Audit(AuditAction.LogIn, AuditResource.User)
+  @Audit(AuditActionDto.LogIn, AuditResourceDto.User)
   @ApiOperation({ summary: 'Log in' })
-  @UseInterceptors(new TransformInterceptor(UserDto))
+  @Transform(UserDto)
   @ApiCreatedResponse({
     description: 'The user has been successfully logged in',
   })
@@ -101,9 +100,8 @@ export class AuthenticationController {
     const accessToken: string = this.authenticationService.generateAccessToken(
       user.email,
     );
-    const refreshToken: string = await this.authenticationService.generateRefreshToken(
-      user.email,
-    );
+    const refreshToken: string =
+      await this.authenticationService.generateRefreshToken(user.email);
     request.res.cookie(
       accessTokenConstants.name,
       accessToken,
@@ -124,7 +122,7 @@ export class AuthenticationController {
    */
   @HttpCode(200)
   @Post('logout')
-  @Audit(AuditAction.LogOut, AuditResource.User)
+  @Audit(AuditActionDto.LogOut, AuditResourceDto.User)
   @ApiCookieAuth()
   @Auth()
   @ApiOperation({ summary: 'Sign out' })
@@ -163,9 +161,8 @@ export class AuthenticationController {
     @Request() request: Req,
     @User() user: UserDocument,
   ): Promise<void> {
-    const refreshToken: string = await this.authenticationService.generateRefreshToken(
-      user.email,
-    );
+    const refreshToken: string =
+      await this.authenticationService.generateRefreshToken(user.email);
     request.res.cookie(
       refreshTokenConstants.name,
       refreshToken,

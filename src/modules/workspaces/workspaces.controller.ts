@@ -1,11 +1,17 @@
-import { AuditResource } from './../auditing/schemas/audit-log.schema';
-import { AddWorkspaceUserDto } from './dto/add-workspace-user.dto';
+import {
+  WorkspaceDto,
+  ExceptionDto,
+  CreateWorkspaceDto,
+  UpdateWorkspaceDto,
+  AddWorkspaceUserDto,
+  ActionDto,
+  AuditActionDto,
+  AuditResourceDto,
+} from '@agoracloud/common';
 import { UserInterceptor } from './../../interceptors/user.interceptor';
 import { WorkspaceInterceptor } from './../../interceptors/workspace.interceptor';
 import { Auth } from '../../decorators/auth.decorator';
-import { Action } from './../authorization/schemas/permission.schema';
 import { Permissions } from './../../decorators/permissions.decorator';
-import { ExceptionDto } from './../../utils/base.dto';
 import {
   ApiTags,
   ApiCookieAuth,
@@ -18,8 +24,6 @@ import {
   ApiOperation,
   ApiForbiddenResponse,
 } from '@nestjs/swagger';
-import { WorkspaceDto } from './dto/workspace.dto';
-import { TransformInterceptor } from './../../interceptors/transform.interceptor';
 import { WorkspaceDocument } from './schemas/workspace.schema';
 import { UserDocument } from '../users/schemas/user.schema';
 import { FindOneParams } from './../../utils/find-one-params';
@@ -34,19 +38,17 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { WorkspacesService } from './workspaces.service';
-import { CreateWorkspaceDto } from './dto/create-workspace.dto';
-import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
 import { User } from '../../decorators/user.decorator';
 import { IsAdmin } from '../../decorators/is-admin.decorator';
 import { Workspace } from '../../decorators/workspace.decorator';
 import { Audit } from '../../decorators/audit.decorator';
-import { AuditAction } from '../auditing/schemas/audit-log.schema';
+import { Transform } from '../../decorators/transform.decorator';
 
 @ApiCookieAuth()
 @ApiTags('Workspaces')
 @Controller('api/workspaces')
 @Auth()
-@UseInterceptors(new TransformInterceptor(WorkspaceDto))
+@Transform(WorkspaceDto)
 export class WorkspacesController {
   constructor(private readonly workspacesService: WorkspacesService) {}
 
@@ -56,8 +58,8 @@ export class WorkspacesController {
    * @param createWorkspaceDto the workspace to create
    */
   @Post()
-  @Permissions(Action.CreateWorkspace)
-  @Audit(AuditAction.Create, AuditResource.Workspace)
+  @Permissions(ActionDto.CreateWorkspace)
+  @Audit(AuditActionDto.Create, AuditResourceDto.Workspace)
   @ApiOperation({ summary: 'Create a workspace' })
   @ApiCreatedResponse({
     description: 'The workspace has been successfully created',
@@ -81,8 +83,8 @@ export class WorkspacesController {
    * @param userId the users id
    */
   @Get()
-  @Permissions(Action.ReadWorkspace)
-  @Audit(AuditAction.Read, AuditResource.Workspace)
+  @Permissions(ActionDto.ReadWorkspace)
+  @Audit(AuditActionDto.Read, AuditResourceDto.Workspace)
   @ApiOperation({ summary: 'Get all workspaces' })
   @ApiOkResponse({
     description: 'The workspaces have been successfully retrieved',
@@ -106,8 +108,8 @@ export class WorkspacesController {
    * @param workspaceId the workspace id
    */
   @Get(':id')
-  @Permissions(Action.ReadWorkspace)
-  @Audit(AuditAction.Read, AuditResource.Workspace)
+  @Permissions(ActionDto.ReadWorkspace)
+  @Audit(AuditActionDto.Read, AuditResourceDto.Workspace)
   @ApiParam({ name: 'id', description: 'The workspace id' })
   @ApiOperation({ summary: 'Get a workspace' })
   @ApiOkResponse({
@@ -142,8 +144,8 @@ export class WorkspacesController {
    * @param updateWorkspaceDto the updated workspace
    */
   @Put(':id')
-  @Permissions(Action.UpdateWorkspace)
-  @Audit(AuditAction.Update, AuditResource.Workspace)
+  @Permissions(ActionDto.UpdateWorkspace)
+  @Audit(AuditActionDto.Update, AuditResourceDto.Workspace)
   @ApiParam({ name: 'id', description: 'The workspace id' })
   @ApiOperation({ summary: 'Update a workspace' })
   @ApiOkResponse({
@@ -182,8 +184,8 @@ export class WorkspacesController {
    * @param workspaceId the workspace id
    */
   @Delete(':id')
-  @Permissions(Action.DeleteWorkspace)
-  @Audit(AuditAction.Delete, AuditResource.Workspace)
+  @Permissions(ActionDto.DeleteWorkspace)
+  @Audit(AuditActionDto.Delete, AuditResourceDto.Workspace)
   @ApiParam({ name: 'id', description: 'The workspace id' })
   @ApiOperation({ summary: 'Delete a workspace' })
   @ApiOkResponse({
@@ -215,9 +217,9 @@ export class WorkspacesController {
    * @param workspaceId the workspace id
    */
   @Get(':workspaceId/users')
-  @Permissions(Action.ReadWorkspace)
+  @Permissions(ActionDto.ReadWorkspace)
   @UseInterceptors(WorkspaceInterceptor)
-  @Audit(AuditAction.ReadUsers, AuditResource.Workspace)
+  @Audit(AuditActionDto.ReadUsers, AuditResourceDto.Workspace)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiOperation({ summary: 'Get the users in a workspace' })
   @ApiOkResponse({
@@ -244,9 +246,9 @@ export class WorkspacesController {
    * @param addWorkspaceUserDto the user to add
    */
   @Put(':workspaceId/users')
-  @Permissions(Action.ManageWorkspace)
+  @Permissions(ActionDto.ManageWorkspace)
   @UseInterceptors(WorkspaceInterceptor)
-  @Audit(AuditAction.AddUser, AuditResource.Workspace)
+  @Audit(AuditActionDto.AddUser, AuditResourceDto.Workspace)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiOperation({ summary: 'Add a user to a workspace' })
   @ApiOkResponse({
@@ -277,9 +279,9 @@ export class WorkspacesController {
    * @param userId the users id
    */
   @Delete(':workspaceId/users/:userId')
-  @Permissions(Action.ManageWorkspace)
+  @Permissions(ActionDto.ManageWorkspace)
   @UseInterceptors(WorkspaceInterceptor, UserInterceptor)
-  @Audit(AuditAction.RemoveUser, AuditResource.Workspace)
+  @Audit(AuditActionDto.RemoveUser, AuditResourceDto.Workspace)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'userId', description: 'The users id' })
   @ApiOperation({ summary: 'Remove a user from a workspace' })

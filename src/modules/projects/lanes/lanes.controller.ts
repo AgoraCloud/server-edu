@@ -1,9 +1,15 @@
-import { AuditResource } from './../../auditing/schemas/audit-log.schema';
+import {
+  ProjectLaneDto,
+  ExceptionDto,
+  CreateProjectLaneDto,
+  UpdateProjectLaneDto,
+  ActionDto,
+  AuditActionDto,
+  AuditResourceDto,
+} from '@agoracloud/common';
 import { IsAdmin } from '../../../decorators/is-admin.decorator';
 import { Permissions } from '../../../decorators/permissions.decorator';
-import { Action } from './../../authorization/schemas/permission.schema';
 import { Auth } from '../../../decorators/auth.decorator';
-import { ExceptionDto } from './../../../utils/base.dto';
 import {
   ApiTags,
   ApiCookieAuth,
@@ -20,7 +26,6 @@ import { FindOneParams } from './../../../utils/find-one-params';
 import { ProjectDocument } from './../schemas/project.schema';
 import { WorkspaceDocument } from './../../workspaces/schemas/workspace.schema';
 import { UserDocument } from './../../users/schemas/user.schema';
-import { TransformInterceptor } from './../../../interceptors/transform.interceptor';
 import { ProjectInterceptor } from './../../../interceptors/project.interceptor';
 import { WorkspaceInterceptor } from './../../../interceptors/workspace.interceptor';
 import {
@@ -34,25 +39,19 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ProjectLanesService } from './lanes.service';
-import { CreateProjectLaneDto } from './dto/create-lane.dto';
-import { UpdateProjectLaneDto } from './dto/update-lane.dto';
-import { ProjectLaneDto } from './dto/lane.dto';
 import { User } from '../../../decorators/user.decorator';
 import { Workspace } from '../../../decorators/workspace.decorator';
 import { Project } from '../../../decorators/project.decorator';
 import { ProjectLaneDocument } from './schemas/lane.schema';
 import { Audit } from '../../../decorators/audit.decorator';
-import { AuditAction } from '../../auditing/schemas/audit-log.schema';
+import { Transform } from '../../../decorators/transform.decorator';
 
 @ApiCookieAuth()
 @ApiTags('Project Lanes')
-@Auth(Action.ReadWorkspace, Action.ReadProject)
+@Auth(ActionDto.ReadWorkspace, ActionDto.ReadProject)
 @Controller('api/workspaces/:workspaceId/projects/:projectId/lanes')
-@UseInterceptors(
-  WorkspaceInterceptor,
-  ProjectInterceptor,
-  new TransformInterceptor(ProjectLaneDto),
-)
+@UseInterceptors(WorkspaceInterceptor, ProjectInterceptor)
+@Transform(ProjectLaneDto)
 export class ProjectLanesController {
   constructor(private readonly projectLanesService: ProjectLanesService) {}
 
@@ -64,8 +63,8 @@ export class ProjectLanesController {
    * @param createProjectLaneDto the project lane to create
    */
   @Post()
-  @Permissions(Action.CreateProjectLane)
-  @Audit(AuditAction.Create, AuditResource.ProjectLane)
+  @Permissions(ActionDto.CreateProjectLane)
+  @Audit(AuditActionDto.Create, AuditResourceDto.ProjectLane)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'projectId', description: 'The project id' })
   @ApiOperation({ summary: 'Create a project lane' })
@@ -105,8 +104,8 @@ export class ProjectLanesController {
    * @param projectId the project id
    */
   @Get()
-  @Permissions(Action.ReadProjectLane)
-  @Audit(AuditAction.Read, AuditResource.ProjectLane)
+  @Permissions(ActionDto.ReadProjectLane)
+  @Audit(AuditActionDto.Read, AuditResourceDto.ProjectLane)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'projectId', description: 'The project id' })
   @ApiOperation({ summary: 'Get all project lanes' })
@@ -148,8 +147,8 @@ export class ProjectLanesController {
    * @param projectLaneId the project lane id
    */
   @Get(':id')
-  @Permissions(Action.ReadProjectLane)
-  @Audit(AuditAction.Read, AuditResource.ProjectLane)
+  @Permissions(ActionDto.ReadProjectLane)
+  @Audit(AuditActionDto.Read, AuditResourceDto.ProjectLane)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'projectId', description: 'The project id' })
   @ApiParam({ name: 'id', description: 'The project lane id' })
@@ -201,8 +200,8 @@ export class ProjectLanesController {
    * @param updateProjectLaneDto the updated project lane
    */
   @Put(':id')
-  @Permissions(Action.UpdateProjectLane)
-  @Audit(AuditAction.Update, AuditResource.ProjectLane)
+  @Permissions(ActionDto.UpdateProjectLane)
+  @Audit(AuditActionDto.Update, AuditResourceDto.ProjectLane)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'projectId', description: 'The project id' })
   @ApiParam({ name: 'id', description: 'The project lane id' })
@@ -256,8 +255,8 @@ export class ProjectLanesController {
    * @param projectLaneId the project lane id
    */
   @Delete(':id')
-  @Permissions(Action.DeleteProjectLane)
-  @Audit(AuditAction.Delete, AuditResource.ProjectLane)
+  @Permissions(ActionDto.DeleteProjectLane)
+  @Audit(AuditActionDto.Delete, AuditResourceDto.ProjectLane)
   @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
   @ApiParam({ name: 'projectId', description: 'The project id' })
   @ApiParam({ name: 'id', description: 'The project lane id' })

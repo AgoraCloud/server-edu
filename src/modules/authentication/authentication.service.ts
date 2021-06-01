@@ -2,17 +2,18 @@ import { accessTokenConstants, refreshTokenConstants } from './constants';
 import { PasswordChangedEvent } from '../../events/password-changed.event';
 import { ForgotPasswordEvent } from '../../events/forgot-password.event';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { TokenExpiredException } from './../../exceptions/token-expired.exception';
 import { TokenType, TokenDocument } from '../tokens/schemas/token.schema';
 import { TokensService } from './../tokens/tokens.service';
-import { VerifyAccountDto } from './dto/verify-account.dto';
-import { ChangePasswordDto } from './dto/change-password.dto';
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import {
+  VerifyAccountDto,
+  CreateUserDto,
+  ChangePasswordDto,
+  ForgotPasswordDto,
+} from '@agoracloud/common';
 import { JwtConfig } from '../../config/configuration.interface';
 import { TokenPayload } from './interfaces/token-payload.interface';
 import { ConfigService } from '@nestjs/config';
 import { InvalidCredentialsException } from '../../exceptions/invalid-credentials.exception';
-import { CreateUserDto } from '../users/dto/create-user.dto';
 import { Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
@@ -47,6 +48,7 @@ export class AuthenticationService {
    * Used by the Passport strategy to verify the supplied user credentials
    * @param email the users email
    * @param password the users password
+   * @returns the user with the matching email and password
    */
   async validate(email: string, password: string): Promise<UserDocument> {
     const user: UserDocument = await this.userService.findByEmail(email);
@@ -58,6 +60,7 @@ export class AuthenticationService {
    * Checks if the plain text password and hashed passwords match
    * @param password the plain text password
    * @param hashedPassword the hashed password
+   * @throws InvalidCredentialsException
    */
   private async passwordsMatch(
     password: string,
@@ -73,6 +76,7 @@ export class AuthenticationService {
   /**
    * Generates a jwt access token
    * @param email the users email
+   * @returns the generated access token
    */
   generateAccessToken(email: string): string {
     const payload = { email };
@@ -86,6 +90,7 @@ export class AuthenticationService {
   /**
    * Generates a jwt refresh token
    * @param email the users email
+   * @returns the generated refresh token
    */
   async generateRefreshToken(email: string): Promise<string> {
     const payload = { email };
@@ -109,6 +114,7 @@ export class AuthenticationService {
   /**
    * Validates a jwt token
    * @param token the token to validate
+   * @returns the decoded access token
    */
   validateJwtToken(token: string): TokenPayload {
     return this.jwtService.verify(token, {
@@ -119,6 +125,7 @@ export class AuthenticationService {
   /**
    * Validates a jwt refresh token
    * @param token the token to validate
+   * @returns the decoded refresh token
    */
   validateJwtRefreshToken(token: string): TokenPayload {
     return this.jwtService.verify(token, {
@@ -154,9 +161,7 @@ export class AuthenticationService {
       changePasswordDto.token,
       TokenType.ChangePassword,
     );
-    if (this.tokensService.isTokenExpired(token)) {
-      throw new TokenExpiredException(token._id);
-    }
+    this.tokensService.isTokenExpired(token);
     await this.userService.updatePassword(
       token.user._id,
       changePasswordDto.password,
@@ -176,9 +181,7 @@ export class AuthenticationService {
       verifyAccountDto.token,
       TokenType.VerifyAccount,
     );
-    if (this.tokensService.isTokenExpired(token)) {
-      throw new TokenExpiredException(token._id);
-    }
+    this.tokensService.isTokenExpired(token);
     await this.userService.verify(token.user._id);
   }
 }

@@ -13,6 +13,10 @@ import {
 import { Observable } from 'rxjs';
 import { isMongoId } from 'class-validator';
 
+/**
+ * An interceptor that extracts the workspace id from the request, fetches it from
+ * the database and attaches it to the request
+ */
 @Injectable()
 export class WorkspaceInterceptor implements NestInterceptor {
   constructor(private readonly workspaceService: WorkspacesService) {}
@@ -39,7 +43,11 @@ export class WorkspaceInterceptor implements NestInterceptor {
     // A super admin or workspace admin is updating a user in the workspace,
     // check if the user exists in the workspace
     const userId: string = request.params.userId;
-    if (userId && workspace.users.findIndex((u) => u._id == userId) === -1) {
+    if (
+      isAdmin &&
+      userId &&
+      workspace.users.findIndex((u) => u._id == userId) === -1
+    ) {
       throw new UserNotInWorkspaceException(userId, workspaceId);
     }
     request.workspace = workspace;

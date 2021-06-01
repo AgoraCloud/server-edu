@@ -9,8 +9,7 @@ import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { InjectModel } from '@nestjs/mongoose';
 import { ProjectLane, ProjectLaneDocument } from './schemas/lane.schema';
 import { Injectable } from '@nestjs/common';
-import { CreateProjectLaneDto } from './dto/create-lane.dto';
-import { UpdateProjectLaneDto } from './dto/update-lane.dto';
+import { CreateProjectLaneDto, UpdateProjectLaneDto } from '@agoracloud/common';
 import { Model, Query } from 'mongoose';
 import { Event } from '../../../events/events.enum';
 
@@ -28,6 +27,7 @@ export class ProjectLanesService {
    * @param workspace the workspace
    * @param project the project
    * @param createProjectLaneDto the project lane to create
+   * @returns the created project lane document
    */
   async create(
     user: UserDocument,
@@ -39,9 +39,8 @@ export class ProjectLanesService {
     projectLane.user = user;
     projectLane.workspace = workspace;
     projectLane.project = project;
-    const createdProjectLane: ProjectLaneDocument = await this.projectLaneModel.create(
-      projectLane,
-    );
+    const createdProjectLane: ProjectLaneDocument =
+      await this.projectLaneModel.create(projectLane);
     return createdProjectLane;
   }
 
@@ -50,16 +49,15 @@ export class ProjectLanesService {
    * @param projectId the project id
    * @param userId the users id
    * @param workspaceId the workspace is
+   * @returns an array of project lane documents
    */
   async findAll(
     projectId: string,
     userId?: string,
     workspaceId?: string,
   ): Promise<ProjectLaneDocument[]> {
-    let projectLanesQuery: Query<
-      ProjectLaneDocument[],
-      ProjectLaneDocument
-    > = this.projectLaneModel.find().where('project').equals(projectId);
+    let projectLanesQuery: Query<ProjectLaneDocument[], ProjectLaneDocument> =
+      this.projectLaneModel.find().where('project').equals(projectId);
     if (userId) {
       projectLanesQuery = projectLanesQuery.where('user').equals(userId);
     }
@@ -78,6 +76,8 @@ export class ProjectLanesService {
    * @param projectId the project id
    * @param projectLaneId the project lane id
    * @param userId the users id
+   * @throws ProjectLaneNotFoundException
+   * @returns a project lane document
    */
   async findOne(
     workspaceId: string,
@@ -85,17 +85,15 @@ export class ProjectLanesService {
     projectLaneId: string,
     userId?: string,
   ): Promise<ProjectLaneDocument> {
-    let projectLaneQuery: Query<
-      ProjectLaneDocument,
-      ProjectLaneDocument
-    > = this.projectLaneModel
-      .findOne()
-      .where('_id')
-      .equals(projectLaneId)
-      .where('workspace')
-      .equals(workspaceId)
-      .where('project')
-      .equals(projectId);
+    let projectLaneQuery: Query<ProjectLaneDocument, ProjectLaneDocument> =
+      this.projectLaneModel
+        .findOne()
+        .where('_id')
+        .equals(projectLaneId)
+        .where('workspace')
+        .equals(workspaceId)
+        .where('project')
+        .equals(projectId);
     if (userId) {
       projectLaneQuery = projectLaneQuery.where('user').equals(userId);
     }
@@ -111,6 +109,8 @@ export class ProjectLanesService {
    * @param projectLaneId the project lane id
    * @param updateProjectLaneDto the updated project lane
    * @param userId the users id
+   * @throws ProjectLaneNotFoundException
+   * @returns the updated project lane document
    */
   async update(
     workspaceId: string,
@@ -119,17 +119,15 @@ export class ProjectLanesService {
     updateProjectLaneDto: UpdateProjectLaneDto,
     userId?: string,
   ): Promise<ProjectLaneDocument> {
-    let projectLaneQuery: Query<
-      ProjectLaneDocument,
-      ProjectLaneDocument
-    > = this.projectLaneModel
-      .findOneAndUpdate(null, updateProjectLaneDto, { new: true })
-      .where('_id')
-      .equals(projectLaneId)
-      .where('workspace')
-      .equals(workspaceId)
-      .where('project')
-      .equals(projectId);
+    let projectLaneQuery: Query<ProjectLaneDocument, ProjectLaneDocument> =
+      this.projectLaneModel
+        .findOneAndUpdate(null, updateProjectLaneDto, { new: true })
+        .where('_id')
+        .equals(projectLaneId)
+        .where('workspace')
+        .equals(workspaceId)
+        .where('project')
+        .equals(projectId);
     if (userId) {
       projectLaneQuery = projectLaneQuery.where('user').equals(userId);
     }
@@ -144,6 +142,7 @@ export class ProjectLanesService {
    * @param projectId the project id
    * @param projectLaneId the project lane id
    * @param userId the users id
+   * @throws ProjectLaneNotFoundException
    */
   async remove(
     workspaceId: string,
@@ -151,17 +150,15 @@ export class ProjectLanesService {
     projectLaneId: string,
     userId?: string,
   ): Promise<void> {
-    let projectLaneQuery: Query<
-      ProjectLaneDocument,
-      ProjectLaneDocument
-    > = this.projectLaneModel
-      .findOneAndDelete()
-      .where('_id')
-      .equals(projectLaneId)
-      .where('workspace')
-      .equals(workspaceId)
-      .where('project')
-      .equals(projectId);
+    let projectLaneQuery: Query<ProjectLaneDocument, ProjectLaneDocument> =
+      this.projectLaneModel
+        .findOneAndDelete()
+        .where('_id')
+        .equals(projectLaneId)
+        .where('workspace')
+        .equals(workspaceId)
+        .where('project')
+        .equals(projectId);
     if (userId) {
       projectLaneQuery = projectLaneQuery.where('user').equals(userId);
     }

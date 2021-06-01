@@ -15,10 +15,9 @@ export class KubernetesPersistentVolumeClaimsService {
   /**
    * Get all Kubernetes persistent volume claims
    * @param namespace the Kubernetes namespace
+   * @returns a list of all Kubernetes persistent volume claims
    */
-  getAllPersistentVolumeClaims(
-    namespace: string,
-  ): Promise<{
+  getAllPersistentVolumeClaims(namespace: string): Promise<{
     response: http.IncomingMessage;
     body: k8s.V1PersistentVolumeClaimList;
   }> {
@@ -37,6 +36,7 @@ export class KubernetesPersistentVolumeClaimsService {
    * @param namespace the Kubernetes namespace
    * @param deploymentId the deployment id
    * @param storageCount the persistent volume claim storage size
+   * @returns the created Kubernetes persistent volume claim
    */
   createPersistentVolumeClaim(
     namespace: string,
@@ -69,6 +69,7 @@ export class KubernetesPersistentVolumeClaimsService {
    * Delete a Kubernetes persistent volume claim
    * @param namespace the Kubernetes namespace
    * @param deploymentId the deployment id
+   * @returns the deleted Kubernetes persistent volume claim
    */
   deletePersistentVolumeClaim(
     namespace: string,
