@@ -119,14 +119,19 @@ export class UsersService implements OnModuleInit {
   /**
    * Find a user by email
    * @param email the users email
+   * @param checkEnabledAndVerified check if the user is enabled and verified
    * @throws UserNotFoundException
    * @throws AccountDisabledException
    * @throws AccountNotVerifiedException
    * @returns a user document
    */
-  async findByEmail(email: string): Promise<UserDocument> {
+  async findByEmail(
+    email: string,
+    checkEnabledAndVerified = true,
+  ): Promise<UserDocument> {
     const user: UserDocument = await this.userModel.findOne({ email }).exec();
     if (!user) throw new UserNotFoundException(email);
+    if (!checkEnabledAndVerified) return user;
     if (!user.isEnabled) throw new AccountDisabledException(email);
     if (!user.isVerified) throw new AccountNotVerifiedException(email);
     return user;

@@ -5,9 +5,9 @@ import { BadRequestException } from '@nestjs/common';
  * that is already a member of the given workspace
  */
 export class ExistingWorkspaceUserException extends BadRequestException {
-  constructor(workspaceId: string, userId: string) {
+  constructor(workspaceId: string, userEmail: string) {
     super(
-      `User with id ${userId} is already a member in workspace with id ${workspaceId}`,
+      `User with email ${userEmail} is already a member in workspace with id ${workspaceId}`,
     );
   }
 }
