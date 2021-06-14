@@ -258,14 +258,41 @@ describe('WorkspacesService', () => {
     it('should throw an error if the user is already a member of the workspace', async () => {
       const expectedErrorMessage: string = new ExistingWorkspaceUserException(
         workspace._id,
-        user._id,
+        user.email,
       ).message;
       try {
-        await service.addUser(workspace, { id: user._id });
+        await service.addUser(workspace, { email: user.email });
         fail('It should throw an error');
       } catch (err) {
         expect(err.message).toBe(expectedErrorMessage);
       }
+    });
+
+    it('should throw an error if the workspace with the given id was not found', async () => {
+      const tempWorkspace: WorkspaceDocument = Object.assign({}, workspace);
+      tempWorkspace._id = Types.ObjectId().toHexString();
+      const expectedErrorMessage: string = new WorkspaceNotFoundException(
+        tempWorkspace._id,
+      ).message;
+      try {
+        await service.addUser(tempWorkspace, { email: user.email });
+        fail('It should throw an error');
+      } catch (err) {
+        expect(err.message).toBe(expectedErrorMessage);
+      }
+    });
+
+    it('should not throw an error if the user was not found', async () => {
+      const eventEmitterSpy: jest.SpyInstance<boolean, any[]> = jest.spyOn(
+        eventEmitter,
+        'emit',
+      );
+      const updatedWorkspace: WorkspaceDocument = await service.addUser(
+        workspace,
+        { email: 'random@test.com' },
+      );
+      expect(updatedWorkspace.users.length).toBe(1);
+      expect(eventEmitterSpy).toHaveBeenCalledTimes(0);
     });
 
     it('should add the user to the workspace', async () => {
@@ -275,7 +302,7 @@ describe('WorkspacesService', () => {
       );
       const updatedWorkspace: WorkspaceDocument = await service.addUser(
         workspace,
-        { id: user2._id },
+        { email: user2.email },
       );
       expect(updatedWorkspace.users.length).toBe(2);
       expect(updatedWorkspace.users[1]._id).toEqual(user2._id);
@@ -340,7 +367,7 @@ describe('WorkspacesService', () => {
 
     it('should throw an error if the workspace will have no admin members left if the user was removed', async () => {
       // Re-add user2 temporarily
-      workspace = await service.addUser(workspace, { id: user2._id });
+      workspace = await service.addUser(workspace, { email: user2.email });
 
       const expectedErrorMessage: string =
         new MinOneAdminUserInWorkspaceException(workspace._id).message;

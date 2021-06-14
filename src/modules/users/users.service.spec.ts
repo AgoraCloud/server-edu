@@ -152,6 +152,14 @@ describe('UsersService', () => {
       }
     });
 
+    it('should not throw an error if the user is not enabled or verified if checkEnabledAndVerified is set to false', async () => {
+      const retrievedUser: UserDocument = await service.findByEmail(
+        user.email,
+        false,
+      );
+      expect(retrievedUser.email).toBe(user.email);
+    });
+
     it('should find the user by email', async () => {
       // Set user isEnabled to true
       await userModel.updateOne({ _id: user._id }, { isVerified: true }).exec();

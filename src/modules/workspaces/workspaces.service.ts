@@ -220,17 +220,29 @@ export class WorkspacesService {
     addWorkspaceUserDto: AddWorkspaceUserDto,
   ): Promise<WorkspaceDocument> {
     const workspaceId: string = workspace._id;
-    const userId: string = addWorkspaceUserDto.id;
+    const userEmail: string = addWorkspaceUserDto.email;
+    // Get the workspace with the users information populated
+    const retrievedWorkspace: WorkspaceDocument = await this.findOneUsers(
+      workspaceId,
+    );
     // Check if the user is already a member
-    if (workspace.users.findIndex((u) => u._id.toString() == userId) !== -1) {
-      throw new ExistingWorkspaceUserException(workspaceId, userId);
+    if (
+      retrievedWorkspace.users.findIndex((u) => u.email === userEmail) !== -1
+    ) {
+      throw new ExistingWorkspaceUserException(workspaceId, userEmail);
     }
-    const user: UserDocument = await this.usersService.findOne(userId);
+    let user: UserDocument;
+    try {
+      user = await this.usersService.findByEmail(userEmail, false);
+    } catch (err) {
+      // Do nothing
+      return workspace;
+    }
     workspace.users.push(user);
     await this.updateUsers(workspaceId, workspace.users);
     this.eventEmitter.emit(
       Event.WorkspaceUserAdded,
-      new WorkspaceUserAddedEvent(workspaceId, userId),
+      new WorkspaceUserAddedEvent(workspaceId, user.id),
     );
     return workspace;
   }
