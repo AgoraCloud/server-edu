@@ -175,7 +175,7 @@ export class ProjectsService {
    * @param payload the workspace.deleted event payload
    */
   @OnEvent(Event.WorkspaceDeleted)
-  private async handleProjectDeletedEvent(
+  private async handleWorkspaceDeletedEvent(
     payload: WorkspaceDeletedEvent,
   ): Promise<void> {
     await this.removeAll(payload.id);
