@@ -1,3 +1,4 @@
+import { ShortcutNotFoundException } from './../../exceptions/shortcut-not-found.exception';
 import { OnEvent } from '@nestjs/event-emitter';
 import { WorkspaceUserRemovedEvent } from './../../events/workspace-user-removed.event';
 import { WorkspaceDeletedEvent } from './../../events/workspace-deleted.event';
@@ -7,7 +8,7 @@ import { CreateShortcutDto, UpdateShortcutDto } from '@agoracloud/common';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Shortcut, ShortcutDocument } from './schemas/shortcut.schema';
-import { Model } from 'mongoose';
+import { Model, Query } from 'mongoose';
 import { Event } from 'src/events/events.enum';
 
 @Injectable()
@@ -17,41 +18,127 @@ export class ShortcutsService {
     private readonly shortcutModel: Model<ShortcutDocument>,
   ) {}
 
-  create(
+  /**
+   * create a shortcut
+   * @param user the user
+   * @param workspace the workspace
+   * @param createShortcutDto the shortcut to create
+   * @returns the created shortcut document
+   */
+  async create(
     user: UserDocument,
     workspace: WorkspaceDocument,
     createShortcutDto: CreateShortcutDto,
   ): Promise<ShortcutDocument> {
-    return;
+    const shortcut: Shortcut = new Shortcut(createShortcutDto);
+    shortcut.user = user;
+    shortcut.workspace = workspace;
+    const createdShortcut: ShortcutDocument = await this.shortcutModel.create(
+      shortcut,
+    );
+    return createdShortcut;
   }
 
-  findAll(worksapceId: string, userId?: string): Promise<ShortcutDocument[]> {
-    return;
+  /**
+   * Find all shortcuts
+   * @param workspaceId the workspace id
+   * @param userId the users id
+   * @returns an array of shortcut documents
+   */
+  async findAll(
+    workspaceId: string,
+    userId?: string,
+  ): Promise<ShortcutDocument[]> {
+    let shortcutsQuery: Query<ShortcutDocument[], ShortcutDocument> =
+      this.shortcutModel.find().where('workspace').equals(workspaceId);
+    if (userId) {
+      shortcutsQuery = shortcutsQuery.where('user').equals(userId);
+    }
+    const shortcuts: ShortcutDocument[] = await shortcutsQuery.exec();
+    return shortcuts;
   }
 
-  findOne(
+  /**
+   * Find a shortcut
+   * @param workspaceId the workspace id
+   * @param shortcutId the shortcut id
+   * @param userId the users id
+   * @throws ShortcutNotFoundException
+   * @returns a shortcut document
+   */
+  async findOne(
     workspaceId: string,
     shortcutId: string,
     userId?: string,
   ): Promise<ShortcutDocument> {
-    return;
+    let shortcutQuery: Query<ShortcutDocument, ShortcutDocument> =
+      this.shortcutModel
+        .findOne()
+        .where('_id')
+        .equals(shortcutId)
+        .where('workspace')
+        .equals(workspaceId);
+    if (userId) {
+      shortcutQuery = shortcutQuery.where('user').equals(userId);
+    }
+    const shortcut: ShortcutDocument = await shortcutQuery.exec();
+    if (!shortcut) throw new ShortcutNotFoundException(shortcutId);
+    return shortcut;
   }
 
-  update(
+  /**
+   * Update a shortcut
+   * @param workspaceId the workspace id
+   * @param shortcutId the shortcut id
+   * @param updateShortcutDto the updated shortcut
+   * @param userId the users id
+   * @throws ShortcutNotFoundException
+   * @returns the updated shortcut document
+   */
+  async update(
     workspaceId: string,
     shortcutId: string,
     updateShortcutDto: UpdateShortcutDto,
     userId?: string,
   ): Promise<ShortcutDocument> {
-    return;
+    let shortcutQuery: Query<ShortcutDocument, ShortcutDocument> =
+      this.shortcutModel
+        .findOneAndUpdate(null, updateShortcutDto, { new: true })
+        .where('_id')
+        .equals(shortcutId)
+        .where('workspace')
+        .equals(workspaceId);
+    if (userId) {
+      shortcutQuery = shortcutQuery.where('user').equals(userId);
+    }
+    const shortcut: ShortcutDocument = await shortcutQuery.exec();
+    if (!shortcut) throw new ShortcutNotFoundException(shortcutId);
+    return shortcut;
   }
 
-  remove(
+  /**
+   * Delete a shortcut
+   * @param workspaceId the workspace id
+   * @param shortcutId the shortcut id
+   * @param userId the user id
+   */
+  async remove(
     workspaceId: string,
     shortcutId: string,
     userId?: string,
   ): Promise<void> {
-    return;
+    let shortcutQuery: Query<ShortcutDocument, ShortcutDocument> =
+      this.shortcutModel
+        .findOneAndDelete()
+        .where('_id')
+        .equals(shortcutId)
+        .where('workspace')
+        .equals(workspaceId);
+    if (userId) {
+      shortcutQuery = shortcutQuery.where('user').equals(userId);
+    }
+    const shortcut: ShortcutDocument = await shortcutQuery.exec();
+    if (!shortcut) throw new ShortcutNotFoundException(shortcutId);
   }
 
   /**

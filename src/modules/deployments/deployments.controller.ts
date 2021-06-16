@@ -39,10 +39,7 @@ import {
 import { Workspace } from '../../decorators/workspace.decorator';
 import { DeploymentsService } from './deployments.service';
 import { User } from '../../decorators/user.decorator';
-import {
-  DeploymentDocument,
-  DeploymentImage,
-} from './schemas/deployment.schema';
+import { DeploymentDocument } from './schemas/deployment.schema';
 import { Auth } from '../../decorators/auth.decorator';
 import { IsAdmin } from '../../decorators/is-admin.decorator';
 import { Transform } from '../../decorators/transform.decorator';
