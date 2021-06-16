@@ -27,6 +27,7 @@ import { WikiPagesModule } from './modules/wiki/pages/pages.module';
 import { ProjectsModule } from './modules/projects/projects.module';
 import { AuthorizationModule } from './modules/authorization/authorization.module';
 import { AuditingModule } from './modules/auditing/auditing.module';
+import { ShortcutsModule } from './modules/shortcuts/shortcuts.module';
 
 @Module({
   imports: [
@@ -111,6 +112,7 @@ import { AuditingModule } from './modules/auditing/auditing.module';
     ProjectTasksModule,
     AuthorizationModule,
     AuditingModule,
+    ShortcutsModule,
   ],
 })
 export class AppModule implements NestModule {
