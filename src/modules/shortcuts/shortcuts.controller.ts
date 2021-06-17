@@ -34,14 +34,14 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
 } from '@nestjs/swagger';
-import { Auth } from 'src/decorators/auth.decorator';
+import { Auth } from '../../decorators/auth.decorator';
 import { ShortcutsService } from './shortcuts.service';
-import { Transform } from 'src/decorators/transform.decorator';
-import { Permissions } from 'src/decorators/permissions.decorator';
-import { Audit } from 'src/decorators/audit.decorator';
-import { User } from 'src/decorators/user.decorator';
-import { Workspace } from 'src/decorators/workspace.decorator';
-import { IsAdmin } from 'src/decorators/is-admin.decorator';
+import { Transform } from '../../decorators/transform.decorator';
+import { Permissions } from '../../decorators/permissions.decorator';
+import { Audit } from '../../decorators/audit.decorator';
+import { User } from '../../decorators/user.decorator';
+import { Workspace } from '../../decorators/workspace.decorator';
+import { IsAdmin } from '../../decorators/is-admin.decorator';
 
 @ApiCookieAuth()
 @ApiTags('Shortcuts')

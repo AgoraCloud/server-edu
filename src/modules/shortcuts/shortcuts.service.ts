@@ -9,7 +9,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Shortcut, ShortcutDocument } from './schemas/shortcut.schema';
 import { Model, Query } from 'mongoose';
-import { Event } from 'src/events/events.enum';
+import { Event } from '../../events/events.enum';
 
 @Injectable()
 export class ShortcutsService {
