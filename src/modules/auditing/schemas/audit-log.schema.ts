@@ -50,6 +50,7 @@ export class AuditLog {
       AuditResourceDto.ProjectTask,
       AuditResourceDto.WikiSection,
       AuditResourceDto.WikiPage,
+      AuditResourceDto.Shortcut,
     ],
   })
   resource: AuditResourceDto;

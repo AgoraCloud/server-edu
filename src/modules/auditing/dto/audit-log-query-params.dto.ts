@@ -48,6 +48,7 @@ export class AuditLogQueryParamsDto extends PaginationQueryParamsDto {
     AuditResourceDto.ProjectTask,
     AuditResourceDto.WikiSection,
     AuditResourceDto.WikiPage,
+    AuditResourceDto.Shortcut,
   ])
   readonly resource?: AuditResourceDto;
 

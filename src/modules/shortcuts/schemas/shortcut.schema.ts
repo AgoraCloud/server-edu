@@ -1,5 +1,4 @@
-import { UserDocument } from './../../users/schemas/user.schema';
-import { User } from './../../../decorators/user.decorator';
+import { User, UserDocument } from './../../users/schemas/user.schema';
 import {
   Workspace,
   WorkspaceDocument,
