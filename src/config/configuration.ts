@@ -23,7 +23,7 @@ export default () => ({
   smtp: {
     host: process.env.SMTP_HOST,
     port: parseInt(process.env.SMTP_PORT),
-    secure: process.env.SMTP_SECURE,
+    secure: JSON.parse(process.env.SMTP_SECURE),
     username: process.env.SMTP_USERNAME,
     password: process.env.SMTP_PASSWORD,
   },

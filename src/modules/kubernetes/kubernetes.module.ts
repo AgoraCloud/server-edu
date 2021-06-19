@@ -1,4 +1,4 @@
-import { KubernetesConfig } from '../../config/configuration.interface';
+import { Config, KubernetesConfig } from '../../config/configuration.interface';
 import { ConfigService } from '@nestjs/config';
 import {
   AppsV1Api,
@@ -48,7 +48,7 @@ const makeKubernetes = (): Provider[] => {
     },
     {
       provide: 'KubernetesConfig',
-      useFactory: (configService: ConfigService) => {
+      useFactory: (configService: ConfigService<Config>) => {
         return configService.get<KubernetesConfig>('kubernetes');
       },
       inject: [ConfigService],

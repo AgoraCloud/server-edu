@@ -1,7 +1,7 @@
 import { ProjectTasksModule } from './modules/projects/tasks/tasks.module';
 import { ProjectLanesModule } from './modules/projects/lanes/lanes.module';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
-import { LogLevel } from './config/configuration.interface';
+import { Config, LogLevel, SmtpConfig } from './config/configuration.interface';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -60,38 +60,39 @@ import { ShortcutsModule } from './modules/shortcuts/shortcuts.module';
       }),
     }),
     MongooseModule.forRootAsync({
-      imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: async (configService: ConfigService<Config>) => ({
         uri: configService.get<string>('databaseUri'),
         useCreateIndex: true,
         useFindAndModify: false,
       }),
     }),
     MailerModule.forRootAsync({
-      imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        transport: {
-          host: configService.get<string>('smtp.host'),
-          port: configService.get<number>('smtp.port'),
-          secure: configService.get<boolean>('smtp.secure'),
-          auth: {
-            user: configService.get<string>('smtp.username'),
-            pass: configService.get<string>('smtp.password'),
+      useFactory: async (configService: ConfigService<Config>) => {
+        const smtpConfig: SmtpConfig = configService.get<SmtpConfig>('smtp');
+        return {
+          transport: {
+            host: smtpConfig.host,
+            port: smtpConfig.port,
+            secure: smtpConfig.secure,
+            auth: {
+              user: smtpConfig.username,
+              pass: smtpConfig.password,
+            },
           },
-        },
-        defaults: {
-          from: `"AgoraCloud" <${configService.get<string>('smtp.username')}>`,
-        },
-        template: {
-          dir: process.cwd() + '/templates/',
-          adapter: new HandlebarsAdapter(),
-          options: {
-            strict: true,
+          defaults: {
+            from: `"AgoraCloud" <${smtpConfig.username}>`,
           },
-        },
-      }),
+          template: {
+            dir: process.cwd() + '/templates/',
+            adapter: new HandlebarsAdapter(),
+            options: {
+              strict: true,
+            },
+          },
+        };
+      },
     }),
     ScheduleModule.forRoot(),
     UsersModule,

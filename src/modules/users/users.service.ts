@@ -1,3 +1,4 @@
+import { Config } from 'src/config/configuration.interface';
 import {
   UserWithIdNotFoundException,
   UserNotFoundException,
@@ -31,7 +32,7 @@ import { isDefined } from 'class-validator';
 export class UsersService implements OnModuleInit {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
-    private readonly configService: ConfigService,
+    private readonly configService: ConfigService<Config>,
     private readonly tokensService: TokensService,
     private readonly eventEmitter: EventEmitter2,
   ) {}

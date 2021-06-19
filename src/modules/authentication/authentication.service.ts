@@ -10,7 +10,7 @@ import {
   ChangePasswordDto,
   ForgotPasswordDto,
 } from '@agoracloud/common';
-import { JwtConfig } from '../../config/configuration.interface';
+import { Config, JwtConfig } from '../../config/configuration.interface';
 import { TokenPayload } from './interfaces/token-payload.interface';
 import { ConfigService } from '@nestjs/config';
 import { InvalidCredentialsException } from '../../exceptions/invalid-credentials.exception';
@@ -29,7 +29,7 @@ export class AuthenticationService {
   constructor(
     private readonly userService: UsersService,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
+    private readonly configService: ConfigService<Config>,
     private readonly tokensService: TokensService,
     private readonly eventEmitter: EventEmitter2,
   ) {
