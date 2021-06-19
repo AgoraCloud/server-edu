@@ -10,7 +10,7 @@ import { AuthenticationController } from './authentication.controller';
 import { UsersModule } from '../users/users.module';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { Config, JwtConfig } from 'src/config/configuration.interface';
+import { Config, JwtConfig } from '../../config/configuration.interface';
 
 @Global()
 @Module({

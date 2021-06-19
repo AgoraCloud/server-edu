@@ -22,6 +22,8 @@ import { KubernetesServicesService } from './kubernetes-services.service';
 import { KubernetesDeploymentsService } from './kubernetes-deployments.service';
 import { KubernetesPodsService } from './kubernetes-pods.service';
 
+export const KUBERNETES_CONFIG_KEY = 'KubernetesConfig';
+
 const makeKubernetes = (): Provider[] => {
   const kc: KubeConfig = new KubeConfig();
   kc.loadFromDefault();
@@ -47,7 +49,7 @@ const makeKubernetes = (): Provider[] => {
       useValue: kc.makeApiClient(RbacAuthorizationV1Api),
     },
     {
-      provide: 'KubernetesConfig',
+      provide: KUBERNETES_CONFIG_KEY,
       useFactory: (configService: ConfigService<Config>) => {
         return configService.get<KubernetesConfig>('kubernetes');
       },

@@ -6,7 +6,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ISendMailOptions, MailerService } from '@nestjs-modules/mailer';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Event } from '../../events/events.enum';
-import { Config } from 'src/config/configuration.interface';
+import { Config } from '../../config/configuration.interface';
 
 @Injectable()
 export class MailService {

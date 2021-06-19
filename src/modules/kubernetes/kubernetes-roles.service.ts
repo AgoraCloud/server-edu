@@ -1,3 +1,4 @@
+import { KUBERNETES_CONFIG_KEY } from './kubernetes.module';
 import { KubernetesConfig } from '../../config/configuration.interface';
 import { Inject, Injectable } from '@nestjs/common';
 import * as k8s from '@kubernetes/client-node';
@@ -9,7 +10,7 @@ export class KubernetesRolesService {
   constructor(
     @Inject(k8s.RbacAuthorizationV1Api)
     private readonly k8sRbacAuthorizationV1Api: k8s.RbacAuthorizationV1Api,
-    @Inject('KubernetesConfig')
+    @Inject(KUBERNETES_CONFIG_KEY)
     private readonly kubernetesConfig: KubernetesConfig,
   ) {}
 

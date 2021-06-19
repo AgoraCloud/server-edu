@@ -1,4 +1,4 @@
-import { Config } from 'src/config/configuration.interface';
+import { Config } from '../../config/configuration.interface';
 import {
   UserWithIdNotFoundException,
   UserNotFoundException,
