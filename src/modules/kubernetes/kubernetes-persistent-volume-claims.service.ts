@@ -1,4 +1,3 @@
-import { KUBERNETES_CONFIG_KEY } from './kubernetes.module';
 import { Inject, Injectable } from '@nestjs/common';
 import * as k8s from '@kubernetes/client-node';
 import * as http from 'http';
@@ -9,7 +8,7 @@ import { KubernetesConfig } from '../../config/configuration.interface';
 export class KubernetesPersistentVolumeClaimsService {
   constructor(
     @Inject(k8s.CoreV1Api) private readonly k8sCoreV1Api: k8s.CoreV1Api,
-    @Inject(KUBERNETES_CONFIG_KEY)
+    @Inject('KUBERNETES_CONFIG')
     private readonly kubernetesConfig: KubernetesConfig,
   ) {}
 

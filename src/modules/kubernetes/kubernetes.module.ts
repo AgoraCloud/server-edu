@@ -1,3 +1,4 @@
+import { InDatabaseConfigModule } from './../in-database-config/in-database-config.module';
 import { Config, KubernetesConfig } from '../../config/configuration.interface';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -21,8 +22,6 @@ import { KubernetesPersistentVolumeClaimsService } from './kubernetes-persistent
 import { KubernetesServicesService } from './kubernetes-services.service';
 import { KubernetesDeploymentsService } from './kubernetes-deployments.service';
 import { KubernetesPodsService } from './kubernetes-pods.service';
-
-export const KUBERNETES_CONFIG_KEY = 'KubernetesConfig';
 
 const makeKubernetes = (): Provider[] => {
   const kc: KubeConfig = new KubeConfig();
@@ -49,7 +48,7 @@ const makeKubernetes = (): Provider[] => {
       useValue: kc.makeApiClient(RbacAuthorizationV1Api),
     },
     {
-      provide: KUBERNETES_CONFIG_KEY,
+      provide: 'KUBERNETES_CONFIG',
       useFactory: (configService: ConfigService<Config>) => {
         return configService.get<KubernetesConfig>('kubernetes');
       },
@@ -59,7 +58,7 @@ const makeKubernetes = (): Provider[] => {
 };
 
 @Module({
-  imports: [WorkspacesModule, DeploymentsModule],
+  imports: [WorkspacesModule, DeploymentsModule, InDatabaseConfigModule],
   providers: [
     ...makeKubernetes(),
     KubernetesService,
