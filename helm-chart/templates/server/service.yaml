@@ -14,4 +14,4 @@ spec:
       protocol: TCP
   selector:
     {{- include "helm-chart.selectorLabels" . | nindent 4 }}
-    app: {{ $chartName }}-server
+    app: {{ .Chart.Name }}-server
