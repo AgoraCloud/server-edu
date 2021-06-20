@@ -3,7 +3,7 @@
 Expand the name of the chart.
 */}}
 {{- define "helm-chart.name" -}}
-{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- printf "%s-%s" .Chart.Name (.Release.Name | trimSuffix "-") | trunc 63 | lower }}
 {{- end }}
 
 {{/*
