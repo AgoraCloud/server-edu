@@ -17,7 +17,7 @@ import { MailModule } from './modules/mail/mail.module';
 import { DeploymentsModule } from './modules/deployments/deployments.module';
 import { KubernetesModule } from './modules/kubernetes/kubernetes.module';
 import { ProxyModule } from './modules/proxy/proxy.module';
-import * as Joi from '@hapi/joi';
+import * as Joi from 'joi';
 import { ScheduleModule } from '@nestjs/schedule';
 import { HealthModule } from './modules/health/health.module';
 import { LoggerModule } from './modules/logger/logger.module';
