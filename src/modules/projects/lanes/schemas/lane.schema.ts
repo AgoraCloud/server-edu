@@ -5,9 +5,9 @@ import {
   WorkspaceDocument,
 } from './../../../workspaces/schemas/workspace.schema';
 import { SchemaFactory, Prop, Schema } from '@nestjs/mongoose';
-import * as mongoose from 'mongoose';
+import { Document, Schema as MongooseSchema } from 'mongoose';
 
-export type ProjectLaneDocument = ProjectLane & mongoose.Document;
+export type ProjectLaneDocument = ProjectLane & Document;
 
 @Schema({ collection: 'project_lanes', timestamps: true })
 export class ProjectLane {
@@ -16,7 +16,7 @@ export class ProjectLane {
 
   @Prop({
     required: true,
-    type: mongoose.Schema.Types.ObjectId,
+    type: MongooseSchema.Types.ObjectId,
     ref: Workspace.name,
     index: true,
   })
@@ -24,7 +24,7 @@ export class ProjectLane {
 
   @Prop({
     required: true,
-    type: mongoose.Schema.Types.ObjectId,
+    type: MongooseSchema.Types.ObjectId,
     ref: User.name,
     index: true,
   })
@@ -32,7 +32,7 @@ export class ProjectLane {
 
   @Prop({
     required: true,
-    type: mongoose.Schema.Types.ObjectId,
+    type: MongooseSchema.Types.ObjectId,
     ref: Project.name,
     index: true,
   })

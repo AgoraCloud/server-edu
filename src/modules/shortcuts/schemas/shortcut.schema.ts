@@ -4,9 +4,9 @@ import {
   WorkspaceDocument,
 } from './../../workspaces/schemas/workspace.schema';
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
-import * as mongoose from 'mongoose';
+import { Document, Schema as MongooseSchema } from 'mongoose';
 
-export type ShortcutDocument = Shortcut & mongoose.Document;
+export type ShortcutDocument = Shortcut & Document;
 
 @Schema({ collection: 'shortcuts', timestamps: true })
 export class Shortcut {
@@ -18,7 +18,7 @@ export class Shortcut {
 
   @Prop({
     required: true,
-    type: mongoose.Schema.Types.ObjectId,
+    type: MongooseSchema.Types.ObjectId,
     ref: Workspace.name,
     index: true,
   })
@@ -26,7 +26,7 @@ export class Shortcut {
 
   @Prop({
     required: true,
-    type: mongoose.Schema.Types.ObjectId,
+    type: MongooseSchema.Types.ObjectId,
     ref: User.name,
     index: true,
   })

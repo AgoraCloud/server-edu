@@ -4,10 +4,10 @@ import {
   WorkspaceDocument,
 } from '../../workspaces/schemas/workspace.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import * as mongoose from 'mongoose';
 import { AuditActionDto, AuditResourceDto } from '@agoracloud/common';
+import { Document, Schema as MongooseSchema } from 'mongoose';
 
-export type AuditLogDocument = AuditLog & mongoose.Document;
+export type AuditLogDocument = AuditLog & Document;
 
 @Schema({ collection: 'audit_logs', timestamps: true })
 export class AuditLog {
@@ -63,14 +63,14 @@ export class AuditLog {
 
   @Prop({
     required: true,
-    type: mongoose.Schema.Types.ObjectId,
+    type: MongooseSchema.Types.ObjectId,
     ref: User.name,
     index: true,
   })
   user: UserDocument;
 
   @Prop({
-    type: mongoose.Schema.Types.ObjectId,
+    type: MongooseSchema.Types.ObjectId,
     ref: Workspace.name,
     index: true,
   })

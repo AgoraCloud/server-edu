@@ -4,9 +4,9 @@ import {
 } from './../../workspaces/schemas/workspace.schema';
 import { User, UserDocument } from './../../users/schemas/user.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import * as mongoose from 'mongoose';
+import { Document, Schema as MongooseSchema } from 'mongoose';
 
-export type ProjectDocument = Project & mongoose.Document;
+export type ProjectDocument = Project & Document;
 
 @Schema({ collection: 'projects', timestamps: true })
 export class Project {
@@ -18,7 +18,7 @@ export class Project {
 
   @Prop({
     required: true,
-    type: mongoose.Schema.Types.ObjectId,
+    type: MongooseSchema.Types.ObjectId,
     ref: Workspace.name,
     index: true,
   })
@@ -26,7 +26,7 @@ export class Project {
 
   @Prop({
     required: true,
-    type: mongoose.Schema.Types.ObjectId,
+    type: MongooseSchema.Types.ObjectId,
     ref: User.name,
     index: true,
   })

@@ -1,13 +1,13 @@
 import { User, UserDocument } from '../../users/schemas/user.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import * as mongoose from 'mongoose';
+import { Document, Schema as MongooseSchema } from 'mongoose';
 
 export enum TokenType {
   ChangePassword = 'CHANGE_PASSWORD',
   VerifyAccount = 'VERIFY_ACCOUNT',
 }
 
-export type TokenDocument = Token & mongoose.Document;
+export type TokenDocument = Token & Document;
 
 @Schema({ collection: 'tokens' })
 export class Token {
@@ -23,7 +23,7 @@ export class Token {
 
   @Prop({
     required: true,
-    type: mongoose.Schema.Types.ObjectId,
+    type: MongooseSchema.Types.ObjectId,
     ref: User.name,
   })
   user: UserDocument;
