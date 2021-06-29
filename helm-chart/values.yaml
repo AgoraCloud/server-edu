@@ -9,6 +9,7 @@ image:
       pullPolicy: Always
       tag: latest
 
+# NOTE: Everything in the config section below has to be filled out
 config:
   # Server log level, comma delimited string, defaults to 'warn,error'
   logLevel: 'warn,error'

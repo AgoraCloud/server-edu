@@ -6,6 +6,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ISendMailOptions, MailerService } from '@nestjs-modules/mailer';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Event } from '../../events/events.enum';
+import { Config } from '../../config/configuration.interface';
 
 @Injectable()
 export class MailService {
@@ -14,7 +15,7 @@ export class MailService {
 
   constructor(
     private readonly mailerService: MailerService,
-    private readonly configService: ConfigService,
+    private readonly configService: ConfigService<Config>,
   ) {
     this.baseDomain = this.configService.get<string>('domain');
   }

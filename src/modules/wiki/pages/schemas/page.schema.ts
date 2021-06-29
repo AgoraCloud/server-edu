@@ -4,8 +4,7 @@ import {
   WorkspaceDocument,
 } from '../../../workspaces/schemas/workspace.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
-import * as mongoose from 'mongoose';
+import { Document, Schema as MongooseSchema } from 'mongoose';
 import {
   WikiSection,
   WikiSectionDocument,
@@ -23,7 +22,7 @@ export class WikiPage {
 
   @Prop({
     required: true,
-    type: mongoose.Schema.Types.ObjectId,
+    type: MongooseSchema.Types.ObjectId,
     ref: Workspace.name,
     index: true,
   })
@@ -31,7 +30,7 @@ export class WikiPage {
 
   @Prop({
     required: true,
-    type: mongoose.Schema.Types.ObjectId,
+    type: MongooseSchema.Types.ObjectId,
     ref: User.name,
     index: true,
   })
@@ -39,7 +38,7 @@ export class WikiPage {
 
   @Prop({
     required: true,
-    type: mongoose.Schema.Types.ObjectId,
+    type: MongooseSchema.Types.ObjectId,
     ref: WikiSection.name,
     index: true,
   })

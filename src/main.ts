@@ -8,7 +8,7 @@ import * as helmet from 'helmet';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { LoggerService } from './modules/logger/logger.service';
 import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
-import { EnvironmentConfig } from './config/configuration.interface';
+import { Config, EnvironmentConfig } from './config/configuration.interface';
 
 declare const module: any;
 
@@ -18,7 +18,7 @@ async function bootstrap() {
   // Use the custom LoggerService for logging
   app.useLogger(app.get(LoggerService));
   // Get configuration values
-  const configService: ConfigService = app.get(ConfigService);
+  const configService: ConfigService<Config> = app.get(ConfigService);
   const port: number = configService.get<number>('port');
   const environment: EnvironmentConfig =
     configService.get<EnvironmentConfig>('environment');

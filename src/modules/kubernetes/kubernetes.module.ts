@@ -1,4 +1,5 @@
-import { KubernetesConfig } from '../../config/configuration.interface';
+import { InDatabaseConfigModule } from './../in-database-config/in-database-config.module';
+import { Config, KubernetesConfig } from '../../config/configuration.interface';
 import { ConfigService } from '@nestjs/config';
 import {
   AppsV1Api,
@@ -47,8 +48,8 @@ const makeKubernetes = (): Provider[] => {
       useValue: kc.makeApiClient(RbacAuthorizationV1Api),
     },
     {
-      provide: 'KubernetesConfig',
-      useFactory: (configService: ConfigService) => {
+      provide: 'KUBERNETES_CONFIG',
+      useFactory: (configService: ConfigService<Config>) => {
         return configService.get<KubernetesConfig>('kubernetes');
       },
       inject: [ConfigService],
@@ -57,7 +58,7 @@ const makeKubernetes = (): Provider[] => {
 };
 
 @Module({
-  imports: [WorkspacesModule, DeploymentsModule],
+  imports: [WorkspacesModule, DeploymentsModule, InDatabaseConfigModule],
   providers: [
     ...makeKubernetes(),
     KubernetesService,

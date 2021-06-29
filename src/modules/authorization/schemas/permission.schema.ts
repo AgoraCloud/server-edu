@@ -6,7 +6,7 @@ import {
   IN_WORKSPACE_ACTIONS_DTO,
   WORKSPACE_ACTIONS_DTO,
 } from '@agoracloud/common';
-import * as mongoose from 'mongoose';
+import { Document, Schema as MongooseSchema } from 'mongoose';
 
 export class WorkspaceRolesAndPermissions {
   @Prop({
@@ -30,13 +30,13 @@ export class WorkspaceRolesAndPermissions {
   }
 }
 
-export type PermissionDocument = Permission & mongoose.Document;
+export type PermissionDocument = Permission & Document;
 
 @Schema({ collection: 'permissions' })
 export class Permission {
   @Prop({
     required: true,
-    type: mongoose.Schema.Types.ObjectId,
+    type: MongooseSchema.Types.ObjectId,
     ref: User.name,
     index: true,
     unique: true,

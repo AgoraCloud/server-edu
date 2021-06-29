@@ -8,7 +8,7 @@ import { KubernetesConfig } from '../../config/configuration.interface';
 export class KubernetesPersistentVolumeClaimsService {
   constructor(
     @Inject(k8s.CoreV1Api) private readonly k8sCoreV1Api: k8s.CoreV1Api,
-    @Inject('KubernetesConfig')
+    @Inject('KUBERNETES_CONFIG')
     private readonly kubernetesConfig: KubernetesConfig,
   ) {}
 

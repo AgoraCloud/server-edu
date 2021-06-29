@@ -9,7 +9,7 @@ export class KubernetesRolesService {
   constructor(
     @Inject(k8s.RbacAuthorizationV1Api)
     private readonly k8sRbacAuthorizationV1Api: k8s.RbacAuthorizationV1Api,
-    @Inject('KubernetesConfig')
+    @Inject('KUBERNETES_CONFIG')
     private readonly kubernetesConfig: KubernetesConfig,
   ) {}
 

@@ -1,20 +1,20 @@
+import { User, UserDocument } from './../../users/schemas/user.schema';
 import {
   Workspace,
   WorkspaceDocument,
 } from './../../workspaces/schemas/workspace.schema';
-import { User, UserDocument } from './../../users/schemas/user.schema';
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 
-export type ProjectDocument = Project & Document;
+export type ShortcutDocument = Shortcut & Document;
 
-@Schema({ collection: 'projects', timestamps: true })
-export class Project {
+@Schema({ collection: 'shortcuts', timestamps: true })
+export class Shortcut {
   @Prop({ required: true, minlength: 4 })
-  name: string;
+  title: string;
 
-  @Prop()
-  description?: string;
+  @Prop({ required: true })
+  link: string;
 
   @Prop({
     required: true,
@@ -32,9 +32,9 @@ export class Project {
   })
   user: UserDocument;
 
-  constructor(partial: Partial<Project>) {
+  constructor(partial: Partial<Shortcut>) {
     Object.assign(this, partial);
   }
 }
 
-export const ProjectSchema = SchemaFactory.createForClass(Project);
+export const ShortcutSchema = SchemaFactory.createForClass(Shortcut);

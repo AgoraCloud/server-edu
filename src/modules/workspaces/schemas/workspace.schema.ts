@@ -1,7 +1,6 @@
 import { User, UserDocument } from '../../users/schemas/user.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
-import * as mongoose from 'mongoose';
+import { Document, Schema as MongooseSchema } from 'mongoose';
 
 export type WorkspaceDocument = Workspace & Document;
 
@@ -39,7 +38,7 @@ export class Workspace {
 
   @Prop({
     required: true,
-    type: [{ type: mongoose.Schema.Types.ObjectId, ref: User.name }],
+    type: [{ type: MongooseSchema.Types.ObjectId, ref: User.name }],
     index: true,
   })
   users: UserDocument[];

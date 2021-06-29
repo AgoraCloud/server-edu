@@ -5,7 +5,7 @@
 1. Kubernetes
 2. Helm (version 3+)
 
-# Installation
+# Install AgoraCloud
 
 1. Clone this repository
 ```bash
@@ -24,8 +24,7 @@ nano values.yaml
 
 4. Create and label the AgoraCloud namespace
 ```bash
-kubectl create namespace agoracloud && kubectl label namespace agoracl
-oud app=agoracloud
+kubectl create namespace agoracloud && kubectl label namespace agoracloud app=agoracloud
 ```
 
 5. Install the AgoraCloud Helm chart
@@ -33,7 +32,7 @@ oud app=agoracloud
 helm install agoracloud . --namespace agoracloud
 ```
 
-# Uninstallation
+# Uninstall AgoraCloud
 
 ```bash
 helm uninstall agoracloud --namespace agoracloud

@@ -4,9 +4,9 @@ import {
   WorkspaceDocument,
 } from '../../../workspaces/schemas/workspace.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import * as mongoose from 'mongoose';
+import { Document, Schema as MongooseSchema } from 'mongoose';
 
-export type WikiSectionDocument = WikiSection & mongoose.Document;
+export type WikiSectionDocument = WikiSection & Document;
 
 @Schema({ collection: 'wiki_sections', timestamps: true })
 export class WikiSection {
@@ -15,7 +15,7 @@ export class WikiSection {
 
   @Prop({
     required: true,
-    type: mongoose.Schema.Types.ObjectId,
+    type: MongooseSchema.Types.ObjectId,
     ref: Workspace.name,
     index: true,
   })
@@ -23,7 +23,7 @@ export class WikiSection {
 
   @Prop({
     required: true,
-    type: mongoose.Schema.Types.ObjectId,
+    type: MongooseSchema.Types.ObjectId,
     ref: User.name,
     index: true,
   })

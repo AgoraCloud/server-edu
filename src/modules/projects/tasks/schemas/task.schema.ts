@@ -9,9 +9,9 @@ import {
   WorkspaceDocument,
 } from './../../../workspaces/schemas/workspace.schema';
 import { SchemaFactory, Prop, Schema } from '@nestjs/mongoose';
-import * as mongoose from 'mongoose';
+import { Document, Schema as MongooseSchema } from 'mongoose';
 
-export type ProjectTaskDocument = ProjectTask & mongoose.Document;
+export type ProjectTaskDocument = ProjectTask & Document;
 
 @Schema({ collection: 'project_tasks', timestamps: true })
 export class ProjectTask {
@@ -23,7 +23,7 @@ export class ProjectTask {
 
   @Prop({
     required: true,
-    type: mongoose.Schema.Types.ObjectId,
+    type: MongooseSchema.Types.ObjectId,
     ref: Workspace.name,
     index: true,
   })
@@ -31,7 +31,7 @@ export class ProjectTask {
 
   @Prop({
     required: true,
-    type: mongoose.Schema.Types.ObjectId,
+    type: MongooseSchema.Types.ObjectId,
     ref: User.name,
     index: true,
   })
@@ -39,7 +39,7 @@ export class ProjectTask {
 
   @Prop({
     required: true,
-    type: mongoose.Schema.Types.ObjectId,
+    type: MongooseSchema.Types.ObjectId,
     ref: Project.name,
     index: true,
   })
@@ -47,7 +47,7 @@ export class ProjectTask {
 
   @Prop({
     required: true,
-    type: mongoose.Schema.Types.ObjectId,
+    type: MongooseSchema.Types.ObjectId,
     ref: ProjectLane.name,
     index: true,
   })
