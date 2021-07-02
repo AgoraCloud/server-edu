@@ -22,7 +22,7 @@
     "prepare": "husky install"
   },
   "dependencies": {
-    "@agoracloud/common": "^1.0.6",
+    "@agoracloud/common": "^1.0.7",
     "@kubernetes/client-node": "^0.13.2",
     "@nestjs-modules/mailer": "^1.6.0",
     "@nestjs/common": "^7.6.17",
