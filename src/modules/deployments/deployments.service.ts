@@ -25,6 +25,7 @@ import {
   UpdateDeploymentImageDto,
 } from '@agoracloud/common';
 import { Event } from '../../events/events.enum';
+import { isDefined } from 'class-validator';
 
 @Injectable()
 export class DeploymentsService {
@@ -145,14 +146,27 @@ export class DeploymentsService {
 
     const updateDeploymentResourcesDto: UpdateDeploymentResourcesDto =
       updateDeploymentDto.properties?.resources;
+    // Tracks whether a deployments Kubernetes specific attributes were updated
+    let isDeploymentUpdated = false;
+
     // Change the updated fields only
     deployment.name = updateDeploymentDto.name || deployment.name;
-    deployment.properties.resources.cpuCount =
-      updateDeploymentResourcesDto?.cpuCount ||
-      deployment.properties.resources.cpuCount;
-    deployment.properties.resources.memoryCount =
-      updateDeploymentResourcesDto?.memoryCount ||
-      deployment.properties.resources.memoryCount;
+    const newCpuCount: number = updateDeploymentResourcesDto?.cpuCount;
+    if (
+      isDefined(newCpuCount) &&
+      deployment.properties.resources.cpuCount !== newCpuCount
+    ) {
+      deployment.properties.resources.cpuCount = newCpuCount;
+      isDeploymentUpdated = true;
+    }
+    const newMemoryCount: number = updateDeploymentResourcesDto?.memoryCount;
+    if (
+      isDefined(newMemoryCount) &&
+      deployment.properties.resources.memoryCount !== newMemoryCount
+    ) {
+      deployment.properties.resources.memoryCount = newMemoryCount;
+      isDeploymentUpdated = true;
+    }
 
     // Check if a new deployment image version has been supplied
     const updateDeploymentImageDto: UpdateDeploymentImageDto =
@@ -183,6 +197,7 @@ export class DeploymentsService {
         );
       }
       deployment.properties.image.version = updateDeploymentImageDto.version;
+      isDeploymentUpdated = true;
     }
 
     let deploymentQuery: Query<
@@ -203,11 +218,7 @@ export class DeploymentsService {
      * Send the deployment.updated event only if cpuCount, memoryCount and/or
      * image version have been updated
      */
-    if (
-      updateDeploymentResourcesDto?.cpuCount ||
-      updateDeploymentResourcesDto?.memoryCount ||
-      updateDeploymentImageDto?.version
-    ) {
+    if (isDeploymentUpdated) {
       this.eventEmitter.emit(
         Event.DeploymentUpdated,
         new DeploymentUpdatedEvent(
