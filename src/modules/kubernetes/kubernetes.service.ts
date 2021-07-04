@@ -313,7 +313,7 @@ export class KubernetesService implements OnModuleInit {
       await this.kubeDeploymentsService.updateDeployment(
         namespace,
         deploymentId,
-        payload.updateDeploymentDto.properties.resources,
+        payload.updateDeploymentDto.properties,
       );
     } catch (error) {
       // TODO: roll back the deployment update
