@@ -1,3 +1,5 @@
+import { InvalidDeploymentVersionUpgradeException } from './../../exceptions/invalid-deployment-version-upgrade.exception';
+import { DeploymentTypeMismatchException } from './../../exceptions/deployment-type-mismatch.exception';
 import { DeploymentCannotBeUpdatedException } from '../../exceptions/deployment-cannot-be-updated.exception';
 import { WorkspaceUserRemovedEvent } from './../../events/workspace-user-removed.event';
 import { WorkspaceDeletedEvent } from './../../events/workspace-deleted.event';
@@ -20,8 +22,10 @@ import {
   UpdateDeploymentResourcesDto,
   DEPLOYMENT_IMAGES_DTO,
   DeploymentImageDto,
+  UpdateDeploymentImageDto,
 } from '@agoracloud/common';
 import { Event } from '../../events/events.enum';
+import { isDefined } from 'class-validator';
 
 @Injectable()
 export class DeploymentsService {
@@ -142,14 +146,59 @@ export class DeploymentsService {
 
     const updateDeploymentResourcesDto: UpdateDeploymentResourcesDto =
       updateDeploymentDto.properties?.resources;
+    // Tracks whether a deployments Kubernetes specific attributes were updated
+    let isDeploymentUpdated = false;
+
     // Change the updated fields only
     deployment.name = updateDeploymentDto.name || deployment.name;
-    deployment.properties.resources.cpuCount =
-      updateDeploymentResourcesDto?.cpuCount ||
-      deployment.properties.resources.cpuCount;
-    deployment.properties.resources.memoryCount =
-      updateDeploymentResourcesDto?.memoryCount ||
-      deployment.properties.resources.memoryCount;
+    const newCpuCount: number = updateDeploymentResourcesDto?.cpuCount;
+    if (
+      isDefined(newCpuCount) &&
+      deployment.properties.resources.cpuCount !== newCpuCount
+    ) {
+      deployment.properties.resources.cpuCount = newCpuCount;
+      isDeploymentUpdated = true;
+    }
+    const newMemoryCount: number = updateDeploymentResourcesDto?.memoryCount;
+    if (
+      isDefined(newMemoryCount) &&
+      deployment.properties.resources.memoryCount !== newMemoryCount
+    ) {
+      deployment.properties.resources.memoryCount = newMemoryCount;
+      isDeploymentUpdated = true;
+    }
+
+    // Check if a new deployment image version has been supplied
+    const updateDeploymentImageDto: UpdateDeploymentImageDto =
+      updateDeploymentDto.properties?.image;
+    if (updateDeploymentImageDto) {
+      if (updateDeploymentImageDto.type !== deployment.properties.image.type) {
+        throw new DeploymentTypeMismatchException(
+          deploymentId,
+          deployment.properties.image.type,
+          updateDeploymentImageDto.type,
+        );
+      }
+      const newImageIndex: number = DEPLOYMENT_IMAGES_DTO.findIndex(
+        (i: DeploymentImageDto) =>
+          i.type === updateDeploymentImageDto.type &&
+          i.version === updateDeploymentImageDto.version,
+      );
+      const currentImageIndex: number = DEPLOYMENT_IMAGES_DTO.findIndex(
+        (i: DeploymentImageDto) =>
+          i.type === deployment.properties.image.type &&
+          i.version === deployment.properties.image.version,
+      );
+      if (newImageIndex >= currentImageIndex) {
+        throw new InvalidDeploymentVersionUpgradeException(
+          deploymentId,
+          deployment.properties.image.version,
+          updateDeploymentImageDto.version,
+        );
+      }
+      deployment.properties.image.version = updateDeploymentImageDto.version;
+      isDeploymentUpdated = true;
+    }
 
     let deploymentQuery: Query<
       { ok: number; n: number; nModified: number },
@@ -166,13 +215,10 @@ export class DeploymentsService {
     await deploymentQuery.exec();
 
     /**
-     * Send the deployment.updated event only if cpuCount and/or
-     * memoryCount have been updated
+     * Send the deployment.updated event only if cpuCount, memoryCount and/or
+     * image version have been updated
      */
-    if (
-      updateDeploymentResourcesDto?.cpuCount ||
-      updateDeploymentResourcesDto?.memoryCount
-    ) {
+    if (isDeploymentUpdated) {
       this.eventEmitter.emit(
         Event.DeploymentUpdated,
         new DeploymentUpdatedEvent(

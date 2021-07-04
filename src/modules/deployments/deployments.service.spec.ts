@@ -1,3 +1,5 @@
+import { InvalidDeploymentVersionUpgradeException } from './../../exceptions/invalid-deployment-version-upgrade.exception';
+import { DeploymentTypeMismatchException } from './../../exceptions/deployment-type-mismatch.exception';
 import { DeploymentCannotBeUpdatedException } from '../../exceptions/deployment-cannot-be-updated.exception';
 import { DeploymentNotFoundException } from './../../exceptions/deployment-not-found.exception';
 import { WorkspaceDocument } from './../workspaces/schemas/workspace.schema';
@@ -22,6 +24,8 @@ import {
   DeploymentStatusDto,
   UpdateDeploymentDto,
   DEPLOYMENT_IMAGES_DTO,
+  DeploymentVersionDto,
+  DeploymentTypeDto,
 } from '@agoracloud/common';
 
 const user: UserDocument = {
@@ -39,7 +43,7 @@ const workspace: WorkspaceDocument = {
   users: [user],
 } as WorkspaceDocument;
 
-let deploymentId: string;
+let deployment: DeploymentDocument;
 
 describe('DeploymentsService', () => {
   let service: DeploymentsService;
@@ -79,8 +83,8 @@ describe('DeploymentsService', () => {
         name: 'Test Deployment',
         properties: {
           image: {
-            type: DEPLOYMENT_IMAGES_DTO[0].type,
-            version: DEPLOYMENT_IMAGES_DTO[0].version,
+            type: DeploymentTypeDto.VSCode,
+            version: DeploymentVersionDto.VSCode_3_9_3,
           },
           resources: {
             cpuCount: 1,
@@ -114,7 +118,7 @@ describe('DeploymentsService', () => {
       expect(createDeploymentDto.properties.resources.storageCount).toBe(
         createDeploymentDto.properties.resources.storageCount,
       );
-      deploymentId = createdDeployment._id;
+      deployment = createdDeployment;
     });
   });
 
@@ -162,35 +166,44 @@ describe('DeploymentsService', () => {
 
     it('should find the deployment in the given workspace for the given user', async () => {
       const retrievedDeployment: DeploymentDocument = await service.findOne(
-        deploymentId,
+        deployment._id,
         user._id,
         workspace._id,
       );
-      expect(retrievedDeployment._id).toEqual(deploymentId);
+      expect(retrievedDeployment._id).toEqual(deployment._id);
       expect(retrievedDeployment.workspace._id).toEqual(workspace._id);
       expect(retrievedDeployment.user._id).toEqual(user._id);
     });
 
     it('should find the deployment for the given user', async () => {
       const retrievedDeployment: DeploymentDocument = await service.findOne(
-        deploymentId,
+        deployment._id,
         user._id,
       );
-      expect(retrievedDeployment._id).toEqual(deploymentId);
+      expect(retrievedDeployment._id).toEqual(deployment._id);
       expect(retrievedDeployment.user._id).toEqual(user._id);
     });
   });
 
   describe('update', () => {
-    const updateDeploymentDto: UpdateDeploymentDto = {
-      name: 'New Test Deployment',
-      properties: {
-        resources: {
-          cpuCount: 2,
-          memoryCount: 4,
+    let updateDeploymentDto: UpdateDeploymentDto;
+
+    beforeAll(() => {
+      updateDeploymentDto = {
+        name: 'New Test Deployment',
+        properties: {
+          image: {
+            type: deployment.properties.image.type,
+            version: DeploymentVersionDto.VSCode_3_10_2,
+          },
+          resources: {
+            cpuCount: 2,
+            memoryCount: 4,
+          },
         },
-      },
-    };
+      };
+    });
+
     it('should throw an error if the deployment with the given id was not found', async () => {
       const deploymentId = Types.ObjectId().toHexString();
       const expectedErrorMessage: string = new DeploymentNotFoundException(
@@ -211,11 +224,70 @@ describe('DeploymentsService', () => {
 
     it('should throw an error if the deployment status is not running or failed', async () => {
       const expectedErrorMessage: string =
-        new DeploymentCannotBeUpdatedException(deploymentId).message;
+        new DeploymentCannotBeUpdatedException(deployment._id).message;
       try {
         await service.update(
           workspace._id,
-          deploymentId,
+          deployment._id,
+          updateDeploymentDto,
+          user._id,
+        );
+        fail('It should throw an error');
+      } catch (err) {
+        expect(err.message).toBe(expectedErrorMessage);
+      } finally {
+        // Update the deployment status to running
+        await service.updateStatus(deployment._id, DeploymentStatusDto.Running);
+      }
+    });
+
+    it('should throw an error if the given deployment type does not match the deployments original type', async () => {
+      // At the time of writing, there is only one deployment type, hence the cast to any
+      const updateDeploymentDto: UpdateDeploymentDto = {
+        properties: {
+          image: {
+            type: 'type',
+            version: deployment.properties.image.version,
+          },
+        },
+      } as any;
+      const expectedErrorMessage: string = new DeploymentTypeMismatchException(
+        deployment._id,
+        deployment.properties.image.type,
+        updateDeploymentDto.properties.image.type,
+      ).message;
+      try {
+        await service.update(
+          workspace._id,
+          deployment._id,
+          updateDeploymentDto,
+          user._id,
+        );
+        fail('It should throw an error');
+      } catch (err) {
+        expect(err.message).toBe(expectedErrorMessage);
+      }
+    });
+
+    it('should throw an error if the given deployment version is older than the deployments current version', async () => {
+      const updateDeploymentDto: UpdateDeploymentDto = {
+        properties: {
+          image: {
+            type: deployment.properties.image.type,
+            version: DeploymentVersionDto.VSCode_3_9_0,
+          },
+        },
+      };
+      const expectedErrorMessage: string =
+        new InvalidDeploymentVersionUpgradeException(
+          deployment._id,
+          deployment.properties.image.version,
+          updateDeploymentDto.properties.image.version,
+        ).message;
+      try {
+        await service.update(
+          workspace._id,
+          deployment._id,
           updateDeploymentDto,
           user._id,
         );
@@ -226,19 +298,17 @@ describe('DeploymentsService', () => {
     });
 
     it('should update the deployment', async () => {
-      // Update the deployment status to running
-      await service.updateStatus(deploymentId, DeploymentStatusDto.Running);
       const eventEmitterSpy: jest.SpyInstance<boolean, any[]> = jest.spyOn(
         eventEmitter,
         'emit',
       );
       const updatedDeployment: DeploymentDocument = await service.update(
         workspace._id,
-        deploymentId,
+        deployment._id,
         updateDeploymentDto,
         user._id,
       );
-      expect(updatedDeployment._id).toEqual(deploymentId);
+      expect(updatedDeployment._id).toEqual(deployment._id);
       expect(updatedDeployment.user._id).toEqual(user._id);
       expect(updatedDeployment.workspace._id).toEqual(workspace._id);
       expect(updatedDeployment.name).toBe(updateDeploymentDto.name);
@@ -262,7 +332,7 @@ describe('DeploymentsService', () => {
       };
       await service.update(
         workspace._id,
-        deploymentId,
+        deployment._id,
         updateDeploymentDto,
         user._id,
       );
@@ -273,9 +343,9 @@ describe('DeploymentsService', () => {
   describe('updateStatus', () => {
     it('should update the deployments status', async () => {
       const updatedStatus: DeploymentStatusDto = DeploymentStatusDto.Deleting;
-      await service.updateStatus(deploymentId, updatedStatus);
+      await service.updateStatus(deployment._id, updatedStatus);
       const retrievedDeployment = await service.findOne(
-        deploymentId,
+        deployment._id,
         user._id,
         workspace._id,
       );
@@ -303,7 +373,7 @@ describe('DeploymentsService', () => {
         'emit',
       );
       eventEmitterSpy.mockClear();
-      await service.remove(workspace._id, deploymentId, user._id);
+      await service.remove(workspace._id, deployment._id, user._id);
       expect(eventEmitterSpy).toHaveBeenCalledTimes(1);
     });
   });

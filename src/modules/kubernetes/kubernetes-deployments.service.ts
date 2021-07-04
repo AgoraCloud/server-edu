@@ -2,6 +2,7 @@ import { DeploymentImage } from './../deployments/schemas/deployment.schema';
 import { DeploymentProperties } from '../deployments/schemas/deployment.schema';
 import {
   DeploymentTypeDto,
+  UpdateDeploymentPropertiesDto,
   UpdateDeploymentResourcesDto,
 } from '@agoracloud/common';
 import { Inject, Injectable } from '@nestjs/common';
@@ -141,20 +142,33 @@ export class KubernetesDeploymentsService {
   updateDeployment(
     namespace: string,
     deploymentId: string,
-    updatedResources: UpdateDeploymentResourcesDto,
+    updatedProperties: UpdateDeploymentPropertiesDto,
   ): Promise<{
     response: http.IncomingMessage;
     body: k8s.V1Deployment;
   }> {
     const resourceName: string = generateResourceName(deploymentId);
-    const resources: k8s.V1ResourceRequirements =
-      new k8s.V1ResourceRequirements();
-    resources.limits = {};
-    if (updatedResources.cpuCount) {
+
+    const resources: k8s.V1ResourceRequirements = {
+      limits: {},
+    };
+    const updatedResources: UpdateDeploymentResourcesDto =
+      updatedProperties.resources;
+    if (updatedResources?.cpuCount) {
       resources.limits.cpu = `${updatedResources.cpuCount}`;
     }
-    if (updatedResources.memoryCount) {
+    if (updatedResources?.memoryCount) {
       resources.limits.memory = `${updatedResources.memoryCount}Gi`;
+    }
+
+    const updatedContainer: k8s.V1Container = {
+      name: resourceName,
+      resources,
+    };
+    if (updatedProperties.image) {
+      updatedContainer.image = this.generateContainerImage(
+        updatedProperties.image,
+      );
     }
 
     return this.k8sAppsV1Api.patchNamespacedDeployment(
@@ -164,12 +178,7 @@ export class KubernetesDeploymentsService {
         spec: {
           template: {
             spec: {
-              containers: [
-                {
-                  name: resourceName,
-                  resources,
-                },
-              ],
+              containers: [updatedContainer],
             },
           },
         },
