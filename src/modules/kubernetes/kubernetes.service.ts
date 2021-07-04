@@ -80,6 +80,7 @@ export class KubernetesService implements OnModuleInit {
       `/api/v1/namespaces/${namespace}/pods`,
       this.podsService.makeNamespacedPodListFunction(namespace),
     );
+    informer.on('add', (pod: k8s.V1Pod) => this.updateDeploymentStatus(pod));
     informer.on('update', (pod: k8s.V1Pod) => this.updateDeploymentStatus(pod));
     informer.on('error', (pod: k8s.V1Pod) => this.updateDeploymentStatus(pod));
     await informer.start();

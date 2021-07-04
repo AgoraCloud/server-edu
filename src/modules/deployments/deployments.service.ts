@@ -189,7 +189,7 @@ export class DeploymentsService {
           i.type === deployment.properties.image.type &&
           i.version === deployment.properties.image.version,
       );
-      if (newImageIndex > currentImageIndex) {
+      if (newImageIndex >= currentImageIndex) {
         throw new InvalidDeploymentVersionUpgradeException(
           deploymentId,
           deployment.properties.image.version,

@@ -13,7 +13,7 @@ import {
 import * as HttpProxy from 'http-proxy';
 import { Server } from 'http';
 import { Socket } from 'net';
-import { generateResourceName, resourcePrefix } from '../kubernetes/helpers';
+import { generateResourceName } from '../kubernetes/helpers';
 import { IncomingMessage, ServerResponse } from 'http';
 
 @Injectable()
