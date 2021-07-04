@@ -1,3 +1,5 @@
+import { InvalidDeploymentVersionUpgradeException } from './../../exceptions/invalid-deployment-version-upgrade.exception';
+import { DeploymentTypeMismatchException } from './../../exceptions/deployment-type-mismatch.exception';
 import { DeploymentCannotBeUpdatedException } from '../../exceptions/deployment-cannot-be-updated.exception';
 import { WorkspaceUserRemovedEvent } from './../../events/workspace-user-removed.event';
 import { WorkspaceDeletedEvent } from './../../events/workspace-deleted.event';
@@ -20,6 +22,7 @@ import {
   UpdateDeploymentResourcesDto,
   DEPLOYMENT_IMAGES_DTO,
   DeploymentImageDto,
+  UpdateDeploymentImageDto,
 } from '@agoracloud/common';
 import { Event } from '../../events/events.enum';
 
@@ -151,6 +154,37 @@ export class DeploymentsService {
       updateDeploymentResourcesDto?.memoryCount ||
       deployment.properties.resources.memoryCount;
 
+    // Check if a new deployment image version has been supplied
+    const updateDeploymentImageDto: UpdateDeploymentImageDto =
+      updateDeploymentDto.properties?.image;
+    if (updateDeploymentImageDto) {
+      if (updateDeploymentImageDto.type !== deployment.properties.image.type) {
+        throw new DeploymentTypeMismatchException(
+          deploymentId,
+          deployment.properties.image.type,
+          updateDeploymentImageDto.type,
+        );
+      }
+      const newImageIndex: number = DEPLOYMENT_IMAGES_DTO.findIndex(
+        (i: DeploymentImageDto) =>
+          i.type === updateDeploymentImageDto.type &&
+          i.version === updateDeploymentImageDto.version,
+      );
+      const currentImageIndex: number = DEPLOYMENT_IMAGES_DTO.findIndex(
+        (i: DeploymentImageDto) =>
+          i.type === deployment.properties.image.type &&
+          i.version === deployment.properties.image.version,
+      );
+      if (newImageIndex > currentImageIndex) {
+        throw new InvalidDeploymentVersionUpgradeException(
+          deploymentId,
+          deployment.properties.image.version,
+          updateDeploymentImageDto.version,
+        );
+      }
+      deployment.properties.image.version = updateDeploymentImageDto.version;
+    }
+
     let deploymentQuery: Query<
       { ok: number; n: number; nModified: number },
       DeploymentDocument
@@ -166,12 +200,13 @@ export class DeploymentsService {
     await deploymentQuery.exec();
 
     /**
-     * Send the deployment.updated event only if cpuCount and/or
-     * memoryCount have been updated
+     * Send the deployment.updated event only if cpuCount, memoryCount and/or
+     * image version have been updated
      */
     if (
       updateDeploymentResourcesDto?.cpuCount ||
-      updateDeploymentResourcesDto?.memoryCount
+      updateDeploymentResourcesDto?.memoryCount ||
+      updateDeploymentImageDto?.version
     ) {
       this.eventEmitter.emit(
         Event.DeploymentUpdated,
