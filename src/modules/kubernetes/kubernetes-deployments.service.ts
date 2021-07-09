@@ -9,6 +9,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import * as k8s from '@kubernetes/client-node';
 import * as http from 'http';
 import { generateDeploymentLabels, generateResourceName } from './helpers';
+import { ContainerConfig, DEPLOYMENT_CONFIG } from './config/deployment.config';
 
 @Injectable()
 export class KubernetesDeploymentsService {
@@ -53,6 +54,10 @@ export class KubernetesDeploymentsService {
     const labels: { [key: string]: string } =
       generateDeploymentLabels(deploymentId);
     const resourceName: string = generateResourceName(deploymentId);
+    const containerConfig: ContainerConfig =
+      DEPLOYMENT_CONFIG[deploymentProperties.image.type];
+
+    // Deployment volumes and volume mounts
     const volumes: k8s.V1Volume[] = [];
     const volumeMounts: k8s.V1VolumeMount[] = [];
     if (deploymentProperties.resources.storageCount) {
@@ -64,7 +69,7 @@ export class KubernetesDeploymentsService {
       });
       volumeMounts.push({
         name: resourceName,
-        mountPath: '/config',
+        mountPath: containerConfig.volumeMountPath,
       });
     }
 
@@ -102,7 +107,7 @@ export class KubernetesDeploymentsService {
                 },
                 env: [
                   {
-                    name: 'SUDO_PASSWORD',
+                    name: containerConfig.passwordEnvVariable,
                     valueFrom: {
                       secretKeyRef: {
                         name: resourceName,
@@ -115,13 +120,13 @@ export class KubernetesDeploymentsService {
                 livenessProbe: {
                   httpGet: {
                     path: '/',
-                    port: new Number(8443),
+                    port: new Number(containerConfig.containerPort),
                   },
                 },
                 readinessProbe: {
                   httpGet: {
                     path: '/',
-                    port: new Number(8443),
+                    port: new Number(containerConfig.containerPort),
                   },
                 },
               },
@@ -222,6 +227,8 @@ export class KubernetesDeploymentsService {
   private generateContainerImage(deploymentImage: DeploymentImage): string {
     if (deploymentImage.type === DeploymentTypeDto.VSCode) {
       return `linuxserver/code-server:version-v${deploymentImage.version}`;
+    } else if (deploymentImage.type === DeploymentTypeDto.Ubuntu) {
+      return `linuxserver/webtop:ubuntu-mate-version-${deploymentImage.version}`;
     }
   }
 }

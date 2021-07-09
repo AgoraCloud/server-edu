@@ -82,7 +82,12 @@ export class KubernetesService implements OnModuleInit {
     );
     informer.on('add', (pod: k8s.V1Pod) => this.updateDeploymentStatus(pod));
     informer.on('update', (pod: k8s.V1Pod) => this.updateDeploymentStatus(pod));
-    informer.on('error', (pod: k8s.V1Pod) => this.updateDeploymentStatus(pod));
+    informer.on('error', (pod: k8s.V1Pod) => {
+      this.updateDeploymentStatus(pod);
+      setTimeout(() => {
+        informer.start();
+      }, 5000);
+    });
     await informer.start();
   }
 
@@ -268,7 +273,11 @@ export class KubernetesService implements OnModuleInit {
         deploymentId,
         payload.sudoPassword,
       );
-      await this.servicesService.createService(namespace, deploymentId);
+      await this.servicesService.createService(
+        namespace,
+        deploymentId,
+        payload.deployment.properties.image.type,
+      );
       if (storageCount) {
         await this.persistentVolumeClaimsService.createPersistentVolumeClaim(
           namespace,

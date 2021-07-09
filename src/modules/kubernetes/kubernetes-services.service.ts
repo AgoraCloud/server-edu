@@ -2,6 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import * as k8s from '@kubernetes/client-node';
 import * as http from 'http';
 import { generateDeploymentLabels, generateResourceName } from './helpers';
+import { DeploymentTypeDto } from '@agoracloud/common';
+import { DEPLOYMENT_CONFIG } from './config/deployment.config';
 
 @Injectable()
 export class KubernetesServicesService {
@@ -37,6 +39,7 @@ export class KubernetesServicesService {
   createService(
     namespace: string,
     deploymentId: string,
+    deploymentType: DeploymentTypeDto,
   ): Promise<{
     response: http.IncomingMessage;
     body: k8s.V1Service;
@@ -55,7 +58,9 @@ export class KubernetesServicesService {
         ports: [
           {
             port: 80,
-            targetPort: new Number(8443),
+            targetPort: new Number(
+              DEPLOYMENT_CONFIG[deploymentType].containerPort,
+            ),
           },
         ],
         selector: labels,
