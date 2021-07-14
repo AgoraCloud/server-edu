@@ -1,4 +1,8 @@
-import { DeploymentStatusDto, DeploymentTypeDto } from '@agoracloud/common';
+import {
+  DeploymentStatusDto,
+  DeploymentTypeDto,
+  DeploymentVersionDto,
+} from '@agoracloud/common';
 import {
   Workspace,
   WorkspaceDocument,
@@ -29,8 +33,17 @@ export class DeploymentImage {
   })
   type: DeploymentTypeDto;
 
-  @Prop({ required: true })
-  version: string;
+  @Prop({
+    required: true,
+    enum: [
+      DeploymentVersionDto.VSCode_3_10_2,
+      DeploymentVersionDto.VSCode_3_9_3,
+      DeploymentVersionDto.VSCode_3_9_2,
+      DeploymentVersionDto.VSCode_3_9_1,
+      DeploymentVersionDto.VSCode_3_9_0,
+    ],
+  })
+  version: DeploymentVersionDto;
 
   constructor(partial: Partial<DeploymentImage>) {
     Object.assign(this, partial);

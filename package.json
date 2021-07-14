@@ -1,6 +1,6 @@
 {
   "name": "agoracloud_server",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "AgoraClouds Server",
   "author": "AgoraCloud",
   "private": true,
@@ -22,7 +22,7 @@
     "prepare": "husky install"
   },
   "dependencies": {
-    "@agoracloud/common": "^1.0.6",
+    "@agoracloud/common": "^1.1.0",
     "@kubernetes/client-node": "^0.13.2",
     "@nestjs-modules/mailer": "^1.6.0",
     "@nestjs/common": "^7.6.17",

@@ -13,7 +13,7 @@ import {
 import * as HttpProxy from 'http-proxy';
 import { Server } from 'http';
 import { Socket } from 'net';
-import { resourcePrefix } from '../kubernetes/helpers';
+import { generateResourceName } from '../kubernetes/helpers';
 import { IncomingMessage, ServerResponse } from 'http';
 
 @Injectable()
@@ -100,7 +100,9 @@ export class ProxyService implements OnModuleInit {
     deploymentId: string,
   ): HttpProxy.ServerOptions {
     return {
-      target: `http://${resourcePrefix}-${deploymentId}.${resourcePrefix}-${workspaceId}.svc.cluster.local`,
+      target: `http://${generateResourceName(
+        deploymentId,
+      )}.${generateResourceName(workspaceId)}.svc.cluster.local`,
       changeOrigin: true,
     };
   }

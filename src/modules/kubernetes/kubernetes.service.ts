@@ -56,13 +56,13 @@ export class KubernetesService implements OnModuleInit {
   ) {}
 
   async onModuleInit(): Promise<void> {
-    await this.startPodInformer();
+    await this.startNamespacedPodInformers();
   }
 
   /**
    * Set up and start the Kubernetes pod informer for all namespaces
    */
-  private async startPodInformer(): Promise<void> {
+  private async startNamespacedPodInformers(): Promise<void> {
     const workspaceNamespaces: WorkspaceNamespace[] =
       await this.getAllWorkspaceNamespaces();
     for (const workspaceNamespace of workspaceNamespaces) {
@@ -80,6 +80,7 @@ export class KubernetesService implements OnModuleInit {
       `/api/v1/namespaces/${namespace}/pods`,
       this.podsService.makeNamespacedPodListFunction(namespace),
     );
+    informer.on('add', (pod: k8s.V1Pod) => this.updateDeploymentStatus(pod));
     informer.on('update', (pod: k8s.V1Pod) => this.updateDeploymentStatus(pod));
     informer.on('error', (pod: k8s.V1Pod) => this.updateDeploymentStatus(pod));
     await informer.start();
@@ -313,7 +314,7 @@ export class KubernetesService implements OnModuleInit {
       await this.kubeDeploymentsService.updateDeployment(
         namespace,
         deploymentId,
-        payload.updateDeploymentDto.properties.resources,
+        payload.updateDeploymentDto.properties,
       );
     } catch (error) {
       // TODO: roll back the deployment update
