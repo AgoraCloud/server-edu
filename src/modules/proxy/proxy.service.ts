@@ -15,6 +15,7 @@ import { Server } from 'http';
 import { Socket } from 'net';
 import { generateResourceName } from '../kubernetes/helpers';
 import { IncomingMessage, ServerResponse } from 'http';
+import { DeploymentTypeDto } from '@agoracloud/common';
 
 @Injectable()
 export class ProxyService implements OnModuleInit {
@@ -62,7 +63,9 @@ export class ProxyService implements OnModuleInit {
         }
         const deployment: DeploymentDocument =
           await this.deploymentsService.findOne(deploymentId);
-        req.url = this.removeProxyUrlPrefix(req.url, deploymentId);
+        if (deployment.properties.image.type === DeploymentTypeDto.VSCode) {
+          req.url = this.removeProxyUrlPrefix(req.url, deploymentId);
+        }
         this.httpProxy.ws(
           req,
           socket,
@@ -81,7 +84,9 @@ export class ProxyService implements OnModuleInit {
    */
   proxy(deployment: DeploymentDocument, req: Request, res: Response): void {
     const deploymentId: string = deployment._id;
-    req.url = this.removeProxyUrlPrefix(req.url, deploymentId);
+    if (deployment.properties.image.type === DeploymentTypeDto.VSCode) {
+      req.url = this.removeProxyUrlPrefix(req.url, deploymentId);
+    }
     this.httpProxy.web(
       req,
       res,
