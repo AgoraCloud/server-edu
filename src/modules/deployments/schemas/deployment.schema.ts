@@ -29,7 +29,7 @@ export class DeploymentResources {
 export class DeploymentImage {
   @Prop({
     required: true,
-    enum: [DeploymentTypeDto.VSCode],
+    enum: [DeploymentTypeDto.VSCode, DeploymentTypeDto.Ubuntu],
   })
   type: DeploymentTypeDto;
 
@@ -41,6 +41,7 @@ export class DeploymentImage {
       DeploymentVersionDto.VSCode_3_9_2,
       DeploymentVersionDto.VSCode_3_9_1,
       DeploymentVersionDto.VSCode_3_9_0,
+      DeploymentVersionDto.Ubuntu_37fd85aa,
     ],
   })
   version: DeploymentVersionDto;
