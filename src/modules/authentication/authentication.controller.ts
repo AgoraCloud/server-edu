@@ -10,7 +10,6 @@ import {
   AuditResourceDto,
 } from '@agoracloud/common';
 import { MongoExceptionFilter } from './../../filters/mongo-exception.filter';
-import { accessTokenConstants, refreshTokenConstants } from './constants';
 import { UserDocument } from '../users/schemas/user.schema';
 import { LocalAuthenticationGuard } from './guards/local-authentication.guard';
 import {
@@ -23,7 +22,7 @@ import {
   Request,
 } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
-import { Request as Req } from 'express';
+import { Request as ExpressRequest } from 'express';
 import { User } from '../../decorators/user.decorator';
 import JwtRefreshGuard from './guards/jwt-refresh-authentication.guard';
 import {
@@ -93,26 +92,11 @@ export class AuthenticationController {
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   @ApiBody({ type: SignInDto })
-  async logIn(
-    @Request() request: Req,
+  logIn(
+    @Request() request: ExpressRequest,
     @User() user: UserDocument,
   ): Promise<UserDocument> {
-    const accessToken: string = this.authenticationService.generateAccessToken(
-      user.email,
-    );
-    const refreshToken: string =
-      await this.authenticationService.generateRefreshToken(user.email);
-    request.res.cookie(
-      accessTokenConstants.name,
-      accessToken,
-      accessTokenConstants.cookieOptions,
-    );
-    request.res.cookie(
-      refreshTokenConstants.name,
-      refreshToken,
-      refreshTokenConstants.cookieOptions,
-    );
-    return user;
+    return this.authenticationService.logIn(user, request.res);
   }
 
   /**
@@ -129,18 +113,10 @@ export class AuthenticationController {
   @ApiOkResponse({ description: 'The user has been successfully logged out' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   async logOut(
-    @Request() request: Req,
+    @Request() request: ExpressRequest,
     @User() user: UserDocument,
   ): Promise<void> {
-    await this.authenticationService.clearRefreshToken(user.email);
-    request.res.clearCookie(
-      accessTokenConstants.name,
-      accessTokenConstants.cookieOptions,
-    );
-    request.res.clearCookie(
-      refreshTokenConstants.name,
-      refreshTokenConstants.cookieOptions,
-    );
+    return this.authenticationService.logOut(request.res, user);
   }
 
   /**
@@ -158,16 +134,10 @@ export class AuthenticationController {
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
   async refreshToken(
-    @Request() request: Req,
+    @Request() request: ExpressRequest,
     @User() user: UserDocument,
   ): Promise<void> {
-    const refreshToken: string =
-      await this.authenticationService.generateRefreshToken(user.email);
-    request.res.cookie(
-      refreshTokenConstants.name,
-      refreshToken,
-      refreshTokenConstants.cookieOptions,
-    );
+    return this.authenticationService.refreshToken(user, request.res);
   }
 
   /**

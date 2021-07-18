@@ -1,11 +1,18 @@
 import { DeploymentTypeDto } from '@agoracloud/common';
 
+/**
+ * Represents all the configuration settings needed to deploy
+ * a container for a deployment in Kubernetes
+ */
 interface ContainerConfig {
   containerPort: number;
   volumeMountPath: string;
   passwordEnvVariable: string;
 }
 
+/**
+ * Contains the container configuration for all deployment types
+ */
 const DEPLOYMENT_CONFIG: Record<DeploymentTypeDto, ContainerConfig> = {
   VSCODE: {
     containerPort: 8443,

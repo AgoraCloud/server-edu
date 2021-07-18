@@ -1,3 +1,4 @@
+import { KubeUtil } from './utils/kube.util';
 import { DeploymentImage } from './../deployments/schemas/deployment.schema';
 import { DeploymentProperties } from '../deployments/schemas/deployment.schema';
 import {
@@ -8,7 +9,6 @@ import {
 import { Inject, Injectable } from '@nestjs/common';
 import * as k8s from '@kubernetes/client-node';
 import * as http from 'http';
-import { generateDeploymentLabels, generateResourceName } from './helpers';
 import { ContainerConfig, DEPLOYMENT_CONFIG } from './config/deployment.config';
 
 @Injectable()
@@ -52,8 +52,8 @@ export class KubernetesDeploymentsService {
     body: k8s.V1Deployment;
   }> {
     const labels: { [key: string]: string } =
-      generateDeploymentLabels(deploymentId);
-    const resourceName: string = generateResourceName(deploymentId);
+      KubeUtil.generateDeploymentLabels(deploymentId);
+    const resourceName: string = KubeUtil.generateResourceName(deploymentId);
     const containerConfig: ContainerConfig =
       DEPLOYMENT_CONFIG[deploymentProperties.image.type];
 
@@ -152,7 +152,7 @@ export class KubernetesDeploymentsService {
     response: http.IncomingMessage;
     body: k8s.V1Deployment;
   }> {
-    const resourceName: string = generateResourceName(deploymentId);
+    const resourceName: string = KubeUtil.generateResourceName(deploymentId);
 
     const resources: k8s.V1ResourceRequirements = {
       limits: {},
@@ -214,7 +214,7 @@ export class KubernetesDeploymentsService {
     body: k8s.V1Status;
   }> {
     return this.k8sAppsV1Api.deleteNamespacedDeployment(
-      generateResourceName(deploymentId),
+      KubeUtil.generateResourceName(deploymentId),
       namespace,
     );
   }

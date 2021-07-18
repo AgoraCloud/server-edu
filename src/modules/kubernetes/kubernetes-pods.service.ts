@@ -1,3 +1,4 @@
+import { KubeUtil } from './utils/kube.util';
 import { DeploymentDocument } from './../deployments/schemas/deployment.schema';
 import { MetricsDto } from '@agoracloud/common';
 import { DeploymentPodMetricsNotAvailableException } from '../../exceptions/deployment-pod-metrics-not-available.exception';
@@ -6,7 +7,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import * as k8s from '@kubernetes/client-node';
 import * as http from 'http';
 import * as request from 'request';
-import { generateResourceName, toPercentage } from './helpers';
 
 @Injectable()
 export class KubernetesPodsService {
@@ -63,7 +63,7 @@ export class KubernetesPodsService {
    * @returns a Kubernetes pod logs
    */
   async getPodLogs(workspaceId: string, deploymentId: string): Promise<string> {
-    const namespace: string = generateResourceName(workspaceId);
+    const namespace: string = KubeUtil.generateResourceName(workspaceId);
     const pod: k8s.V1Pod = await this.getPod(namespace, deploymentId);
     const { body } = await this.k8sCoreV1Api.readNamespacedPodLog(
       pod.metadata.name,
@@ -82,7 +82,7 @@ export class KubernetesPodsService {
     workspaceId: string,
     deployment: DeploymentDocument,
   ): Promise<MetricsDto> {
-    const namespace: string = generateResourceName(workspaceId);
+    const namespace: string = KubeUtil.generateResourceName(workspaceId);
     const deploymentId: string = deployment._id.toString();
     const pod: k8s.V1Pod = await this.getPod(namespace, deploymentId);
     const opts: request.Options = {
@@ -114,17 +114,17 @@ export class KubernetesPodsService {
     }
     const containers: any[] = response.containers as any[];
     const containerIndex: number = containers.findIndex(
-      (c) => c.name === generateResourceName(deploymentId),
+      (c) => c.name === KubeUtil.generateResourceName(deploymentId),
     );
     if (containerIndex === -1) {
       throw new DeploymentPodMetricsNotAvailableException(deploymentId);
     }
     const containerMetrics: MetricsDto = new MetricsDto({
-      cpu: toPercentage(
+      cpu: KubeUtil.toPercentage(
         containers[containerIndex].usage?.cpu,
         deployment.properties.resources.cpuCount,
       ),
-      memory: toPercentage(
+      memory: KubeUtil.toPercentage(
         containers[containerIndex].usage?.memory,
         deployment.properties.resources.memoryCount,
       ),

@@ -1,3 +1,4 @@
+import { KubeUtil } from './utils/kube.util';
 import { KubernetesPodsService } from './kubernetes-pods.service';
 import { KubernetesDeploymentsService } from './kubernetes-deployments.service';
 import { KubernetesServicesService } from './kubernetes-services.service';
@@ -34,7 +35,6 @@ import * as k8s from '@kubernetes/client-node';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Event } from '../../events/events.enum';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { generateResourceName, toPercentage } from './helpers';
 
 @Injectable()
 export class KubernetesService implements OnModuleInit {
@@ -112,19 +112,19 @@ export class KubernetesService implements OnModuleInit {
     try {
       const { body: resourceQuota } =
         await this.resourceQuotasService.getResourceQuota(
-          generateResourceName(workspaceId),
+          KubeUtil.generateResourceName(workspaceId),
           workspaceId,
         );
       const workspaceMetrics: MetricsDto = new MetricsDto({
-        cpu: toPercentage(
+        cpu: KubeUtil.toPercentage(
           resourceQuota.status?.used['limits.cpu'],
           workspace.properties?.resources?.cpuCount,
         ),
-        memory: toPercentage(
+        memory: KubeUtil.toPercentage(
           resourceQuota.status?.used['limits.memory'],
           workspace.properties?.resources?.memoryCount,
         ),
-        storage: toPercentage(
+        storage: KubeUtil.toPercentage(
           resourceQuota.status?.used['requests.storage'],
           workspace.properties?.resources?.storageCount,
         ),
@@ -146,7 +146,7 @@ export class KubernetesService implements OnModuleInit {
     const workspaceId: string = payload.workspace._id;
     const workspaceResources: WorkspaceResources =
       payload.workspace.properties?.resources;
-    const namespace: string = generateResourceName(workspaceId);
+    const namespace: string = KubeUtil.generateResourceName(workspaceId);
     try {
       await this.namespacesService.createNamespace(namespace, workspaceId);
       await this.networkPoliciesService.createNetworkPolicy(
@@ -186,7 +186,7 @@ export class KubernetesService implements OnModuleInit {
     payload: WorkspaceUpdatedEvent,
   ): Promise<void> {
     const workspaceId: string = payload.workspace._id;
-    const namespace: string = generateResourceName(workspaceId);
+    const namespace: string = KubeUtil.generateResourceName(workspaceId);
     const workspaceResources: WorkspaceResources =
       payload.workspace.properties?.resources;
     // Check if a resource quota for the workspaces namespace exists
@@ -241,7 +241,7 @@ export class KubernetesService implements OnModuleInit {
     payload: WorkspaceDeletedEvent,
   ): Promise<void> {
     try {
-      const namespace: string = generateResourceName(payload.id);
+      const namespace: string = KubeUtil.generateResourceName(payload.id);
       await this.namespacesService.deleteNamespace(namespace);
     } catch (err) {
       // Do nothing, this will get picked up by the
@@ -257,7 +257,7 @@ export class KubernetesService implements OnModuleInit {
   private async handleDeploymentCreatedEvent(
     payload: DeploymentCreatedEvent,
   ): Promise<void> {
-    const namespace: string = generateResourceName(
+    const namespace: string = KubeUtil.generateResourceName(
       payload.deployment.workspace._id,
     );
     const deploymentId: string = payload.deployment._id;
@@ -313,7 +313,9 @@ export class KubernetesService implements OnModuleInit {
   private async handleDeploymentUpdatedEvent(
     payload: DeploymentUpdatedEvent,
   ): Promise<void> {
-    const namespace: string = generateResourceName(payload.workspaceId);
+    const namespace: string = KubeUtil.generateResourceName(
+      payload.workspaceId,
+    );
     const deploymentId: string = payload.deploymentId;
     await this.deploymentsService.updateStatus(
       deploymentId,
@@ -348,7 +350,7 @@ export class KubernetesService implements OnModuleInit {
   private async handleDeploymentDeletedEvent(
     payload: DeploymentDeletedEvent,
   ): Promise<void> {
-    const namespace: string = generateResourceName(
+    const namespace: string = KubeUtil.generateResourceName(
       payload.deployment.workspace._id,
     );
     const deploymentId: string = payload.deployment._id;
@@ -532,7 +534,8 @@ export class KubernetesService implements OnModuleInit {
     const workspaces: WorkspaceDocument[] =
       await this.workspacesService.findAll();
     return workspaces.map(
-      (w) => new WorkspaceNamespace(w._id, generateResourceName(w._id)),
+      (w) =>
+        new WorkspaceNamespace(w._id, KubeUtil.generateResourceName(w._id)),
     );
   }
 }
