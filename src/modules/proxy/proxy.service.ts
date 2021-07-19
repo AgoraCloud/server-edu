@@ -63,15 +63,12 @@ export class ProxyService implements OnModuleInit {
       async (req: Request, socket: Socket, head: any) => {
         // TODO: remove this after testing
         this.logger.log({
-          cookies: req.cookies,
-          signedCookies: req.signedCookies,
-          headerCookies: req.headers['cookie'],
-          hostname: req.hostname,
-          host: req.host,
+          headerCookies: req.headers.cookie,
+          host: req.headers.host,
         });
 
         const deploymentId: string = ProxyUtil.getDeploymentIdFromHostname(
-          req.hostname,
+          req.headers.host,
         );
         if (!isMongoId(deploymentId)) {
           throw new InvalidMongoIdException('deploymentId');
