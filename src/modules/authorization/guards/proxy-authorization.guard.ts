@@ -10,11 +10,19 @@ import { isMongoId } from 'class-validator';
 import { DeploymentDocument } from './../../deployments/schemas/deployment.schema';
 import { AuthorizationService } from '../authorization.service';
 import { UserDocument } from '../../users/schemas/user.schema';
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { ActionDto, DeploymentStatusDto } from '@agoracloud/common';
 
 @Injectable()
 export class ProxyAuthorizationGuard implements CanActivate {
+  // TODO: remove this after testing
+  private readonly logger: Logger = new Logger(ProxyAuthorizationGuard.name);
+
   constructor(
     private readonly reflector: Reflector,
     private readonly deploymentsService: DeploymentsService,
@@ -28,6 +36,7 @@ export class ProxyAuthorizationGuard implements CanActivate {
     const request: RequestWithDeploymentAndUser = context
       .switchToHttp()
       .getRequest();
+    this.logger.log({ hostname: request.hostname, host: request.host });
     const deploymentId: string = ProxyUtil.getDeploymentIdFromHostname(
       request.hostname,
     );

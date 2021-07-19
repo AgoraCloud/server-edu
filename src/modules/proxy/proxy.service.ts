@@ -11,6 +11,7 @@ import {
   Injectable,
   OnModuleInit,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import * as HttpProxy from 'http-proxy';
 import { Server } from 'http';
@@ -19,6 +20,9 @@ import { IncomingMessage, ServerResponse } from 'http';
 
 @Injectable()
 export class ProxyService implements OnModuleInit {
+  // TODO: remove this after testing
+  private readonly logger: Logger = new Logger(ProxyService.name);
+
   constructor(
     @Inject(HttpProxy) private readonly httpProxy: HttpProxy,
     private readonly httpAdapterHost: HttpAdapterHost,
@@ -57,7 +61,15 @@ export class ProxyService implements OnModuleInit {
     httpServer.on(
       'upgrade',
       async (req: Request, socket: Socket, head: any) => {
-        // TODO: log cookies and signedCookies for checking
+        // TODO: remove this after testing
+        this.logger.log({
+          cookies: req.cookies,
+          signedCookies: req.signedCookies,
+          headerCookies: req.headers['cookie'],
+          hostname: req.hostname,
+          host: req.host,
+        });
+
         const deploymentId: string = ProxyUtil.getDeploymentIdFromHostname(
           req.hostname,
         );

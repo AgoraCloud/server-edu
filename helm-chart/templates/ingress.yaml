@@ -23,7 +23,7 @@ spec:
     - hosts:
         {{- range .hosts }}
         - {{ . | quote }}
-        - {{ printf "%s%s" "*." . | quote}}
+        - {{ printf "%s%s" "*." . | quote }}
         {{- end }}
       secretName: {{ .secretName }}
     {{- end }}
