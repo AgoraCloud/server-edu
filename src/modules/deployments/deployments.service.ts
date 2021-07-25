@@ -1,3 +1,4 @@
+import { ProxyUtil } from './../proxy/utils/proxy.util';
 import { DeploymentVersionCanNotBeUpgradedException } from './../../exceptions/deployment-version-can-not-be-upgraded.exception';
 import { InvalidDeploymentVersionUpgradeException } from './../../exceptions/invalid-deployment-version-upgrade.exception';
 import { DeploymentTypeMismatchException } from './../../exceptions/deployment-type-mismatch.exception';
@@ -28,14 +29,20 @@ import {
 } from '@agoracloud/common';
 import { Event } from '../../events/events.enum';
 import { isDefined } from 'class-validator';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class DeploymentsService {
+  private readonly domain: string;
+
   constructor(
     @InjectModel(Deployment.name)
     private readonly deploymentModel: Model<DeploymentDocument>,
     private readonly eventEmitter: EventEmitter2,
-  ) {}
+    private readonly configService: ConfigService,
+  ) {
+    this.domain = this.configService.get<string>('domain');
+  }
 
   /**
    * Create a deployment
@@ -58,6 +65,7 @@ export class DeploymentsService {
 
     const createdDeployment: DeploymentDocument =
       await this.deploymentModel.create(deployment);
+    await this.generateAndUpdateProxyUrl(createdDeployment);
     this.eventEmitter.emit(
       Event.DeploymentCreated,
       new DeploymentCreatedEvent(sudoPassword, createdDeployment),
@@ -318,6 +326,22 @@ export class DeploymentsService {
         );
       });
     }
+  }
+
+  /**
+   * Generates and updates a deployments publicly accessible proxy URL
+   * @param deployment the deployment to update
+   */
+  private async generateAndUpdateProxyUrl(
+    deployment: DeploymentDocument,
+  ): Promise<void> {
+    deployment.properties.proxyUrl = ProxyUtil.generatePublicProxyUrl(
+      this.domain,
+      deployment._id,
+    );
+    await this.deploymentModel
+      .updateOne({ _id: deployment._id }, deployment)
+      .exec();
   }
 
   /**
