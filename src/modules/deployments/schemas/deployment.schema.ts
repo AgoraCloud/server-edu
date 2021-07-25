@@ -36,6 +36,7 @@ export class DeploymentImage {
   @Prop({
     required: true,
     enum: [
+      DeploymentVersionDto.VSCode_3_11_0,
       DeploymentVersionDto.VSCode_3_10_2,
       DeploymentVersionDto.VSCode_3_9_3,
       DeploymentVersionDto.VSCode_3_9_2,
@@ -54,6 +55,9 @@ export class DeploymentImage {
 export class DeploymentProperties {
   @Prop({ default: false })
   isFavorite?: boolean;
+
+  @Prop()
+  proxyUrl?: string;
 
   @Prop({ required: true, type: DeploymentImage })
   image: DeploymentImage;

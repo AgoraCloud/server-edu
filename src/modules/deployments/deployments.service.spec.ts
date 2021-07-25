@@ -1,3 +1,4 @@
+import { ProxyUtil } from './../proxy/utils/proxy.util';
 import { DeploymentVersionCanNotBeUpgradedException } from './../../exceptions/deployment-version-can-not-be-upgraded.exception';
 import { InvalidDeploymentVersionUpgradeException } from './../../exceptions/invalid-deployment-version-upgrade.exception';
 import { DeploymentTypeMismatchException } from './../../exceptions/deployment-type-mismatch.exception';
@@ -28,6 +29,9 @@ import {
   DeploymentVersionDto,
   DeploymentTypeDto,
 } from '@agoracloud/common';
+import { ConfigService } from '@nestjs/config';
+
+const domainConfig = 'agoracloud.test.com';
 
 const user: UserDocument = {
   _id: Types.ObjectId(),
@@ -61,7 +65,22 @@ describe('DeploymentsService', () => {
           { name: Deployment.name, schema: DeploymentSchema },
         ]),
       ],
-      providers: [DeploymentsService, EventEmitter2],
+      providers: [
+        DeploymentsService,
+        {
+          provide: ConfigService,
+          useValue: {
+            get(key: string) {
+              switch (key) {
+                case 'domain': {
+                  return domainConfig;
+                }
+              }
+            },
+          },
+        },
+        EventEmitter2,
+      ],
     }).compile();
 
     service = module.get<DeploymentsService>(DeploymentsService);
@@ -83,6 +102,8 @@ describe('DeploymentsService', () => {
       const createDeploymentDto: CreateDeploymentDto = {
         name: 'Test Deployment',
         properties: {
+          isFavorite: true,
+          sudoPassword: 'Sudo Password',
           image: {
             type: DeploymentTypeDto.VSCode,
             version: DeploymentVersionDto.VSCode_3_9_3,
@@ -92,7 +113,6 @@ describe('DeploymentsService', () => {
             memoryCount: 2,
             storageCount: 8,
           },
-          sudoPassword: 'Sudo Password',
         },
       };
       const createdDeployment: DeploymentDocument = await service.create(
@@ -100,23 +120,28 @@ describe('DeploymentsService', () => {
         workspace,
         createDeploymentDto,
       );
-      expect(createdDeployment.name).toBe(createDeploymentDto.name);
-      expect(createDeploymentDto.properties.sudoPassword).toBe(
-        createDeploymentDto.properties.sudoPassword,
+      const expectedProxyUrl: string = ProxyUtil.generatePublicProxyUrl(
+        domainConfig,
+        createdDeployment._id,
       );
-      expect(createDeploymentDto.properties.image.type).toBe(
+      expect(createdDeployment.name).toBe(createDeploymentDto.name);
+      expect(createdDeployment.properties.isFavorite).toBe(
+        createDeploymentDto.properties.isFavorite,
+      );
+      expect(createdDeployment.properties.proxyUrl).toBe(expectedProxyUrl);
+      expect(createdDeployment.properties.image.type).toBe(
         createDeploymentDto.properties.image.type,
       );
-      expect(createDeploymentDto.properties.image.version).toBe(
+      expect(createdDeployment.properties.image.version).toBe(
         createDeploymentDto.properties.image.version,
       );
-      expect(createDeploymentDto.properties.resources.cpuCount).toBe(
+      expect(createdDeployment.properties.resources.cpuCount).toBe(
         createDeploymentDto.properties.resources.cpuCount,
       );
-      expect(createDeploymentDto.properties.resources.memoryCount).toBe(
+      expect(createdDeployment.properties.resources.memoryCount).toBe(
         createDeploymentDto.properties.resources.memoryCount,
       );
-      expect(createDeploymentDto.properties.resources.storageCount).toBe(
+      expect(createdDeployment.properties.resources.storageCount).toBe(
         createDeploymentDto.properties.resources.storageCount,
       );
       deployment = createdDeployment;

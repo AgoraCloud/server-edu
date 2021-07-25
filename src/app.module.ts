@@ -1,7 +1,12 @@
 import { ProjectTasksModule } from './modules/projects/tasks/tasks.module';
 import { ProjectLanesModule } from './modules/projects/lanes/lanes.module';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
-import { Config, LogLevel, SmtpConfig } from './config/configuration.interface';
+import {
+  Config,
+  EnvironmentConfig,
+  LogLevel,
+  SmtpConfig,
+} from './config/configuration.interface';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -38,13 +43,19 @@ import { InDatabaseConfigModule } from './modules/in-database-config/in-database
       load: [configuration],
       validationSchema: Joi.object({
         NODE_ENV: Joi.string()
-          .valid('development', 'production')
-          .default('development'),
+          .valid(EnvironmentConfig.Development, EnvironmentConfig.Production)
+          .default(EnvironmentConfig.Development),
         PORT: Joi.number().default(3000),
         LOG_LEVEL: Joi.string()
           .pattern(new RegExp(commaDelimitedLogLevel))
           .default(`${LogLevel.Warn},${LogLevel.Error}`),
-        DOMAIN: Joi.string().domain().required(),
+        DOMAIN: Joi.string()
+          .domain()
+          .required()
+          .when('NODE_ENV', {
+            is: EnvironmentConfig.Development,
+            then: Joi.allow('localhost'),
+          }),
         DATABASE_URI: Joi.string().required(),
         ADMIN_EMAIL: Joi.string().email().required(),
         ADMIN_PASSWORD: Joi.string().min(8).required(),
