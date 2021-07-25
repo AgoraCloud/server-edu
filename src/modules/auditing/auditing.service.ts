@@ -1,10 +1,10 @@
+import { DateUtil } from './../../utils/date.util';
 import { AuditLogQueryParamsDto } from './dto/audit-log-query-params.dto';
 import { AuditLog, AuditLogDocument } from './schemas/audit-log.schema';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Query } from 'mongoose';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { removeDays } from '../../utils/date';
 
 @Injectable()
 export class AuditingService {
@@ -87,7 +87,7 @@ export class AuditingService {
    */
   @Cron(CronExpression.EVERY_HOUR)
   private async deleteExpiredAuditLogsJob(): Promise<void> {
-    const twentyEightDays: Date = removeDays(new Date(), 28);
+    const twentyEightDays: Date = DateUtil.removeDays(new Date(), 28);
     await this.auditLogModel
       .deleteMany()
       .where('createdAt')

@@ -1,3 +1,4 @@
+import { DateUtil } from './../../utils/date.util';
 import { Config } from '../../config/configuration.interface';
 import {
   UserWithIdNotFoundException,
@@ -6,7 +7,6 @@ import {
 import { UserDeletedEvent } from './../../events/user-deleted.event';
 import { UserCreatedEvent } from '../../events/user-created.event';
 import { Event } from './../../events/events.enum';
-import { addDays, removeDays } from '../../utils/date';
 import { TokenType, TokenDocument } from '../tokens/schemas/token.schema';
 import { TokensService } from './../tokens/tokens.service';
 import { AdminConfig } from './../../config/configuration.interface';
@@ -273,7 +273,7 @@ export class UsersService implements OnModuleInit {
     return this.tokensService.create({
       type: TokenType.VerifyAccount,
       user,
-      expiresAt: addDays(new Date()),
+      expiresAt: DateUtil.addDays(new Date()),
     });
   }
 
@@ -293,7 +293,7 @@ export class UsersService implements OnModuleInit {
    */
   @Cron(CronExpression.EVERY_HOUR)
   private async deleteStaleUsersJob(): Promise<void> {
-    const yesterday: Date = removeDays(new Date());
+    const yesterday: Date = DateUtil.removeDays(new Date());
     const staleUsers: UserDocument[] = await this.userModel
       .find()
       .where('isVerified')

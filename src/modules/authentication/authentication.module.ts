@@ -1,4 +1,3 @@
-import { accessTokenConstants } from './constants';
 import { TokensModule } from './../tokens/tokens.module';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
@@ -11,6 +10,7 @@ import { UsersModule } from '../users/users.module';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { Config, JwtConfig } from '../../config/configuration.interface';
+import { AuthTokenType, COOKIE_CONFIG } from './config/cookie.config';
 
 @Global()
 @Module({
@@ -22,7 +22,7 @@ import { Config, JwtConfig } from '../../config/configuration.interface';
       useFactory: async (configService: ConfigService<Config>) => ({
         secret: configService.get<JwtConfig>('jwt').access.secret,
         signOptions: {
-          expiresIn: accessTokenConstants.expirationTime,
+          expiresIn: COOKIE_CONFIG[AuthTokenType.Access].expirationTime,
         },
       }),
     }),

@@ -1,3 +1,4 @@
+import { DeploymentVersionCanNotBeUpgradedException } from './../../exceptions/deployment-version-can-not-be-upgraded.exception';
 import { InvalidDeploymentVersionUpgradeException } from './../../exceptions/invalid-deployment-version-upgrade.exception';
 import { DeploymentTypeMismatchException } from './../../exceptions/deployment-type-mismatch.exception';
 import { DeploymentCannotBeUpdatedException } from '../../exceptions/deployment-cannot-be-updated.exception';
@@ -242,15 +243,14 @@ describe('DeploymentsService', () => {
     });
 
     it('should throw an error if the given deployment type does not match the deployments original type', async () => {
-      // At the time of writing, there is only one deployment type, hence the cast to any
       const updateDeploymentDto: UpdateDeploymentDto = {
         properties: {
           image: {
-            type: 'type',
+            type: DeploymentTypeDto.Ubuntu,
             version: deployment.properties.image.version,
           },
         },
-      } as any;
+      };
       const expectedErrorMessage: string = new DeploymentTypeMismatchException(
         deployment._id,
         deployment.properties.image.type,
@@ -295,6 +295,64 @@ describe('DeploymentsService', () => {
       } catch (err) {
         expect(err.message).toBe(expectedErrorMessage);
       }
+    });
+
+    it('should throw an error if the version of any deployment with type UBUNTU is changed', async () => {
+      // Create a new UBUNTU deployment
+      const createDeploymentDto: CreateDeploymentDto = {
+        name: 'Test Deployment',
+        properties: {
+          image: {
+            type: DeploymentTypeDto.Ubuntu,
+            version: DeploymentVersionDto.Ubuntu_37fd85aa,
+          },
+          resources: {
+            cpuCount: 1,
+            memoryCount: 2,
+            storageCount: 8,
+          },
+          sudoPassword: 'Sudo Password',
+        },
+      };
+      const createdDeployment: DeploymentDocument = await service.create(
+        user,
+        workspace,
+        createDeploymentDto,
+      );
+      // Update the deployment status to running
+      await service.updateStatus(
+        createdDeployment._id,
+        DeploymentStatusDto.Running,
+      );
+
+      // At the time of writing, there is only one version for UBUNTU deployments, hence the cast to any
+      const updateDeploymentDto: UpdateDeploymentDto = {
+        properties: {
+          image: {
+            type: createDeploymentDto.properties.image.type,
+            version: 'new_version',
+          },
+        },
+      } as any;
+      const expectedErrorMessage: string =
+        new DeploymentVersionCanNotBeUpgradedException(
+          createdDeployment._id,
+          createDeploymentDto.properties.image.type,
+        ).message;
+      try {
+        await service.update(
+          workspace._id,
+          createdDeployment._id,
+          updateDeploymentDto,
+          user._id,
+        );
+        fail('It should throw an error');
+      } catch (err) {
+        expect(err.message).toBe(expectedErrorMessage);
+      }
+
+      // Delete the UBUNTU deployment
+      await service.remove(workspace._id, createdDeployment._id, user._id);
     });
 
     it('should update the deployment', async () => {

@@ -1,3 +1,4 @@
+import { ProxyUtil } from './../../proxy/utils/proxy.util';
 import { DeploymentNotFoundException } from './../../../exceptions/deployment-not-found.exception';
 import { PERMISSIONS_KEY } from './../../../decorators/permissions.decorator';
 import { Reflector } from '@nestjs/core';
@@ -27,7 +28,9 @@ export class ProxyAuthorizationGuard implements CanActivate {
     const request: RequestWithDeploymentAndUser = context
       .switchToHttp()
       .getRequest();
-    const deploymentId: string = request.params.deploymentId;
+    const deploymentId: string = ProxyUtil.getDeploymentIdFromHostname(
+      request.hostname,
+    );
     if (!isMongoId(deploymentId)) {
       throw new InvalidMongoIdException('deploymentId');
     }

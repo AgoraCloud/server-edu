@@ -1,3 +1,5 @@
+import { KubeUtil } from './../kubernetes/utils/kube.util';
+import { ProxyUtil } from './utils/proxy.util';
 import { DeploymentsService } from './../deployments/deployments.service';
 import { InvalidMongoIdException } from './../../exceptions/invalid-mongo-id.exception';
 import { isMongoId } from 'class-validator';
@@ -13,7 +15,6 @@ import {
 import * as HttpProxy from 'http-proxy';
 import { Server } from 'http';
 import { Socket } from 'net';
-import { generateResourceName } from '../kubernetes/helpers';
 import { IncomingMessage, ServerResponse } from 'http';
 
 @Injectable()
@@ -56,13 +57,14 @@ export class ProxyService implements OnModuleInit {
     httpServer.on(
       'upgrade',
       async (req: Request, socket: Socket, head: any) => {
-        const deploymentId: string = req.url.split('/')[2];
+        const deploymentId: string = ProxyUtil.getDeploymentIdFromHostname(
+          req.headers.host,
+        );
         if (!isMongoId(deploymentId)) {
           throw new InvalidMongoIdException('deploymentId');
         }
         const deployment: DeploymentDocument =
           await this.deploymentsService.findOne(deploymentId);
-        req.url = this.removeProxyUrlPrefix(req.url, deploymentId);
         this.httpProxy.ws(
           req,
           socket,
@@ -80,12 +82,10 @@ export class ProxyService implements OnModuleInit {
    * @param res the response
    */
   proxy(deployment: DeploymentDocument, req: Request, res: Response): void {
-    const deploymentId: string = deployment._id;
-    req.url = this.removeProxyUrlPrefix(req.url, deploymentId);
     this.httpProxy.web(
       req,
       res,
-      this.makeProxyOptions(deployment.workspace._id, deploymentId),
+      this.makeProxyOptions(deployment.workspace._id, deployment._id),
     );
   }
 
@@ -100,23 +100,9 @@ export class ProxyService implements OnModuleInit {
     deploymentId: string,
   ): HttpProxy.ServerOptions {
     return {
-      target: `http://${generateResourceName(
+      target: `http://${KubeUtil.generateResourceName(
         deploymentId,
-      )}.${generateResourceName(workspaceId)}.svc.cluster.local`,
-      changeOrigin: true,
+      )}.${KubeUtil.generateResourceName(workspaceId)}.svc.cluster.local`,
     };
-  }
-
-  /**
-   * Removes the /proxy/:deploymentId prefix from request urls
-   * @param requestUrl the request url
-   * @param deploymentId the deployment id
-   * @returns the modified request url
-   */
-  private removeProxyUrlPrefix(
-    requestUrl: string,
-    deploymentId: string,
-  ): string {
-    return requestUrl.replace(`/proxy/${deploymentId}`, '');
   }
 }

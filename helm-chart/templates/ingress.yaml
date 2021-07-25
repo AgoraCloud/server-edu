@@ -23,6 +23,7 @@ spec:
     - hosts:
         {{- range .hosts }}
         - {{ . | quote }}
+        - {{ printf "%s%s" "*." . | quote }}
         {{- end }}
       secretName: {{ .secretName }}
     {{- end }}
@@ -36,13 +37,16 @@ spec:
             backend:
               serviceName: {{ $chartName }}-server
               servicePort: {{ $serverServicePort }}
-          - path: /proxy
-            backend:
-              serviceName: {{ $chartName }}-server
-              servicePort: {{ $serverServicePort }}
           - path: /
             backend:
               serviceName: {{ $chartName }}-ui
               servicePort: {{ $uiServicePort }}
+    - host: {{ printf "%s%s" "*." .host | quote }}
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: {{ $chartName }}-server
+              servicePort: {{ $serverServicePort }}
     {{- end }}
   {{- end }}

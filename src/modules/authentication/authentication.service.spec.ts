@@ -35,6 +35,8 @@ import {
   RoleDto,
   VerifyAccountDto,
 } from '@agoracloud/common';
+import { AuthTokenType, COOKIE_CONFIG } from './config/cookie.config';
+import { Request, Response } from 'express';
 
 let user: UserDocument;
 const createUserDto: CreateUserDto = {
@@ -50,8 +52,6 @@ const jwtConfig: JwtConfig = {
     secret: 'refresh_secret',
   },
 };
-let accessToken: string;
-let refreshToken: string;
 
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
@@ -113,12 +113,7 @@ describe('AuthenticationService', () => {
   });
 
   describe('register', () => {
-    afterAll(async () => {
-      // Get the user after registration
-      user = await usersModel.findOne({ email: createUserDto.email }).exec();
-    });
-
-    it('should register a user', async () => {
+    it('should register the user', async () => {
       const usersServiceSpy: jest.SpyInstance<
         Promise<UserDocument>,
         [
@@ -129,6 +124,11 @@ describe('AuthenticationService', () => {
       > = jest.spyOn(usersService, 'create');
       await service.register(createUserDto);
       expect(usersServiceSpy).toHaveBeenCalledTimes(1);
+    });
+
+    afterAll(async () => {
+      // Get the user after registration
+      user = await usersModel.findOne({ email: createUserDto.email }).exec();
     });
   });
 
@@ -174,6 +174,47 @@ describe('AuthenticationService', () => {
     });
   });
 
+  describe('logIn', () => {
+    it('should log the user in by generating and setting the access and refresh cookies', async () => {
+      const mockCookieFunction: jest.Mock = jest.fn();
+      const response: Response = {
+        cookie: mockCookieFunction,
+      } as any;
+      await service.logIn(user, response);
+      expect(mockCookieFunction.mock.calls).toHaveLength(2);
+    });
+  });
+
+  describe('logOut', () => {
+    it('should log the user out by clearing the access and refresh cookies', async () => {
+      const mockClearCookieFunction: jest.Mock = jest.fn();
+      const response: Response = {
+        clearCookie: mockClearCookieFunction,
+      } as any;
+      const usersServiceSpy: jest.SpyInstance<Promise<void>, [email: string]> =
+        jest.spyOn(usersService, 'clearRefreshToken');
+      await service.logOut(response, user);
+      expect(mockClearCookieFunction.mock.calls).toHaveLength(2);
+      expect(usersServiceSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('refreshToken', () => {
+    it('should generate a new refresh token and update the refresh cookie', async () => {
+      const mockCookieFunction: jest.Mock = jest.fn();
+      const response: Response = {
+        cookie: mockCookieFunction,
+      } as any;
+      const usersServiceSpy: jest.SpyInstance<
+        Promise<void>,
+        [email: string, latestRefreshToken: string]
+      > = jest.spyOn(usersService, 'updateRefreshToken');
+      await service.refreshToken(user, response);
+      expect(mockCookieFunction.mock.calls).toHaveLength(1);
+      expect(usersServiceSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('validate', () => {
     it('should throw an error if incorrect credentials are supplied', async () => {
       const expectedErrorMessage: string = new InvalidCredentialsException()
@@ -193,75 +234,6 @@ describe('AuthenticationService', () => {
       );
       expect(user).toBeTruthy();
       expect(user.email).toBe(createUserDto.email);
-    });
-  });
-
-  describe('generateAccessToken', () => {
-    it('should generate an access token', () => {
-      const token: string = service.generateAccessToken(user.email);
-      expect(token).toBeTruthy();
-      accessToken = token;
-    });
-  });
-
-  describe('generateRefreshToken', () => {
-    it('should generate a refresh token', async () => {
-      const usersServiceSpy: jest.SpyInstance<
-        Promise<void>,
-        [email: string, latestRefreshToken: string]
-      > = jest.spyOn(usersService, 'updateRefreshToken');
-      const token: string = await service.generateRefreshToken(user.email);
-      expect(token).toBeTruthy();
-      expect(usersServiceSpy).toHaveBeenCalledTimes(1);
-      refreshToken = token;
-    });
-  });
-
-  describe('clearRefreshToken', () => {
-    it('should clear the users refresh token', async () => {
-      const usersServiceSpy: jest.SpyInstance<Promise<void>, [email: string]> =
-        jest.spyOn(usersService, 'clearRefreshToken');
-      await service.clearRefreshToken(user.email);
-      expect(usersServiceSpy).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('validateJwtToken', () => {
-    it('should throw an error if the access token is not valid', () => {
-      const randomToken = 'randomToken';
-      const expectedErrorMessage = 'jwt malformed';
-      try {
-        service.validateJwtToken(randomToken);
-        fail('It should throw an error');
-      } catch (err) {
-        expect(err.message).toBe(expectedErrorMessage);
-      }
-    });
-
-    it('should return the decoded access token', () => {
-      const decodedToken: TokenPayload = service.validateJwtToken(accessToken);
-      expect(decodedToken).toBeTruthy();
-      expect(decodedToken.email).toBe(user.email);
-    });
-  });
-
-  describe('validateJwtRefreshToken', () => {
-    it('should throw an error if the refresh token is not valid', () => {
-      const randomToken = 'randomToken';
-      const expectedErrorMessage = 'jwt malformed';
-      try {
-        service.validateJwtRefreshToken(randomToken);
-        fail('It should throw an error');
-      } catch (err) {
-        expect(err.message).toBe(expectedErrorMessage);
-      }
-    });
-
-    it('should return the decoded refresh token', () => {
-      const decodedToken: TokenPayload =
-        service.validateJwtRefreshToken(refreshToken);
-      expect(decodedToken).toBeTruthy();
-      expect(decodedToken.email).toBe(user.email);
     });
   });
 
@@ -328,6 +300,90 @@ describe('AuthenticationService', () => {
       } catch (err) {
         expect(err.message).toBe(expectedErrorMessage);
       }
+    });
+  });
+
+  describe('getTokenFromRequest', () => {
+    it('should return the access token from the given request', () => {
+      const accessCookieKey = COOKIE_CONFIG[AuthTokenType.Access].name;
+      const request: Request = { cookies: {} } as any;
+      request.cookies[accessCookieKey] = 'access_token';
+      const retrievedToken: string = AuthenticationService.getTokenFromRequest(
+        request,
+        AuthTokenType.Access,
+      );
+      expect(retrievedToken).toBe(request.cookies[accessCookieKey]);
+    });
+
+    it('should return the refresh token from the given request', () => {
+      const refreshCookieKey = COOKIE_CONFIG[AuthTokenType.Refresh].name;
+      const request: Request = { cookies: {} } as any;
+      request.cookies[refreshCookieKey] = 'refresh_token';
+      const retrievedToken: string = AuthenticationService.getTokenFromRequest(
+        request,
+        AuthTokenType.Refresh,
+      );
+      expect(retrievedToken).toBe(request.cookies[refreshCookieKey]);
+    });
+  });
+
+  describe('validateCookieToken', () => {
+    let accessToken: string;
+    let refreshToken: string;
+
+    beforeAll(async () => {
+      // Generate an access and refresh token for testing token validation
+      const response: Response = { cookie: jest.fn() } as any;
+      accessToken = await service.generateAndSetCookie(
+        user,
+        response,
+        AuthTokenType.Access,
+      );
+      refreshToken = await service.generateAndSetCookie(
+        user,
+        response,
+        AuthTokenType.Refresh,
+      );
+    });
+
+    it('should throw an error if the access token is not valid', () => {
+      const randomToken = 'randomToken';
+      const expectedErrorMessage = 'jwt malformed';
+      try {
+        service.validateCookieToken(randomToken, AuthTokenType.Access);
+        fail('It should throw an error');
+      } catch (err) {
+        expect(err.message).toBe(expectedErrorMessage);
+      }
+    });
+
+    it('should return the decoded access token', () => {
+      const decodedToken: TokenPayload = service.validateCookieToken(
+        accessToken,
+        AuthTokenType.Access,
+      );
+      expect(decodedToken).toBeTruthy();
+      expect(decodedToken.email).toBe(user.email);
+    });
+
+    it('should throw an error if the refresh token is not valid', () => {
+      const randomToken = 'randomToken';
+      const expectedErrorMessage = 'jwt malformed';
+      try {
+        service.validateCookieToken(randomToken, AuthTokenType.Refresh);
+        fail('It should throw an error');
+      } catch (err) {
+        expect(err.message).toBe(expectedErrorMessage);
+      }
+    });
+
+    it('should return the decoded refresh token', () => {
+      const decodedToken: TokenPayload = service.validateCookieToken(
+        refreshToken,
+        AuthTokenType.Refresh,
+      );
+      expect(decodedToken).toBeTruthy();
+      expect(decodedToken.email).toBe(user.email);
     });
   });
 });

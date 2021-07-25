@@ -1,3 +1,4 @@
+import { DeploymentVersionCanNotBeUpgradedException } from './../../exceptions/deployment-version-can-not-be-upgraded.exception';
 import { InvalidDeploymentVersionUpgradeException } from './../../exceptions/invalid-deployment-version-upgrade.exception';
 import { DeploymentTypeMismatchException } from './../../exceptions/deployment-type-mismatch.exception';
 import { DeploymentCannotBeUpdatedException } from '../../exceptions/deployment-cannot-be-updated.exception';
@@ -23,6 +24,7 @@ import {
   DEPLOYMENT_IMAGES_DTO,
   DeploymentImageDto,
   UpdateDeploymentImageDto,
+  DeploymentTypeDto,
 } from '@agoracloud/common';
 import { Event } from '../../events/events.enum';
 import { isDefined } from 'class-validator';
@@ -189,6 +191,16 @@ export class DeploymentsService {
           i.type === deployment.properties.image.type &&
           i.version === deployment.properties.image.version,
       );
+      // Versions of deployments with type UBUNTU can not be upgraded
+      if (
+        updateDeploymentImageDto.type === DeploymentTypeDto.Ubuntu &&
+        newImageIndex !== currentImageIndex
+      ) {
+        throw new DeploymentVersionCanNotBeUpgradedException(
+          deploymentId,
+          updateDeploymentImageDto.type,
+        );
+      }
       if (newImageIndex >= currentImageIndex) {
         throw new InvalidDeploymentVersionUpgradeException(
           deploymentId,

@@ -1,4 +1,4 @@
-import { addDays } from '../../utils/date';
+import { DateUtil } from './../../utils/date.util';
 import { User, UserSchema } from './../users/schemas/user.schema';
 import { TokenNotFoundException } from './../../exceptions/token-not-found.exception';
 import { UserDocument } from '../users/schemas/user.schema';
@@ -102,7 +102,7 @@ describe('TokensService', () => {
     });
 
     it('should return false if the token is not expired', () => {
-      token.expiresAt = addDays(new Date());
+      token.expiresAt = DateUtil.addDays(new Date());
       expect(service.isTokenExpired(token as TokenDocument)).toBe(false);
     });
   });

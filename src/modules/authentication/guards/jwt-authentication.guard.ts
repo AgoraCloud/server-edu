@@ -1,5 +1,4 @@
 import { UserDocument } from '../../users/schemas/user.schema';
-import { accessTokenConstants, refreshTokenConstants } from '../constants';
 import { UsersService } from '../../users/users.service';
 import { Request, Response } from 'express';
 import { AuthenticationService } from '../authentication.service';
@@ -11,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { TokenPayload } from '../interfaces/token-payload.interface';
+import { AuthTokenType, COOKIE_CONFIG } from '../config/cookie.config';
 
 @Injectable()
 export class JwtAuthenticationGuard extends AuthGuard('jwt') {
@@ -29,10 +29,18 @@ export class JwtAuthenticationGuard extends AuthGuard('jwt') {
 
     try {
       // Check the access token
-      const accessToken: string = request.cookies?.jwt;
+      const accessToken: string = AuthenticationService.getTokenFromRequest(
+        request,
+        AuthTokenType.Access,
+      );
       if (!accessToken) throw new UnauthorizedException();
       try {
-        if (this.authenticationService.validateJwtToken(accessToken)) {
+        if (
+          this.authenticationService.validateCookieToken(
+            accessToken,
+            AuthTokenType.Access,
+          )
+        ) {
           return this.activate(context);
         }
       } catch (err) {
@@ -40,10 +48,16 @@ export class JwtAuthenticationGuard extends AuthGuard('jwt') {
       }
 
       // Check the refresh token
-      const refreshToken: string = request.cookies?.jwt_refresh;
+      const refreshToken: string = AuthenticationService.getTokenFromRequest(
+        request,
+        AuthTokenType.Refresh,
+      );
       if (!refreshToken) throw new UnauthorizedException();
       const decodedRefreshToken: TokenPayload =
-        this.authenticationService.validateJwtRefreshToken(refreshToken);
+        this.authenticationService.validateCookieToken(
+          refreshToken,
+          AuthTokenType.Refresh,
+        );
       if (!decodedRefreshToken) throw new UnauthorizedException();
 
       // Check if the user has the refresh token
@@ -52,26 +66,20 @@ export class JwtAuthenticationGuard extends AuthGuard('jwt') {
         await this.userService.findByEmailAndRefreshToken(email, refreshToken);
       if (!user) throw new UnauthorizedException();
 
-      // Generate and set the new access token
+      // Generate and set the new access token (in the response)
       const newAccessToken: string =
-        this.authenticationService.generateAccessToken(email);
-      request.cookies[accessTokenConstants.name] = newAccessToken;
-      response.cookie(
-        accessTokenConstants.name,
-        newAccessToken,
-        accessTokenConstants.cookieOptions,
-      );
+        await this.authenticationService.generateAndSetCookie(
+          user,
+          response,
+          AuthTokenType.Access,
+        );
+      // Set the new access token in the current request
+      request.cookies[COOKIE_CONFIG[AuthTokenType.Access].name] =
+        newAccessToken;
       return this.activate(context);
     } catch (err) {
       // Something went wrong, clear the users access and refresh tokens
-      response.clearCookie(
-        accessTokenConstants.name,
-        accessTokenConstants.cookieOptions,
-      );
-      response.clearCookie(
-        refreshTokenConstants.name,
-        refreshTokenConstants.cookieOptions,
-      );
+      await this.authenticationService.logOut(response);
       throw new UnauthorizedException();
     }
   }

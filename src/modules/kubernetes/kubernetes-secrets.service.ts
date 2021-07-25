@@ -1,11 +1,7 @@
+import { KubeUtil } from './utils/kube.util';
 import { Inject, Injectable } from '@nestjs/common';
 import * as k8s from '@kubernetes/client-node';
 import * as http from 'http';
-import {
-  generateDeploymentLabels,
-  generateResourceName,
-  toBase64,
-} from './helpers';
 
 @Injectable()
 export class KubernetesSecretsService {
@@ -51,11 +47,11 @@ export class KubernetesSecretsService {
       apiVersion: 'v1',
       kind: 'Secret',
       metadata: {
-        name: generateResourceName(deploymentId),
-        labels: generateDeploymentLabels(deploymentId),
+        name: KubeUtil.generateResourceName(deploymentId),
+        labels: KubeUtil.generateDeploymentLabels(deploymentId),
       },
       data: {
-        sudo_password: toBase64(sudoPassword),
+        sudo_password: KubeUtil.toBase64(sudoPassword),
       },
     });
   }
@@ -74,7 +70,7 @@ export class KubernetesSecretsService {
     body: k8s.V1Status;
   }> {
     return this.k8sCoreV1Api.deleteNamespacedSecret(
-      generateResourceName(deploymentId),
+      KubeUtil.generateResourceName(deploymentId),
       namespace,
     );
   }

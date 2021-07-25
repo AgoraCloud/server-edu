@@ -24,7 +24,7 @@ import { Audit } from '../../decorators/audit.decorator';
 
 @ApiCookieAuth()
 @ApiTags('Proxy')
-@Controller('proxy/:deploymentId')
+@Controller({ host: 'p:deploymentId' })
 @UseGuards(JwtAuthenticationGuard, ProxyAuthorizationGuard)
 export class ProxyController {
   constructor(private readonly proxyService: ProxyService) {}
