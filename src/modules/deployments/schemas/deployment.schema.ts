@@ -29,18 +29,20 @@ export class DeploymentResources {
 export class DeploymentImage {
   @Prop({
     required: true,
-    enum: [DeploymentTypeDto.VSCode],
+    enum: [DeploymentTypeDto.VSCode, DeploymentTypeDto.Ubuntu],
   })
   type: DeploymentTypeDto;
 
   @Prop({
     required: true,
     enum: [
+      DeploymentVersionDto.VSCode_3_11_0,
       DeploymentVersionDto.VSCode_3_10_2,
       DeploymentVersionDto.VSCode_3_9_3,
       DeploymentVersionDto.VSCode_3_9_2,
       DeploymentVersionDto.VSCode_3_9_1,
       DeploymentVersionDto.VSCode_3_9_0,
+      DeploymentVersionDto.Ubuntu_37fd85aa,
     ],
   })
   version: DeploymentVersionDto;
@@ -53,6 +55,9 @@ export class DeploymentImage {
 export class DeploymentProperties {
   @Prop({ default: false })
   isFavorite?: boolean;
+
+  @Prop()
+  proxyUrl?: string;
 
   @Prop({ required: true, type: DeploymentImage })
   image: DeploymentImage;

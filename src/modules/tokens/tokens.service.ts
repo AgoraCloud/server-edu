@@ -1,3 +1,4 @@
+import { DateUtil } from './../../utils/date.util';
 import { TokenExpiredException } from './../../exceptions/token-expired.exception';
 import { UserDeletedEvent } from './../../events/user-deleted.event';
 import { OnEvent } from '@nestjs/event-emitter';
@@ -8,7 +9,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Event } from '../../events/events.enum';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { removeDays } from '../../utils/date';
 
 @Injectable()
 export class TokensService {
@@ -84,7 +84,7 @@ export class TokensService {
    */
   @Cron(CronExpression.EVERY_HOUR)
   private async deleteExpiredTokensJob(): Promise<void> {
-    const yesterday: Date = removeDays(new Date());
+    const yesterday: Date = DateUtil.removeDays(new Date());
     await this.tokenModel
       .deleteMany()
       .where('expiresAt')

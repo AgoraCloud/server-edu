@@ -1,11 +1,7 @@
+import { KubeUtil } from './utils/kube.util';
 import { Inject, Injectable } from '@nestjs/common';
 import * as k8s from '@kubernetes/client-node';
 import * as http from 'http';
-import {
-  generateResourceName,
-  generateWorkspaceLabels,
-  resourcePrefix,
-} from './helpers';
 
 @Injectable()
 export class KubernetesNetworkPoliciesService {
@@ -31,8 +27,8 @@ export class KubernetesNetworkPoliciesService {
       apiVersion: 'networking.k8s.io/v1',
       kind: 'NetworkPolicy',
       metadata: {
-        name: generateResourceName(workspaceId),
-        labels: generateWorkspaceLabels(workspaceId),
+        name: KubeUtil.generateResourceName(workspaceId),
+        labels: KubeUtil.generateWorkspaceLabels(workspaceId),
       },
       spec: {
         // Select all the pods in the namespace
@@ -45,12 +41,12 @@ export class KubernetesNetworkPoliciesService {
               {
                 namespaceSelector: {
                   matchLabels: {
-                    app: resourcePrefix,
+                    app: KubeUtil.resourcePrefix,
                   },
                 },
                 podSelector: {
                   matchLabels: {
-                    app: `${resourcePrefix}-server`,
+                    app: `${KubeUtil.resourcePrefix}-server`,
                   },
                 },
               },

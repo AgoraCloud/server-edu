@@ -1,4 +1,3 @@
-import { accessTokenConstants } from './modules/authentication/constants';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
@@ -9,6 +8,10 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { LoggerService } from './modules/logger/logger.service';
 import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 import { Config, EnvironmentConfig } from './config/configuration.interface';
+import {
+  AuthTokenType,
+  COOKIE_CONFIG,
+} from './modules/authentication/config/cookie.config';
 
 declare const module: any;
 
@@ -41,7 +44,7 @@ async function bootstrap() {
       .setTitle('AgoraCloud Server APIs')
       .setDescription('A list of all the AgoraCloud Server APIs')
       .setVersion(`v${version}`)
-      .addCookieAuth(accessTokenConstants.name)
+      .addCookieAuth(COOKIE_CONFIG[AuthTokenType.Access].name)
       .build();
     const document: OpenAPIObject = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api/docs', app, document);

@@ -1,8 +1,8 @@
+import { KubeUtil } from './utils/kube.util';
 import { KubernetesConfig } from '../../config/configuration.interface';
 import { Inject, Injectable } from '@nestjs/common';
 import * as k8s from '@kubernetes/client-node';
 import * as http from 'http';
-import { generateResourceName, generateWorkspaceLabels } from './helpers';
 
 @Injectable()
 export class KubernetesRolesService {
@@ -30,8 +30,8 @@ export class KubernetesRolesService {
       apiVersion: 'rbac.authorization.k8s.io/v1',
       kind: 'Role',
       metadata: {
-        name: generateResourceName(workspaceId),
-        labels: generateWorkspaceLabels(workspaceId),
+        name: KubeUtil.generateResourceName(workspaceId),
+        labels: KubeUtil.generateWorkspaceLabels(workspaceId),
       },
       rules: [
         {
@@ -72,7 +72,7 @@ export class KubernetesRolesService {
     response: http.IncomingMessage;
     body: k8s.V1RoleBinding;
   }> {
-    const name: string = generateResourceName(workspaceId);
+    const name: string = KubeUtil.generateResourceName(workspaceId);
     return this.k8sRbacAuthorizationV1Api.createNamespacedRoleBinding(
       namespace,
       {
@@ -80,7 +80,7 @@ export class KubernetesRolesService {
         kind: 'RoleBinding',
         metadata: {
           name,
-          labels: generateWorkspaceLabels(workspaceId),
+          labels: KubeUtil.generateWorkspaceLabels(workspaceId),
         },
         roleRef: {
           apiGroup: 'rbac.authorization.k8s.io',

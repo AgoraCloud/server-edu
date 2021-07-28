@@ -1,8 +1,8 @@
+import { KubeUtil } from './utils/kube.util';
 import { InDatabaseConfigService } from './../in-database-config/in-database-config.service';
 import { Inject, Injectable } from '@nestjs/common';
 import * as k8s from '@kubernetes/client-node';
 import * as http from 'http';
-import { generateWorkspaceLabels } from './helpers';
 
 @Injectable()
 export class KubernetesNamespacesService {
@@ -55,7 +55,7 @@ export class KubernetesNamespacesService {
       metadata: {
         name,
         labels: {
-          ...generateWorkspaceLabels(workspaceId),
+          ...KubeUtil.generateWorkspaceLabels(workspaceId),
           instance: this.inDatabaseConfigService.instanceId,
         },
       },

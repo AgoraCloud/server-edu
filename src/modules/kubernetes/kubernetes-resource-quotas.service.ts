@@ -1,8 +1,8 @@
+import { KubeUtil } from './utils/kube.util';
 import { WorkspaceResources } from '../workspaces/schemas/workspace.schema';
 import { Inject, Injectable } from '@nestjs/common';
 import * as k8s from '@kubernetes/client-node';
 import * as http from 'http';
-import { generateResourceName, resourcePrefix } from './helpers';
 
 @Injectable()
 export class KubernetesResourceQuotasService {
@@ -24,7 +24,7 @@ export class KubernetesResourceQuotasService {
     body: k8s.V1ResourceQuota;
   }> {
     return this.k8sCoreV1Api.readNamespacedResourceQuota(
-      generateResourceName(workspaceId),
+      KubeUtil.generateResourceName(workspaceId),
       namespace,
     );
   }
@@ -58,9 +58,9 @@ export class KubernetesResourceQuotasService {
       apiVersion: 'v1',
       kind: 'ResourceQuota',
       metadata: {
-        name: generateResourceName(workspaceId),
+        name: KubeUtil.generateResourceName(workspaceId),
         labels: {
-          app: resourcePrefix,
+          app: KubeUtil.resourcePrefix,
         },
       },
       spec: {
@@ -94,14 +94,14 @@ export class KubernetesResourceQuotasService {
     if (workspaceResources.storageCount) {
       hardQuotas['requests.storage'] = `${workspaceResources.storageCount}Gi`;
     }
-    const name: string = generateResourceName(workspaceId);
+    const name: string = KubeUtil.generateResourceName(workspaceId);
     return this.k8sCoreV1Api.replaceNamespacedResourceQuota(name, namespace, {
       apiVersion: 'v1',
       kind: 'ResourceQuota',
       metadata: {
         name: name,
         labels: {
-          app: resourcePrefix,
+          app: KubeUtil.resourcePrefix,
         },
       },
       spec: {
@@ -124,7 +124,7 @@ export class KubernetesResourceQuotasService {
     body: k8s.V1ResourceQuota;
   }> {
     return this.k8sCoreV1Api.deleteNamespacedResourceQuota(
-      generateResourceName(workspaceId),
+      KubeUtil.generateResourceName(workspaceId),
       namespace,
     );
   }

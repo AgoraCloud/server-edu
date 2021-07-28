@@ -1,7 +1,7 @@
+import { KubeUtil } from './utils/kube.util';
 import { Inject, Injectable } from '@nestjs/common';
 import * as k8s from '@kubernetes/client-node';
 import * as http from 'http';
-import { generateDeploymentLabels, generateResourceName } from './helpers';
 import { KubernetesConfig } from '../../config/configuration.interface';
 
 @Injectable()
@@ -50,8 +50,8 @@ export class KubernetesPersistentVolumeClaimsService {
       apiVersion: 'v1',
       kind: 'PersistentVolumeClaim',
       metadata: {
-        name: generateResourceName(deploymentId),
-        labels: generateDeploymentLabels(deploymentId),
+        name: KubeUtil.generateResourceName(deploymentId),
+        labels: KubeUtil.generateDeploymentLabels(deploymentId),
       },
       spec: {
         accessModes: ['ReadWriteOnce'],
@@ -79,7 +79,7 @@ export class KubernetesPersistentVolumeClaimsService {
     body: k8s.V1PersistentVolumeClaim;
   }> {
     return this.k8sCoreV1Api.deleteNamespacedPersistentVolumeClaim(
-      generateResourceName(deploymentId),
+      KubeUtil.generateResourceName(deploymentId),
       namespace,
     );
   }

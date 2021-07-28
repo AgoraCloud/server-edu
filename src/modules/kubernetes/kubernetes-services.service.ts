@@ -1,7 +1,9 @@
+import { KubeUtil } from './utils/kube.util';
 import { Inject, Injectable } from '@nestjs/common';
 import * as k8s from '@kubernetes/client-node';
 import * as http from 'http';
-import { generateDeploymentLabels, generateResourceName } from './helpers';
+import { DeploymentTypeDto } from '@agoracloud/common';
+import { DEPLOYMENT_CONFIG } from './config/deployment.config';
 
 @Injectable()
 export class KubernetesServicesService {
@@ -37,17 +39,18 @@ export class KubernetesServicesService {
   createService(
     namespace: string,
     deploymentId: string,
+    deploymentType: DeploymentTypeDto,
   ): Promise<{
     response: http.IncomingMessage;
     body: k8s.V1Service;
   }> {
     const labels: { [key: string]: string } =
-      generateDeploymentLabels(deploymentId);
+      KubeUtil.generateDeploymentLabels(deploymentId);
     return this.k8sCoreV1Api.createNamespacedService(namespace, {
       apiVersion: 'v1',
       kind: 'Service',
       metadata: {
-        name: generateResourceName(deploymentId),
+        name: KubeUtil.generateResourceName(deploymentId),
         labels,
       },
       spec: {
@@ -55,7 +58,9 @@ export class KubernetesServicesService {
         ports: [
           {
             port: 80,
-            targetPort: new Number(8443),
+            targetPort: new Number(
+              DEPLOYMENT_CONFIG[deploymentType].containerPort,
+            ),
           },
         ],
         selector: labels,
@@ -77,7 +82,7 @@ export class KubernetesServicesService {
     body: k8s.V1Status;
   }> {
     return this.k8sCoreV1Api.deleteNamespacedService(
-      generateResourceName(deploymentId),
+      KubeUtil.generateResourceName(deploymentId),
       namespace,
     );
   }
