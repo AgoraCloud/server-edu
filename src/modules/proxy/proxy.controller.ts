@@ -1,3 +1,4 @@
+import { PROXY_ACTIONS_DTO } from './../authorization/schemas/permission.schema';
 import {
   ActionDto,
   AuditActionDto,
@@ -36,11 +37,7 @@ export class ProxyController {
    * @param res the response
    */
   @All()
-  @Permissions(
-    ActionDto.ReadWorkspace,
-    ActionDto.ReadDeployment,
-    ActionDto.ProxyDeployment,
-  )
+  @Permissions(...PROXY_ACTIONS_DTO)
   @Audit(AuditActionDto.Proxy, AuditResourceDto.Deployment)
   @ApiOperation({ summary: 'Proxy a deployment API request' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })

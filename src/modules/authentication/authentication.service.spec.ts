@@ -1,3 +1,4 @@
+import { RequestWithUser } from '../../utils/requests.interface';
 import { TokenPayload } from './interfaces/token-payload.interface';
 import { InvalidCredentialsException } from './../../exceptions/invalid-credentials.exception';
 import { TokenExpiredException } from './../../exceptions/token-expired.exception';
@@ -37,6 +38,7 @@ import {
 } from '@agoracloud/common';
 import { AuthTokenType, COOKIE_CONFIG } from './config/cookie.config';
 import { Request, Response } from 'express';
+import { UnauthorizedException } from '@nestjs/common';
 
 let user: UserDocument;
 const createUserDto: CreateUserDto = {
@@ -52,6 +54,10 @@ const jwtConfig: JwtConfig = {
     secret: 'refresh_secret',
   },
 };
+const domainConfig = 'agoracloud.test.com';
+
+const accessCookieKey = COOKIE_CONFIG[AuthTokenType.Access].name;
+const refreshCookieKey = COOKIE_CONFIG[AuthTokenType.Refresh].name;
 
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
@@ -84,6 +90,9 @@ describe('AuthenticationService', () => {
               switch (key) {
                 case 'jwt': {
                   return jwtConfig;
+                }
+                case 'domain': {
+                  return domainConfig;
                 }
               }
             },
@@ -305,7 +314,6 @@ describe('AuthenticationService', () => {
 
   describe('getTokenFromRequest', () => {
     it('should return the access token from the given request', () => {
-      const accessCookieKey = COOKIE_CONFIG[AuthTokenType.Access].name;
       const request: Request = { cookies: {} } as any;
       request.cookies[accessCookieKey] = 'access_token';
       const retrievedToken: string = AuthenticationService.getTokenFromRequest(
@@ -316,7 +324,6 @@ describe('AuthenticationService', () => {
     });
 
     it('should return the refresh token from the given request', () => {
-      const refreshCookieKey = COOKIE_CONFIG[AuthTokenType.Refresh].name;
       const request: Request = { cookies: {} } as any;
       request.cookies[refreshCookieKey] = 'refresh_token';
       const retrievedToken: string = AuthenticationService.getTokenFromRequest(
@@ -324,6 +331,129 @@ describe('AuthenticationService', () => {
         AuthTokenType.Refresh,
       );
       expect(retrievedToken).toBe(request.cookies[refreshCookieKey]);
+    });
+  });
+
+  describe('canActivate', () => {
+    const expectedErrorMessage: string = new UnauthorizedException().message;
+
+    it('should throw an error if there is no access token in the request (websocket proxy request)', async () => {
+      const request: Request = { cookies: {} } as any;
+      const response: Response = {} as any;
+      try {
+        await service.canActivate(request, response, true);
+        fail('It should throw an error');
+      } catch (err) {
+        expect(err.message).toBe(expectedErrorMessage);
+      }
+    });
+
+    it('should throw an error if the access token in the request is not valid (websocket proxy request)', async () => {
+      const request: Request = { cookies: {} } as any;
+      request.cookies[accessCookieKey] = 'jwt malformed';
+      const response: Response = {} as any;
+      try {
+        await service.canActivate(request, response, true);
+        fail('It should throw an error');
+      } catch (err) {
+        expect(err.message).toBe(expectedErrorMessage);
+      }
+    });
+
+    it('should return if the access token is valid', async () => {
+      const request: Request = { cookies: {} } as any;
+      const response: Response = {
+        cookie: jest.fn(),
+      } as any;
+      // Generate and set a valid access token
+      const validAccessToken: string = await service.generateAndSetCookie(
+        user,
+        response,
+        AuthTokenType.Access,
+      );
+      request.cookies[accessCookieKey] = validAccessToken;
+
+      try {
+        await service.canActivate(request, response);
+      } catch (err) {
+        fail('It should not throw an error');
+      }
+    });
+
+    it('should attach the user to the request and return if the access token is valid (websocket proxy request)', async () => {
+      const request: RequestWithUser = { cookies: {} } as any;
+      const response: Response = { cookie: jest.fn() } as any;
+      // Generate and set a valid access token
+      const validAccessToken: string = await service.generateAndSetCookie(
+        user,
+        response,
+        AuthTokenType.Access,
+      );
+      request.cookies[accessCookieKey] = validAccessToken;
+
+      try {
+        await service.canActivate(request, response, true);
+        expect(request.user).toBeTruthy();
+        expect(request.user.email).toBe(user.email);
+      } catch (err) {
+        fail('It should not throw an error');
+      }
+    });
+
+    it('it should throw an error if the access token is invalid and there is no refresh token in the request', async () => {
+      const request: Request = { cookies: {} } as any;
+      request.cookies[accessCookieKey] = 'jwt malformed';
+      const mockClearCookieFunction: jest.Mock = jest.fn();
+      const response: Response = {
+        clearCookie: mockClearCookieFunction,
+      } as any;
+      try {
+        await service.canActivate(request, response);
+        fail('It should throw an error');
+      } catch (err) {
+        expect(err.message).toBe(expectedErrorMessage);
+        expect(mockClearCookieFunction.mock.calls).toHaveLength(2);
+      }
+    });
+
+    it('it should throw an error if both the access and refresh tokens in the request are not valid', async () => {
+      const request: Request = { cookies: {} } as any;
+      request.cookies[accessCookieKey] = 'jwt malformed';
+      request.cookies[refreshCookieKey] = 'jwt malformed';
+      const mockClearCookieFunction: jest.Mock = jest.fn();
+      const response: Response = {
+        clearCookie: mockClearCookieFunction,
+      } as any;
+      try {
+        await service.canActivate(request, response);
+        fail('It should throw an error');
+      } catch (err) {
+        expect(err.message).toBe(expectedErrorMessage);
+        expect(mockClearCookieFunction.mock.calls).toHaveLength(2);
+      }
+    });
+
+    it('should generate and set a new access token if the given access token is expired and a valid refresh token is supplied', async () => {
+      const request: Request = { cookies: {} } as any;
+      request.cookies[accessCookieKey] = 'jwt malformed';
+      const mockCookieFunction: jest.Mock = jest.fn();
+      const response: Response = { cookie: mockCookieFunction } as any;
+      // Generate and set a valid refresh token
+      const validRefreshToken: string = await service.generateAndSetCookie(
+        user,
+        response,
+        AuthTokenType.Refresh,
+      );
+      request.cookies[refreshCookieKey] = validRefreshToken;
+      mockCookieFunction.mockClear();
+
+      try {
+        await service.canActivate(request, response);
+        expect(request.cookies[accessCookieKey]).not.toBe('jwt malformed');
+        expect(mockCookieFunction.mock.calls).toHaveLength(1);
+      } catch (err) {
+        fail('It should not throw an error');
+      }
     });
   });
 

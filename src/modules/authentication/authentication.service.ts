@@ -14,7 +14,7 @@ import { Config, JwtConfig } from '../../config/configuration.interface';
 import { TokenPayload } from './interfaces/token-payload.interface';
 import { ConfigService } from '@nestjs/config';
 import { InvalidCredentialsException } from '../../exceptions/invalid-credentials.exception';
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
@@ -26,6 +26,7 @@ import {
   COOKIE_CONFIG,
 } from './config/cookie.config';
 import { CookieOptions, Request, Response } from 'express';
+import { RequestWithUser } from '../../utils/requests.interface';
 
 @Injectable()
 export class AuthenticationService {
@@ -223,6 +224,78 @@ export class AuthenticationService {
     authTokenType: AuthTokenType,
   ): string {
     return request.cookies[COOKIE_CONFIG[authTokenType].name];
+  }
+
+  /**
+   * Checks whether the user is authenticated or not
+   * @param request the server request instance
+   * @param response the server response instance
+   * @param isWsProxyRequest boolean indicating whether this method is being used by the websocket proxy or not
+   * @throws UnauthorizedException
+   */
+  async canActivate(
+    request: Request | RequestWithUser,
+    response: Response,
+    isWsProxyRequest = false,
+  ): Promise<void> {
+    try {
+      // Check the access token
+      let accessToken: string = AuthenticationService.getTokenFromRequest(
+        request,
+        AuthTokenType.Access,
+      );
+      if (isWsProxyRequest && !accessToken) throw new UnauthorizedException();
+      try {
+        accessToken = accessToken || '';
+        const decodedAccessToken: TokenPayload = this.validateCookieToken(
+          accessToken,
+          AuthTokenType.Access,
+        );
+        if (!isWsProxyRequest) return;
+        // Attach the user to the request instance if this is being used by the websocket proxy
+        const user: UserDocument = await this.userService.findByEmail(
+          decodedAccessToken.email,
+        );
+        request.user = user;
+        return;
+      } catch (err) {
+        // Catch TokenExpiredError, do nothing if this is not being used by the websocket proxy
+        if (isWsProxyRequest) throw err;
+      }
+
+      // Check the refresh token
+      const refreshToken: string = AuthenticationService.getTokenFromRequest(
+        request,
+        AuthTokenType.Refresh,
+      );
+      if (!refreshToken) throw new UnauthorizedException();
+      const decodedRefreshToken: TokenPayload = this.validateCookieToken(
+        refreshToken,
+        AuthTokenType.Refresh,
+      );
+      if (!decodedRefreshToken) throw new UnauthorizedException();
+
+      // Check if the user has the refresh token
+      const user: UserDocument =
+        await this.userService.findByEmailAndRefreshToken(
+          decodedRefreshToken.email,
+          refreshToken,
+        );
+
+      // Generate and set the new access token (in the response)
+      const newAccessToken: string = await this.generateAndSetCookie(
+        user,
+        response,
+        AuthTokenType.Access,
+      );
+      // Set the new access token in the current request
+      request.cookies[COOKIE_CONFIG[AuthTokenType.Access].name] =
+        newAccessToken;
+    } catch (err) {
+      // Something went wrong, clear the users access and refresh tokens
+      if (!isWsProxyRequest) await this.logOut(response);
+      throw new UnauthorizedException();
+    }
   }
 
   /**

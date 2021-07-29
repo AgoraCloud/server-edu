@@ -8,6 +8,15 @@ import {
 } from '@agoracloud/common';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 
+/**
+ * List of actions (permissions) needed to proxy a deployment
+ */
+export const PROXY_ACTIONS_DTO: ActionDto[] = [
+  ActionDto.ReadWorkspace,
+  ActionDto.ReadDeployment,
+  ActionDto.ProxyDeployment,
+];
+
 export class WorkspaceRolesAndPermissions {
   @Prop({
     required: true,
