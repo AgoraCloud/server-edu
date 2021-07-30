@@ -106,6 +106,11 @@ export class ProxyService implements OnModuleInit {
             this.makeProxyOptions(deployment.workspace._id, deployment._id),
           );
         } catch (err) {
+          // TODO: remove this
+          this.logger.error({
+            message: 'Error proxying websocket',
+            error: err,
+          });
           socket.destroy();
           return;
         }
@@ -193,6 +198,8 @@ export class ProxyService implements OnModuleInit {
     // Parse the cookies present in the request headers
     const parsedCookies: { [key: string]: string } =
       Cookie.parse(headerCookies);
+    // TODO: remove this
+    this.logger.log({ parsedCookies });
     req.cookies = parsedCookies;
     await this.authenticationService.canActivate(req, req.res, true);
   }
