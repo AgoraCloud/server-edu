@@ -94,10 +94,6 @@ export class ProxyService implements OnModuleInit {
     httpServer.on(
       'upgrade',
       async (req: RequestWithDeploymentAndUser, socket: Socket, head: any) => {
-        // TODO: Remove this after testing - seeing how the server and browser will react to websocket connections being closed
-        socket.destroy();
-        return;
-
         try {
           await this.authenticateWebsocket(req);
           await this.authorizeWebsocket(req);
@@ -110,8 +106,7 @@ export class ProxyService implements OnModuleInit {
             this.makeProxyOptions(deployment.workspace._id, deployment._id),
           );
         } catch (err) {
-          // TODO: What to do here?
-          socket.end();
+          socket.destroy();
           return;
         }
       },
