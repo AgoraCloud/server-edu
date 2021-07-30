@@ -37,7 +37,6 @@ import { Config } from '../../config/configuration.interface';
 @Injectable()
 export class ProxyService implements OnModuleInit {
   private readonly domain: string;
-  // TODO: remove after testing
   private readonly logger: Logger = new Logger(ProxyService.name);
 
   constructor(
@@ -74,6 +73,10 @@ export class ProxyService implements OnModuleInit {
     this.httpProxy.on(
       'error',
       (err: Error, req: IncomingMessage, res: ServerResponse) => {
+        this.logger.error({
+          message: 'Proxy error',
+          error: err,
+        });
         const exception: InternalServerErrorException =
           new InternalServerErrorException(`Proxy Error`);
         res.writeHead(exception.getStatus(), {
@@ -94,14 +97,10 @@ export class ProxyService implements OnModuleInit {
     httpServer.on(
       'upgrade',
       async (req: RequestWithDeploymentAndUser, socket: Socket, head: any) => {
+        // TODO: add auditing log?
         try {
           await this.authenticateWebsocket(req);
-          // TODO: remove this
-          this.logger.log({ message: 'Websocket authenticated' });
           await this.authorizeWebsocket(req);
-          // TODO: remove this
-          this.logger.log({ message: 'Websocket authorized' });
-          // TODO: add auditing log?
           const deployment: DeploymentDocument = req.deployment;
           this.httpProxy.ws(
             req,
@@ -110,7 +109,6 @@ export class ProxyService implements OnModuleInit {
             this.makeProxyOptions(deployment.workspace._id, deployment._id),
           );
         } catch (err) {
-          // TODO: remove this
           this.logger.error({
             message: 'Error proxying websocket',
             error: err,
@@ -142,9 +140,9 @@ export class ProxyService implements OnModuleInit {
    * @returns boolean indicating whether the user is authorized to proxy deployments or not
    */
   async authorize(req: RequestWithDeploymentAndUser): Promise<boolean> {
-    const deploymentId: string = ProxyUtil.getDeploymentIdFromHostname(
-      req.hostname,
-    );
+    const hostname: string = req.hostname || req.headers.host;
+    const deploymentId: string =
+      ProxyUtil.getDeploymentIdFromHostname(hostname);
     if (!isMongoId(deploymentId)) {
       throw new InvalidMongoIdException('deploymentId');
     }
