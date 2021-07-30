@@ -289,8 +289,7 @@ export class AuthenticationService {
         AuthTokenType.Access,
       );
       // Set the new access token in the current request
-      request.cookies[COOKIE_CONFIG[AuthTokenType.Access].name] =
-        newAccessToken;
+      request.cookies[this.accessCookieConfig.name] = newAccessToken;
     } catch (err) {
       // Something went wrong, clear the users access and refresh tokens
       if (!isWsProxyRequest) await this.logOut(response);

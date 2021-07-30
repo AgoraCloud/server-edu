@@ -95,24 +95,7 @@ export class ProxyService implements OnModuleInit {
       'upgrade',
       async (req: RequestWithDeploymentAndUser, socket: Socket, head: any) => {
         // TODO: Remove this after testing - seeing how the server and browser will react to websocket connections being closed
-
-        // FIXME: Solution 1
-        // socket.write('TESTING');
-        // socket.end('');
-        // socket.destroy();
-
-        // FIXME: solution 2
-        socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
         socket.destroy();
-        // socket.write(
-        //   'HTTP/1.1 401 Web Socket Protocol Handshake\r\n' +
-        //     'Upgrade: WebSocket\r\n' +
-        //     'Connection: Upgrade\r\n' +
-        //     '\r\n',
-        // );
-        // socket.end('HTTP/1.1 503 Service Unavailable\r\n\r\n','ascii');
-        // socket.close();
-        // socket.destroy();
         return;
 
         try {
