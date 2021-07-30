@@ -96,7 +96,11 @@ export class ProxyService implements OnModuleInit {
       async (req: RequestWithDeploymentAndUser, socket: Socket, head: any) => {
         try {
           await this.authenticateWebsocket(req);
+          // TODO: remove this
+          this.logger.log({ message: 'Websocket authenticated' });
           await this.authorizeWebsocket(req);
+          // TODO: remove this
+          this.logger.log({ message: 'Websocket authorized' });
           // TODO: add auditing log?
           const deployment: DeploymentDocument = req.deployment;
           this.httpProxy.ws(
@@ -198,8 +202,6 @@ export class ProxyService implements OnModuleInit {
     // Parse the cookies present in the request headers
     const parsedCookies: { [key: string]: string } =
       Cookie.parse(headerCookies);
-    // TODO: remove this
-    this.logger.log({ parsedCookies });
     req.cookies = parsedCookies;
     await this.authenticationService.canActivate(req, req.res, true);
   }
