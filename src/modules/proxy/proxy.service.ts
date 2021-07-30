@@ -58,6 +58,7 @@ export class ProxyService implements OnModuleInit {
     this.httpProxy.on('open', (socket: Socket) => {
       this.logger.log('ON OPEN SOCKET ADDRESS' + socket.address());
     });
+    // TODO: Remove after testing
     this.httpProxy.on(
       'close',
       (res: IncomingMessage, socket: Socket, head: any) => {
@@ -93,8 +94,10 @@ export class ProxyService implements OnModuleInit {
     httpServer.on(
       'upgrade',
       async (req: RequestWithDeploymentAndUser, socket: Socket, head: any) => {
-        // TODO: Remove this after testing - seeing how the server and browser will react to thrown exceptions
-        throw new UnauthorizedException();
+        // TODO: Remove this after testing - seeing how the server and browser will react to websocket connections being closed
+        socket.write('TESTING');
+        socket.end();
+        socket.destroy();
 
         try {
           await this.authenticateWebsocket(req);
