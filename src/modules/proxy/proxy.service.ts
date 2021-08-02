@@ -55,13 +55,23 @@ export class ProxyService implements OnModuleInit {
     this.proxyWebsockets();
     // TODO: Remove after testing
     this.httpProxy.on('open', (socket: Socket) => {
-      this.logger.log({ message: 'ON OPEN SOCKET ADDRESS', socket });
+      this.logger.log({
+        message: 'ON OPEN SOCKET ADDRESS',
+        remoteAddress: socket.remoteAddress,
+        address: socket.address(),
+      });
     });
     // TODO: Remove after testing
     this.httpProxy.on(
       'close',
       (res: IncomingMessage, socket: Socket, head: any) => {
-        this.logger.log({ message: 'ON CLOSE HOST', res, socket });
+        this.logger.log({
+          message: 'ON CLOSE HOST',
+          remoteAddress: socket.remoteAddress,
+          address: socket.address(),
+          headers: res.headers,
+          url: res.url,
+        });
       },
     );
   }
