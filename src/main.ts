@@ -32,8 +32,8 @@ async function bootstrap() {
   );
   app.use(cookieParser());
   // TODO: figure out how to disable these for the /proxy endpoint
-  // app.use(helmet());
-  // app.enableCors();
+  app.use(helmet());
+  app.enableCors();
   app.set('trust proxy', 1);
   // Swagger
   if (environment === EnvironmentConfig.Development) {

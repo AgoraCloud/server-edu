@@ -1,6 +1,5 @@
 import { PROXY_ACTIONS_DTO } from './../authorization/schemas/permission.schema';
 import {
-  ActionDto,
   AuditActionDto,
   AuditResourceDto,
   ExceptionDto,

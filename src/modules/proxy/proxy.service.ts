@@ -53,27 +53,6 @@ export class ProxyService implements OnModuleInit {
   onModuleInit(): void {
     this.onProxyError();
     this.proxyWebsockets();
-    // TODO: Remove after testing
-    this.httpProxy.on('open', (socket: Socket) => {
-      this.logger.log({
-        message: 'ON OPEN SOCKET ADDRESS',
-        remoteAddress: socket.remoteAddress,
-        address: socket.address(),
-      });
-    });
-    // TODO: Remove after testing
-    this.httpProxy.on(
-      'close',
-      (res: IncomingMessage, socket: Socket, head: any) => {
-        this.logger.log({
-          message: 'ON CLOSE HOST',
-          remoteAddress: socket.remoteAddress,
-          address: socket.address(),
-          headers: res.headers,
-          url: res.url,
-        });
-      },
-    );
   }
 
   /**
@@ -106,7 +85,6 @@ export class ProxyService implements OnModuleInit {
     httpServer.on(
       'upgrade',
       async (req: RequestWithDeploymentAndUser, socket: Socket, head: any) => {
-        // TODO: add auditing log?
         try {
           await this.authenticateWebsocket(req);
           await this.authorizeWebsocket(req);
@@ -191,7 +169,6 @@ export class ProxyService implements OnModuleInit {
       target: `http://${KubeUtil.generateResourceName(
         deploymentId,
       )}.${KubeUtil.generateResourceName(workspaceId)}.svc.cluster.local`,
-      // TODO: Test this - rewrites domain in cookies
       cookieDomainRewrite: {
         '*': ProxyUtil.generatePublicProxyUrl(this.domain, deploymentId),
       },
