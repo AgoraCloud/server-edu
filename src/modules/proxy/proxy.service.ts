@@ -1,3 +1,10 @@
+import { PROXY_ACTIONS_DTO } from './../authorization/schemas/permission.schema';
+import { AuthorizationService } from './../authorization/authorization.service';
+import { DeploymentNotRunningException } from './../../exceptions/deployment-not-running.exception';
+import { DeploymentNotFoundException } from './../../exceptions/deployment-not-found.exception';
+import { DeploymentStatusDto } from '@agoracloud/common';
+import { AuthenticationService } from './../authentication/authentication.service';
+import { UserDocument } from './../users/schemas/user.schema';
 import { KubeUtil } from './../kubernetes/utils/kube.util';
 import { ProxyUtil } from './utils/proxy.util';
 import { DeploymentsService } from './../deployments/deployments.service';
@@ -11,19 +18,37 @@ import {
   Injectable,
   OnModuleInit,
   InternalServerErrorException,
+  ForbiddenException,
+  UnauthorizedException,
+  Logger,
 } from '@nestjs/common';
 import * as HttpProxy from 'http-proxy';
 import { Server } from 'http';
 import { Socket } from 'net';
 import { IncomingMessage, ServerResponse } from 'http';
+import * as Cookie from 'cookie';
+import {
+  RequestWithDeploymentAndUser,
+  RequestWithUser,
+} from '../../utils/requests.interface';
+import { ConfigService } from '@nestjs/config';
+import { Config } from '../../config/configuration.interface';
 
 @Injectable()
 export class ProxyService implements OnModuleInit {
+  private readonly domain: string;
+  private readonly logger: Logger = new Logger(ProxyService.name);
+
   constructor(
     @Inject(HttpProxy) private readonly httpProxy: HttpProxy,
     private readonly httpAdapterHost: HttpAdapterHost,
     private readonly deploymentsService: DeploymentsService,
-  ) {}
+    private readonly authenticationService: AuthenticationService,
+    private readonly authorizationService: AuthorizationService,
+    private readonly configService: ConfigService<Config>,
+  ) {
+    this.domain = this.configService.get<string>('domain');
+  }
 
   onModuleInit(): void {
     this.onProxyError();
@@ -37,13 +62,16 @@ export class ProxyService implements OnModuleInit {
     this.httpProxy.on(
       'error',
       (err: Error, req: IncomingMessage, res: ServerResponse) => {
+        this.logger.error({
+          message: 'Proxy error',
+          error: err,
+        });
         const exception: InternalServerErrorException =
           new InternalServerErrorException(`Proxy Error`);
-        res
-          .writeHead(exception.getStatus(), {
-            'Content-Type': 'application/json',
-          })
-          .end(JSON.stringify(exception.getResponse()));
+        res.writeHead(exception.getStatus(), {
+          'Content-Type': 'application/json',
+        });
+        res.end(JSON.stringify(exception.getResponse()));
       },
     );
   }
@@ -56,21 +84,25 @@ export class ProxyService implements OnModuleInit {
     const httpServer: Server = this.httpAdapterHost.httpAdapter.getHttpServer();
     httpServer.on(
       'upgrade',
-      async (req: Request, socket: Socket, head: any) => {
-        const deploymentId: string = ProxyUtil.getDeploymentIdFromHostname(
-          req.headers.host,
-        );
-        if (!isMongoId(deploymentId)) {
-          throw new InvalidMongoIdException('deploymentId');
+      async (req: RequestWithDeploymentAndUser, socket: Socket, head: any) => {
+        try {
+          await this.authenticateWebsocket(req);
+          await this.authorizeWebsocket(req);
+          const deployment: DeploymentDocument = req.deployment;
+          this.httpProxy.ws(
+            req,
+            socket,
+            head,
+            this.makeProxyOptions(deployment.workspace._id, deployment._id),
+          );
+        } catch (err) {
+          this.logger.error({
+            message: 'Error proxying websocket',
+            error: err,
+          });
+          socket.destroy();
+          return;
         }
-        const deployment: DeploymentDocument =
-          await this.deploymentsService.findOne(deploymentId);
-        this.httpProxy.ws(
-          req,
-          socket,
-          head,
-          this.makeProxyOptions(deployment.workspace._id, deploymentId),
-        );
       },
     );
   }
@@ -90,6 +122,40 @@ export class ProxyService implements OnModuleInit {
   }
 
   /**
+   * Checks if the user is authorized to proxy deployments
+   * @param req the server request instance
+   * @returns boolean indicating whether the user is authorized to proxy deployments or not
+   */
+  async authorize(req: RequestWithDeploymentAndUser): Promise<boolean> {
+    const hostname: string = req.hostname || req.headers.host;
+    const deploymentId: string =
+      ProxyUtil.getDeploymentIdFromHostname(hostname);
+    if (!isMongoId(deploymentId)) {
+      throw new InvalidMongoIdException('deploymentId');
+    }
+
+    const deployment: DeploymentDocument =
+      await this.deploymentsService.findOne(deploymentId);
+    const user: UserDocument = req.user;
+
+    const { canActivate, isAdmin } = await this.authorizationService.can(
+      user,
+      PROXY_ACTIONS_DTO,
+      deployment.workspace._id,
+    );
+    if (canActivate) {
+      if (!isAdmin && deployment.user._id.toString() != user._id.toString()) {
+        throw new DeploymentNotFoundException(deploymentId);
+      }
+      if (deployment.status !== DeploymentStatusDto.Running) {
+        throw new DeploymentNotRunningException(deploymentId);
+      }
+      req.deployment = deployment;
+    }
+    return canActivate;
+  }
+
+  /**
    * Dynamically creates configuration options for the proxy
    * @param workspaceId the deployments workspace id
    * @param deploymentId the deployment id
@@ -103,6 +169,35 @@ export class ProxyService implements OnModuleInit {
       target: `http://${KubeUtil.generateResourceName(
         deploymentId,
       )}.${KubeUtil.generateResourceName(workspaceId)}.svc.cluster.local`,
+      cookieDomainRewrite: {
+        '*': ProxyUtil.generatePublicProxyUrl(this.domain, deploymentId),
+      },
     };
+  }
+
+  /**
+   * Makes sure a user is authenticated before proxying websockets
+   * @param req the server request instance
+   */
+  private async authenticateWebsocket(req: RequestWithUser): Promise<void> {
+    // Check if the request headers contains cookies
+    const headerCookies: string = req.headers.cookie;
+    if (!headerCookies) throw new UnauthorizedException();
+    // Parse the cookies present in the request headers
+    const parsedCookies: { [key: string]: string } =
+      Cookie.parse(headerCookies);
+    req.cookies = parsedCookies;
+    await this.authenticationService.canActivate(req, req.res, true);
+  }
+
+  /**
+   * Makes sure a user is authorized to proxy before proxying websockets
+   * @param req the server request instance
+   */
+  private async authorizeWebsocket(
+    req: RequestWithDeploymentAndUser,
+  ): Promise<void> {
+    const canActivate: boolean = await this.authorize(req);
+    if (!canActivate) throw new ForbiddenException();
   }
 }
