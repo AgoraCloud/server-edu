@@ -18,8 +18,17 @@ declare const module: any;
 async function bootstrap() {
   const app: NestExpressApplication =
     await NestFactory.create<NestExpressApplication>(AppModule);
+
+  app.use(helmet({ contentSecurityPolicy: false }));
   // Use the custom LoggerService for logging
   app.useLogger(app.get(LoggerService));
+  app.useGlobalPipes(
+    new ValidationPipe({ forbidUnknownValues: true, whitelist: true }),
+  );
+  app.use(cookieParser());
+  app.enableCors();
+  app.set('trust proxy', 1);
+
   // Get configuration values
   const configService: ConfigService<Config> = app.get(ConfigService);
   const port: number = configService.get<number>('port');
@@ -27,15 +36,6 @@ async function bootstrap() {
     configService.get<EnvironmentConfig>('environment');
   const version: number = configService.get<number>('version');
 
-  // TODO: test this
-  app.use(helmet({ contentSecurityPolicy: false }));
-  app.useGlobalPipes(
-    new ValidationPipe({ forbidUnknownValues: true, whitelist: true }),
-  );
-  app.use(cookieParser());
-  // TODO: test this
-  app.enableCors();
-  app.set('trust proxy', 1);
   // Swagger
   if (environment === EnvironmentConfig.Development) {
     const config: Pick<
@@ -53,7 +53,7 @@ async function bootstrap() {
 
   await app.listen(port);
 
-  // Hot Reload
+  // Hot reload
   if (module.hot) {
     module.hot.accept();
     module.hot.dispose(() => app.close());
