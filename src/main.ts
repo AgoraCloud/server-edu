@@ -27,12 +27,13 @@ async function bootstrap() {
     configService.get<EnvironmentConfig>('environment');
   const version: number = configService.get<number>('version');
 
+  // TODO: test this
+  app.use(helmet({ contentSecurityPolicy: false }));
   app.useGlobalPipes(
     new ValidationPipe({ forbidUnknownValues: true, whitelist: true }),
   );
   app.use(cookieParser());
-  // TODO: figure out how to disable these for the /proxy endpoint
-  app.use(helmet({ contentSecurityPolicy: false }));
+  // TODO: test this
   app.enableCors();
   app.set('trust proxy', 1);
   // Swagger
