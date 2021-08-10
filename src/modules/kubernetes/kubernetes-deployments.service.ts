@@ -122,16 +122,12 @@ export class KubernetesDeploymentsService {
                     path: '/',
                     port: new Number(containerConfig.containerPort),
                   },
-                  initialDelaySeconds: 3,
-                  periodSeconds: 3,
                 },
                 readinessProbe: {
                   httpGet: {
                     path: '/',
                     port: new Number(containerConfig.containerPort),
                   },
-                  initialDelaySeconds: 3,
-                  periodSeconds: 3,
                 },
               },
             ],
