@@ -15,7 +15,7 @@ export class InDatabaseConfigService implements OnModuleInit {
     private readonly inDatabaseConfigModel: Model<InDatabaseConfigDocument>,
   ) {}
 
-  async onModuleInit() {
+  async onModuleInit(): Promise<void> {
     const inDatabaseConfigDocuments: InDatabaseConfigDocument[] =
       await this.inDatabaseConfigModel.find().exec();
     if (inDatabaseConfigDocuments.length) {

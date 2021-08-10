@@ -27,7 +27,7 @@ export class KubernetesPersistentVolumeClaimsService {
       undefined,
       undefined,
       undefined,
-      'deployment',
+      KubeUtil.resourcePrefixLabelSelector,
     );
   }
 

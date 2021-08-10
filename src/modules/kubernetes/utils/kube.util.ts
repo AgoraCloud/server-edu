@@ -2,6 +2,7 @@ import { isDefined } from 'class-validator';
 
 export class KubeUtil {
   static resourcePrefix = 'agoracloud';
+  static resourcePrefixLabelSelector = `app=${KubeUtil.resourcePrefix}`;
 
   /**
    * Convert a string to a base64 string
