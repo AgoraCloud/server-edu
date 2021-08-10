@@ -30,7 +30,7 @@ export class KubernetesPodsService {
       undefined,
       undefined,
       undefined,
-      'deployment',
+      KubeUtil.resourcePrefixLabelSelector,
     );
   }
 
@@ -41,11 +41,18 @@ export class KubernetesPodsService {
    * @returns a Kubernetes pod
    */
   async getPod(namespace: string, deploymentId: string): Promise<k8s.V1Pod> {
-    // Get all pods
     const {
       body: { items: pods },
-    } = await this.getAllPods(namespace);
-    // Filter the pods by the deployment label
+    } = await this.k8sCoreV1Api.listNamespacedPod(
+      namespace,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      `${KubeUtil.resourcePrefixLabelSelector},deployment=${deploymentId}`,
+    );
+    // Even though the method above should return 0 or 1 pod(s), filter the
+    // pods by the deployment label to be sure
     const podIndex: number = pods.findIndex(
       (p) =>
         p.metadata?.labels?.deployment === deploymentId && p.metadata?.name,

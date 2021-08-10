@@ -15,25 +15,17 @@ export class KubernetesNamespacesService {
    * Get all Kubernetes namespaces
    * @returns a list of all Kubernetes namespaces
    */
-  async getAllNamespaces(): Promise<{
+  getAllNamespaces(): Promise<{
     response: http.IncomingMessage;
     body: k8s.V1NamespaceList;
   }> {
-    const namespaces: {
-      response: http.IncomingMessage;
-      body: k8s.V1NamespaceList;
-    } = await this.k8sCoreV1Api.listNamespace(
+    return this.k8sCoreV1Api.listNamespace(
       undefined,
       undefined,
       undefined,
       undefined,
-      'workspace',
+      `${KubeUtil.resourcePrefixLabelSelector},instance=${this.inDatabaseConfigService.instanceId}`,
     );
-    namespaces.body.items = namespaces.body.items.filter(
-      (n) =>
-        n.metadata?.labels?.instance == this.inDatabaseConfigService.instanceId,
-    );
-    return namespaces;
   }
 
   /**

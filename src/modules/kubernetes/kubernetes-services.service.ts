@@ -26,7 +26,7 @@ export class KubernetesServicesService {
       undefined,
       undefined,
       undefined,
-      'deployment',
+      KubeUtil.resourcePrefixLabelSelector,
     );
   }
 

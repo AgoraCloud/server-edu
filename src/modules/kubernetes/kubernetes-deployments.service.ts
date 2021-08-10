@@ -32,7 +32,7 @@ export class KubernetesDeploymentsService {
       undefined,
       undefined,
       undefined,
-      'deployment',
+      KubeUtil.resourcePrefixLabelSelector,
     );
   }
 
@@ -98,7 +98,7 @@ export class KubernetesDeploymentsService {
               {
                 name: resourceName,
                 image: this.generateContainerImage(deploymentProperties.image),
-                imagePullPolicy: 'Always',
+                imagePullPolicy: 'IfNotPresent',
                 resources: {
                   limits: {
                     memory: `${deploymentProperties.resources.memoryCount}Gi`,
