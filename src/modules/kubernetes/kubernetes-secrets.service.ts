@@ -24,7 +24,7 @@ export class KubernetesSecretsService {
       undefined,
       undefined,
       undefined,
-      'deployment',
+      KubeUtil.resourcePrefixLabelSelector,
     );
   }
 

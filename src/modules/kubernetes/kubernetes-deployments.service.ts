@@ -32,7 +32,7 @@ export class KubernetesDeploymentsService {
       undefined,
       undefined,
       undefined,
-      'deployment',
+      KubeUtil.resourcePrefixLabelSelector,
     );
   }
 
@@ -98,7 +98,7 @@ export class KubernetesDeploymentsService {
               {
                 name: resourceName,
                 image: this.generateContainerImage(deploymentProperties.image),
-                imagePullPolicy: 'Always',
+                imagePullPolicy: 'IfNotPresent',
                 resources: {
                   limits: {
                     memory: `${deploymentProperties.resources.memoryCount}Gi`,
@@ -122,12 +122,16 @@ export class KubernetesDeploymentsService {
                     path: '/',
                     port: new Number(containerConfig.containerPort),
                   },
+                  initialDelaySeconds: 3,
+                  periodSeconds: 3,
                 },
                 readinessProbe: {
                   httpGet: {
                     path: '/',
                     port: new Number(containerConfig.containerPort),
                   },
+                  initialDelaySeconds: 3,
+                  periodSeconds: 3,
                 },
               },
             ],
