@@ -46,7 +46,7 @@ export class HealthController {
       async () =>
         this.memoryHealthIndicator.checkHeap('memoryHeap', 300 * 1024 * 1024),
       async () =>
-        this.memoryHealthIndicator.checkRSS('memoryRss', 300 * 1024 * 1024),
+        this.memoryHealthIndicator.checkRSS('memoryRss', 600 * 1024 * 1024),
     ]);
   }
 }
