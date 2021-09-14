@@ -1,5 +1,5 @@
 # https://blog.logrocket.com/containerized-development-nestjs-docker/
-FROM node:14.17-alpine as development
+FROM node:14.17.6-slim as development
 WORKDIR /agoracloud
 COPY package*.json ./
 RUN npm ci
