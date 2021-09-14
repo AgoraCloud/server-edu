@@ -7,7 +7,7 @@ COPY . .
 RUN npm i rimraf
 RUN npm run build
 
-FROM node:14.17-alpine as production
+FROM node:14.17.6-slim as production
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
 WORKDIR /agoracloud
