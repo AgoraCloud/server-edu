@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@agoracloud/common": "^1.2.0",
-    "@kubernetes/client-node": "^0.13.2",
+    "@kubernetes/client-node": "^0.15.1",
     "@nestjs-modules/mailer": "^1.6.0",
     "@nestjs/common": "^7.6.17",
     "@nestjs/config": "^0.6.3",

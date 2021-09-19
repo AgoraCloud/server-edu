@@ -1,21 +1,12 @@
+import { HealthService } from './health.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Controller, Get } from '@nestjs/common';
-import {
-  HealthCheck,
-  HealthCheckResult,
-  HealthCheckService,
-  MemoryHealthIndicator,
-  MongooseHealthIndicator,
-} from '@nestjs/terminus';
+import { HealthCheck, HealthCheckResult } from '@nestjs/terminus';
 
-@Controller('api/health')
 @ApiTags('Health')
+@Controller('api/health')
 export class HealthController {
-  constructor(
-    private readonly healthCheckService: HealthCheckService,
-    private readonly mongooseHealthIndicator: MongooseHealthIndicator,
-    private readonly memoryHealthIndicator: MemoryHealthIndicator,
-  ) {}
+  constructor(private readonly healthService: HealthService) {}
 
   /**
    * Get the readiness state of the server
@@ -24,7 +15,7 @@ export class HealthController {
   @Get('readiness')
   @ApiOperation({ summary: 'Get the readiness state of the server' })
   readinessCheck(): Promise<HealthCheckResult> {
-    return this.healthCheck();
+    return this.healthService.check();
   }
 
   /**
@@ -34,19 +25,6 @@ export class HealthController {
   @Get('liveness')
   @ApiOperation({ summary: 'Get the liveness state of the server' })
   livenessCheck(): Promise<HealthCheckResult> {
-    return this.healthCheck();
-  }
-
-  /**
-   * Checks if the server is healthy
-   */
-  private async healthCheck(): Promise<HealthCheckResult> {
-    return this.healthCheckService.check([
-      async () => this.mongooseHealthIndicator.pingCheck('mongodb'),
-      async () =>
-        this.memoryHealthIndicator.checkHeap('memoryHeap', 300 * 1024 * 1024),
-      async () =>
-        this.memoryHealthIndicator.checkRSS('memoryRss', 600 * 1024 * 1024),
-    ]);
+    return this.healthService.check();
   }
 }
