@@ -154,8 +154,10 @@ describe('AuthenticationService', () => {
         Promise<TokenDocument>,
         [tokenId: string, type: TokenType]
       > = jest.spyOn(tokensService, 'findOneAndRemove');
-      const usersServiceSpy: jest.SpyInstance<Promise<void>, [userId: string]> =
-        jest.spyOn(usersService, 'verify');
+      const usersServiceSpy: jest.SpyInstance<
+        Promise<void>,
+        [userId: string]
+      > = jest.spyOn(usersService, 'verify');
       await service.verifyAccount(verifyAccountDto);
       expect(tokensServiceSpy).toHaveBeenCalledTimes(1);
       expect(usersServiceSpy).toHaveBeenCalledTimes(1);
@@ -200,8 +202,10 @@ describe('AuthenticationService', () => {
       const response: Response = {
         clearCookie: mockClearCookieFunction,
       } as any;
-      const usersServiceSpy: jest.SpyInstance<Promise<void>, [email: string]> =
-        jest.spyOn(usersService, 'clearRefreshToken');
+      const usersServiceSpy: jest.SpyInstance<
+        Promise<void>,
+        [email: string]
+      > = jest.spyOn(usersService, 'clearRefreshToken');
       await service.logOut(response, user);
       expect(mockClearCookieFunction.mock.calls).toHaveLength(2);
       expect(usersServiceSpy).toHaveBeenCalledTimes(1);
