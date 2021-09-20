@@ -82,12 +82,7 @@ export class KubernetesService implements OnModuleInit {
     );
     informer.on('add', (pod: k8s.V1Pod) => this.updateDeploymentStatus(pod));
     informer.on('update', (pod: k8s.V1Pod) => this.updateDeploymentStatus(pod));
-    informer.on('error', (pod: k8s.V1Pod) => {
-      this.updateDeploymentStatus(pod);
-      setTimeout(() => {
-        informer.start();
-      }, 5000);
-    });
+    informer.on('error', (pod: k8s.V1Pod) => this.updateDeploymentStatus(pod));
     await informer.start();
   }
 
