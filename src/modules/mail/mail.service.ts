@@ -41,7 +41,7 @@ export class MailService {
     this.sendEmail({
       to: payload.user.email,
       subject: 'Verify Your AgoraCloud Account',
-      template: 'verify-account',
+      template: './verify-account',
       context: {
         fullName: payload.user.fullName,
         link: `${this.baseDomain}/verify-account?token=${payload.token}`,
@@ -57,7 +57,7 @@ export class MailService {
     this.sendEmail({
       to: payload.user.email,
       subject: 'Change Your AgoraCloud Account Password',
-      template: 'forgot-password',
+      template: './forgot-password',
       context: {
         fullName: payload.user.fullName,
         link: `${this.baseDomain}/change-password?token=${payload.token}`,
@@ -73,7 +73,7 @@ export class MailService {
     this.sendEmail({
       to: payload.user.email,
       subject: 'AgoraCloud Account Password Changed',
-      template: 'password-changed',
+      template: './password-changed',
       context: {
         fullName: payload.user.fullName,
         link: `${this.baseDomain}/sign-in`,
