@@ -35,6 +35,7 @@ import * as k8s from '@kubernetes/client-node';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Event } from '../../events/events.enum';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { DeletedKubernetesResourcesCount } from './schemas/delete-kubernetes-resources-count.type';
 
 @Injectable()
 export class KubernetesService implements OnModuleInit {
@@ -376,6 +377,8 @@ export class KubernetesService implements OnModuleInit {
    */
   @Cron(CronExpression.EVERY_HOUR)
   private async deleteRemainingKubernetesNamespacesJob(): Promise<void> {
+    this.logger.log('Delete remaining Kubernetes namespaces chron job running');
+    let deletedCount = 0;
     const {
       body: { items: namespaces },
     } = await this.namespacesService.getAllNamespaces();
@@ -388,8 +391,12 @@ export class KubernetesService implements OnModuleInit {
         -1
       ) {
         await this.namespacesService.deleteNamespace(namespaceName);
+        deletedCount++;
       }
     }
+    this.logger.log(
+      `Delete remaining kubernetes namespaces chron job finished - ${deletedCount} namespaces deleted`,
+    );
   }
 
   /**
@@ -399,6 +406,13 @@ export class KubernetesService implements OnModuleInit {
    */
   @Cron(CronExpression.EVERY_HOUR)
   private async deleteRemainingKubernetesResourcesJob(): Promise<void> {
+    this.logger.log('Delete remaining Kubernetes resources chron job running');
+    const deletedCount: DeletedKubernetesResourcesCount = {
+      services: 0,
+      deployments: 0,
+      persistentVolumeClaims: 0,
+      secrets: 0,
+    };
     const workspaceNamespaces: WorkspaceNamespace[] =
       await this.getAllWorkspaceNamespaces();
     for (const workspaceNamespace of workspaceNamespaces) {
@@ -426,6 +440,7 @@ export class KubernetesService implements OnModuleInit {
         const deploymentId: string = service?.metadata?.labels?.deployment;
         if (!storedDeploymentIds.includes(deploymentId)) {
           await this.servicesService.deleteService(namespace, deploymentId);
+          deletedCount.services++;
         }
       }
       for (const deployment of deployments) {
@@ -435,6 +450,7 @@ export class KubernetesService implements OnModuleInit {
             namespace,
             deploymentId,
           );
+          deletedCount.deployments++;
         }
       }
       for (const persistentVolumeClaim of persistentVolumeClaims) {
@@ -445,15 +461,20 @@ export class KubernetesService implements OnModuleInit {
             namespace,
             deploymentId,
           );
+          deletedCount.persistentVolumeClaims++;
         }
       }
       for (const secret of secrets) {
         const deploymentId: string = secret?.metadata?.labels?.deployment;
         if (!storedDeploymentIds.includes(deploymentId)) {
           await this.secretsService.deleteSecret(namespace, deploymentId);
+          deletedCount.secrets++;
         }
       }
     }
+    this.logger.log(
+      `Delete remaining Kubernetes resources chron job finished - ${deletedCount.services} services, ${deletedCount.deployments} deployments, ${deletedCount.persistentVolumeClaims} persistent volume claims and ${deletedCount.secrets} secrets deleted`,
+    );
   }
 
   /**
@@ -462,6 +483,8 @@ export class KubernetesService implements OnModuleInit {
    */
   @Cron(CronExpression.EVERY_MINUTE)
   private async updateDeploymentStatusesJob(): Promise<void> {
+    this.logger.log('Update deployment statuses chron job running');
+    let updatedStatusCount = 0;
     const workspaceNamespaces: WorkspaceNamespace[] =
       await this.getAllWorkspaceNamespaces();
     for (const workspaceNamespace of workspaceNamespaces) {
@@ -470,8 +493,12 @@ export class KubernetesService implements OnModuleInit {
       } = await this.podsService.getAllPods(workspaceNamespace.namespace);
       for (const pod of pods) {
         await this.updateDeploymentStatus(pod);
+        updatedStatusCount++;
       }
     }
+    this.logger.log(
+      `Update deployment statuses chron job finished - ${updatedStatusCount} deployment statuses updated`,
+    );
   }
 
   /**
