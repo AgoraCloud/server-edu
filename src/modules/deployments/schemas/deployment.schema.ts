@@ -36,12 +36,15 @@ export class DeploymentImage {
   @Prop({
     required: true,
     enum: [
+      DeploymentVersionDto.VSCode_3_12_0,
+      DeploymentVersionDto.VSCode_3_11_1,
       DeploymentVersionDto.VSCode_3_11_0,
       DeploymentVersionDto.VSCode_3_10_2,
       DeploymentVersionDto.VSCode_3_9_3,
       DeploymentVersionDto.VSCode_3_9_2,
       DeploymentVersionDto.VSCode_3_9_1,
       DeploymentVersionDto.VSCode_3_9_0,
+      DeploymentVersionDto.Ubuntu_814b4f04,
       DeploymentVersionDto.Ubuntu_37fd85aa,
     ],
   })

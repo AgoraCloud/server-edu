@@ -4,7 +4,7 @@ import { UserDeletedEvent } from './../../events/user-deleted.event';
 import { OnEvent } from '@nestjs/event-emitter';
 import { TokenNotFoundException } from './../../exceptions/token-not-found.exception';
 import { TokenType, Token, TokenDocument } from './schemas/token.schema';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Event } from '../../events/events.enum';
@@ -12,6 +12,8 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class TokensService {
+  private readonly logger: Logger = new Logger(TokensService.name);
+
   constructor(
     @InjectModel(Token.name) private readonly tokenModel: Model<TokenDocument>,
   ) {}
@@ -84,11 +86,15 @@ export class TokensService {
    */
   @Cron(CronExpression.EVERY_HOUR)
   private async deleteExpiredTokensJob(): Promise<void> {
+    this.logger.log('Delete expired tokens chron job running');
     const yesterday: Date = DateUtil.removeDays(new Date());
-    await this.tokenModel
+    const { deletedCount } = await this.tokenModel
       .deleteMany()
       .where('expiresAt')
       .lte(yesterday.getTime())
       .exec();
+    this.logger.log(
+      `Delete expired tokens chron job finished - ${deletedCount} tokens deleted`,
+    );
   }
 }

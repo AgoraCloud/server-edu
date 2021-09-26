@@ -14,7 +14,7 @@ import { ConfigService } from '@nestjs/config';
 import { AccountNotVerifiedException } from '../../exceptions/account-not-verified.exception';
 import { AccountDisabledException } from '../../exceptions/account-disabled.exception';
 import { User, UserDocument } from './schemas/user.schema';
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {
@@ -30,6 +30,8 @@ import { isDefined } from 'class-validator';
 
 @Injectable()
 export class UsersService implements OnModuleInit {
+  private readonly logger: Logger = new Logger(UsersService.name);
+
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
     private readonly configService: ConfigService<Config>,
@@ -293,6 +295,8 @@ export class UsersService implements OnModuleInit {
    */
   @Cron(CronExpression.EVERY_HOUR)
   private async deleteStaleUsersJob(): Promise<void> {
+    this.logger.log('Delete stale users chron job running');
+    let deletedCount = 0;
     const yesterday: Date = DateUtil.removeDays(new Date());
     const staleUsers: UserDocument[] = await this.userModel
       .find()
@@ -303,6 +307,10 @@ export class UsersService implements OnModuleInit {
       .exec();
     for (const staleUser of staleUsers) {
       await this.remove(staleUser._id);
+      deletedCount++;
     }
+    this.logger.log(
+      `Delete stale users chron job finished - ${deletedCount} stale users deleted`,
+    );
   }
 }
