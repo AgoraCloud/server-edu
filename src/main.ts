@@ -19,7 +19,7 @@ async function bootstrap() {
   const app: NestExpressApplication =
     await NestFactory.create<NestExpressApplication>(AppModule);
 
-  app.use(helmet({ contentSecurityPolicy: false }));
+  app.use(helmet({ contentSecurityPolicy: false, frameguard: false }));
   // Use the custom LoggerService for logging
   app.useLogger(app.get(LoggerService));
   app.useGlobalPipes(
