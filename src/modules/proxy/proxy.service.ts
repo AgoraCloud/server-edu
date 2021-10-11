@@ -17,7 +17,6 @@ import {
   Inject,
   Injectable,
   OnModuleInit,
-  InternalServerErrorException,
   ForbiddenException,
   UnauthorizedException,
   Logger,
@@ -25,7 +24,6 @@ import {
 import * as HttpProxy from 'http-proxy';
 import { Server } from 'http';
 import { Socket } from 'net';
-import { IncomingMessage, ServerResponse } from 'http';
 import * as Cookie from 'cookie';
 import {
   RequestWithDeploymentAndUser,
@@ -59,21 +57,12 @@ export class ProxyService implements OnModuleInit {
    * Handle proxy errors
    */
   private onProxyError(): void {
-    this.httpProxy.on(
-      'error',
-      (err: Error, req: IncomingMessage, res: ServerResponse) => {
-        this.logger.error({
-          message: 'Proxy error',
-          error: err,
-        });
-        const exception: InternalServerErrorException =
-          new InternalServerErrorException(`Proxy Error`);
-        res.writeHead(exception.getStatus(), {
-          'Content-Type': 'application/json',
-        });
-        res.end(JSON.stringify(exception.getResponse()));
-      },
-    );
+    this.httpProxy.on('error', (err: Error) => {
+      this.logger.error({
+        message: 'Proxy error',
+        error: err,
+      });
+    });
   }
 
   /**
@@ -101,7 +90,6 @@ export class ProxyService implements OnModuleInit {
             error: err,
           });
           socket.destroy();
-          return;
         }
       },
     );
