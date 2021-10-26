@@ -295,7 +295,7 @@ export class UsersService implements OnModuleInit {
    */
   @Cron(CronExpression.EVERY_HOUR)
   private async deleteStaleUsersJob(): Promise<void> {
-    this.logger.log('Delete stale users chron job running');
+    this.logger.log('Delete stale users cron job running');
     let deletedCount = 0;
     const yesterday: Date = DateUtil.removeDays(new Date());
     const staleUsers: UserDocument[] = await this.userModel
@@ -310,7 +310,7 @@ export class UsersService implements OnModuleInit {
       deletedCount++;
     }
     this.logger.log(
-      `Delete stale users chron job finished - ${deletedCount} stale users deleted`,
+      `Delete stale users cron job finished - ${deletedCount} stale users deleted`,
     );
   }
 }

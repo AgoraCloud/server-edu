@@ -86,7 +86,7 @@ export class TokensService {
    */
   @Cron(CronExpression.EVERY_HOUR)
   private async deleteExpiredTokensJob(): Promise<void> {
-    this.logger.log('Delete expired tokens chron job running');
+    this.logger.log('Delete expired tokens cron job running');
     const yesterday: Date = DateUtil.removeDays(new Date());
     const { deletedCount } = await this.tokenModel
       .deleteMany()
@@ -94,7 +94,7 @@ export class TokensService {
       .lte(yesterday.getTime())
       .exec();
     this.logger.log(
-      `Delete expired tokens chron job finished - ${deletedCount} tokens deleted`,
+      `Delete expired tokens cron job finished - ${deletedCount} tokens deleted`,
     );
   }
 }

@@ -33,6 +33,8 @@ export class AuditLog {
       AuditActionDto.ReadUsers,
       AuditActionDto.AddUser,
       AuditActionDto.RemoveUser,
+      AuditActionDto.TurnOn,
+      AuditActionDto.TurnOff,
     ],
   })
   action: AuditActionDto;

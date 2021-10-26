@@ -26,10 +26,12 @@ import {
   DeploymentImageDto,
   UpdateDeploymentImageDto,
   DeploymentTypeDto,
+  DeploymentScalingMethodDto,
 } from '@agoracloud/common';
 import { Event } from '../../events/events.enum';
 import { isDefined } from 'class-validator';
 import { ConfigService } from '@nestjs/config';
+import { DateUtil } from '../../utils/date.util';
 
 @Injectable()
 export class DeploymentsService {
@@ -62,6 +64,10 @@ export class DeploymentsService {
     const deployment: Deployment = new Deployment(createDeploymentDto);
     deployment.user = user;
     deployment.workspace = workspace;
+    deployment.internalProperties = {
+      isCurrentlyInUse: false,
+      lastActiveAt: new Date(),
+    };
 
     const createdDeployment: DeploymentDocument =
       await this.deploymentModel.create(deployment);
@@ -101,6 +107,30 @@ export class DeploymentsService {
   }
 
   /**
+   * Find all deployments that are inactive (inactive deployments are deployments that
+   * have the scaling method ON_DEMAND, are currently running, are not currently in use
+   * and have not been used in the past 15 minutes or more)
+   * @returns an array of deployment documents
+   */
+  async findAllInactive(): Promise<DeploymentDocument[]> {
+    const fifteenMinutesAgo: Date = DateUtil.removeMinutes(new Date(), 15);
+    const inactiveDeployments: DeploymentDocument[] = await this.deploymentModel
+      .find({
+        'internalProperties.lastActiveAt': {
+          $lte: fifteenMinutesAgo,
+        },
+      })
+      .where('status')
+      .equals(DeploymentStatusDto.Running)
+      .where('properties.scalingMethod')
+      .equals(DeploymentScalingMethodDto.OnDemand)
+      .where('internalProperties.isCurrentlyInUse')
+      .equals(false)
+      .exec();
+    return inactiveDeployments;
+  }
+
+  /**
    * Find a deployment
    * @param deploymentId the deployment id
    * @param userId the users id
@@ -124,6 +154,21 @@ export class DeploymentsService {
     const deployment: DeploymentDocument = await deploymentQuery.exec();
     if (!deployment) throw new DeploymentNotFoundException(deploymentId);
     return deployment;
+  }
+
+  /**
+   * Get the status of a deployment
+   * @param deploymentId the deployment id
+   * @returns the status of the deployment
+   */
+  async getStatus(deploymentId: string): Promise<DeploymentStatusDto> {
+    const deployment: DeploymentDocument = await this.deploymentModel
+      .findOne(undefined, 'status')
+      .where('_id')
+      .equals(deploymentId)
+      .exec();
+    if (!deployment) throw new DeploymentNotFoundException(deploymentId);
+    return deployment.status;
   }
 
   /**
@@ -265,6 +310,26 @@ export class DeploymentsService {
   ): Promise<void> {
     await this.deploymentModel
       .updateOne({ _id: deploymentId }, { status, failureReason })
+      .exec();
+  }
+
+  /**
+   * Update a deployments usage status
+   * @param deploymentId the deployment id
+   * @param isCurrentlyInUse boolean indicating whether the deployment is currently in use or not
+   */
+  async updateUsageStatus(
+    deploymentId: string,
+    isCurrentlyInUse: boolean,
+  ): Promise<void> {
+    const updatedDeployment: DeploymentDocument = {
+      internalProperties: { isCurrentlyInUse },
+    } as DeploymentDocument;
+    if (!isCurrentlyInUse) {
+      updatedDeployment.internalProperties.lastActiveAt = new Date();
+    }
+    await this.deploymentModel
+      .updateOne({ _id: deploymentId }, updatedDeployment)
       .exec();
   }
 

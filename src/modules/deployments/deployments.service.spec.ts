@@ -1,3 +1,4 @@
+import { DateUtil } from './../../utils/date.util';
 import { ProxyUtil } from './../proxy/utils/proxy.util';
 import { DeploymentVersionCanNotBeUpgradedException } from './../../exceptions/deployment-version-can-not-be-upgraded.exception';
 import { InvalidDeploymentVersionUpgradeException } from './../../exceptions/invalid-deployment-version-upgrade.exception';
@@ -12,13 +13,17 @@ import {
   DeploymentDocument,
   Deployment,
 } from './schemas/deployment.schema';
-import { MongooseModule, getConnectionToken } from '@nestjs/mongoose';
+import {
+  MongooseModule,
+  getConnectionToken,
+  getModelToken,
+} from '@nestjs/mongoose';
 import {
   MongooseMockModule,
   closeMongooseConnection,
 } from './../../../test/utils/mongoose-mock-module';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Connection, Types } from 'mongoose';
+import { Connection, Model, Types } from 'mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
 import { DeploymentsService } from './deployments.service';
 import {
@@ -28,6 +33,7 @@ import {
   DEPLOYMENT_IMAGES_DTO,
   DeploymentVersionDto,
   DeploymentTypeDto,
+  DeploymentScalingMethodDto,
 } from '@agoracloud/common';
 import { ConfigService } from '@nestjs/config';
 
@@ -54,6 +60,7 @@ describe('DeploymentsService', () => {
   let service: DeploymentsService;
   let connection: Connection;
   let eventEmitter: EventEmitter2;
+  let deploymentsModel: Model<DeploymentDocument>;
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -86,6 +93,9 @@ describe('DeploymentsService', () => {
     service = module.get<DeploymentsService>(DeploymentsService);
     connection = await module.get(getConnectionToken());
     eventEmitter = module.get<EventEmitter2>(EventEmitter2);
+    deploymentsModel = module.get<Model<DeploymentDocument>>(
+      getModelToken(Deployment.name),
+    );
   });
 
   afterAll(async () => {
@@ -103,6 +113,7 @@ describe('DeploymentsService', () => {
         name: 'Test Deployment',
         properties: {
           isFavorite: true,
+          scalingMethod: DeploymentScalingMethodDto.OnDemand,
           sudoPassword: 'Sudo Password',
           image: {
             type: DeploymentTypeDto.VSCode,
@@ -127,6 +138,9 @@ describe('DeploymentsService', () => {
       expect(createdDeployment.name).toBe(createDeploymentDto.name);
       expect(createdDeployment.properties.isFavorite).toBe(
         createDeploymentDto.properties.isFavorite,
+      );
+      expect(createdDeployment.properties.scalingMethod).toBe(
+        createDeploymentDto.properties.scalingMethod,
       );
       expect(createdDeployment.properties.proxyUrl).toBe(expectedProxyUrl);
       expect(createdDeployment.properties.image.type).toBe(
@@ -176,6 +190,45 @@ describe('DeploymentsService', () => {
     });
   });
 
+  describe('findAllInactive', () => {
+    beforeAll(async () => {
+      /**
+       * Manually update the current deployments status and lastActivateAt date to test the
+       * findAllInactive() method
+       */
+      await deploymentsModel
+        .updateOne(
+          { _id: deployment._id },
+          {
+            status: DeploymentStatusDto.Running,
+            internalProperties: {
+              isCurrentlyInUse: false,
+              lastActiveAt: DateUtil.removeMinutes(new Date(), 16),
+            },
+          },
+        )
+        .exec();
+    });
+
+    afterAll(async () => {
+      // Restore the deployments status to PENDING
+      await deploymentsModel
+        .updateOne(
+          { _id: deployment._id },
+          {
+            status: DeploymentStatusDto.Pending,
+          },
+        )
+        .exec();
+    });
+
+    it('should find all inactive deployments', async () => {
+      const inactiveDeployments: DeploymentDocument[] =
+        await service.findAllInactive();
+      expect(inactiveDeployments).toHaveLength(1);
+    });
+  });
+
   describe('findOne', () => {
     it('should throw an error if the deployment with the given id was not found', async () => {
       const deploymentId: string = Types.ObjectId().toHexString();
@@ -208,6 +261,28 @@ describe('DeploymentsService', () => {
       );
       expect(retrievedDeployment._id).toEqual(deployment._id);
       expect(retrievedDeployment.user._id).toEqual(user._id);
+    });
+  });
+
+  describe('getStatus', () => {
+    it('should throw an error if the deployment with the given id was not found', async () => {
+      const deploymentId: string = Types.ObjectId().toHexString();
+      const expectedErrorMessage: string = new DeploymentNotFoundException(
+        deploymentId,
+      ).message;
+      try {
+        await service.getStatus(deploymentId);
+        fail('It should throw an error');
+      } catch (err) {
+        expect(err.message).toBe(expectedErrorMessage);
+      }
+    });
+
+    it('should get the status of the deployment with the given id', async () => {
+      const deploymentStatus: DeploymentStatusDto = await service.getStatus(
+        deployment._id,
+      );
+      expect(deploymentStatus).toBe(deployment.status);
     });
   });
 
@@ -327,6 +402,7 @@ describe('DeploymentsService', () => {
       const createDeploymentDto: CreateDeploymentDto = {
         name: 'Test Deployment',
         properties: {
+          scalingMethod: DeploymentScalingMethodDto.AlwaysOn,
           image: {
             type: DeploymentTypeDto.Ubuntu,
             version: DeploymentVersionDto.Ubuntu_37fd85aa,
@@ -433,6 +509,21 @@ describe('DeploymentsService', () => {
         workspace._id,
       );
       expect(retrievedDeployment.status).toBe(updatedStatus);
+    });
+  });
+
+  describe('updateUsageStatus', () => {
+    it('should update the deployments usage status', async () => {
+      const updatedUsageStatus = false;
+      await service.updateUsageStatus(deployment._id, updatedUsageStatus);
+      const retrievedDeployment = await service.findOne(
+        deployment._id,
+        user._id,
+        workspace._id,
+      );
+      expect(retrievedDeployment.internalProperties.isCurrentlyInUse).toBe(
+        updatedUsageStatus,
+      );
     });
   });
 
