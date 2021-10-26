@@ -46,7 +46,6 @@ export class KubernetesServicesService {
         undefined,
         undefined,
         KubeUtil.resourcePrefixLabelSelector,
-        1,
       );
     // Filter the retrieved services by clusterIP
     const filteredServices: k8s.V1Service[] = services.items.filter(
