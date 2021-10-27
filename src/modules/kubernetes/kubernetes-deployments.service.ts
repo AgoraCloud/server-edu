@@ -220,6 +220,41 @@ export class KubernetesDeploymentsService {
   }
 
   /**
+   * Updates the replica count of a Kubernetes deployment
+   * @param namespace the Kubernetes namespace
+   * @param deploymentId the deployment id
+   * @param replicaCount the desired Kubernetes deployment replica count
+   * @returns the updated Kubernetes deployment
+   */
+  updateDeploymentReplicaCount(
+    namespace: string,
+    deploymentId: string,
+    replicaCount: 0 | 1,
+  ): Promise<{
+    response: http.IncomingMessage;
+    body: k8s.V1Deployment;
+  }> {
+    return this.k8sAppsV1Api.patchNamespacedDeployment(
+      KubeUtil.generateResourceName(deploymentId),
+      namespace,
+      {
+        spec: {
+          replicas: replicaCount,
+        },
+      },
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      {
+        headers: {
+          'Content-type': k8s.PatchUtils.PATCH_FORMAT_STRATEGIC_MERGE_PATCH,
+        },
+      },
+    );
+  }
+
+  /**
    * Generates a container image from the given deployment type and version
    * @param deploymentImage the deployment image to convert
    * @returns the generated container image

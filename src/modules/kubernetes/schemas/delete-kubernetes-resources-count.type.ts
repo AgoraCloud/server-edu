@@ -1,6 +1,6 @@
 /**
  * Used to track how many Kubernetes resources were deleted in the
- * delete remaining kubernetes resources chron job
+ * delete remaining kubernetes resources cron job
  */
 export type DeletedKubernetesResourcesCount = {
   services: number;

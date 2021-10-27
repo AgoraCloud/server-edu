@@ -89,7 +89,7 @@ export class AuditingService {
    */
   @Cron(CronExpression.EVERY_HOUR)
   private async deleteExpiredAuditLogsJob(): Promise<void> {
-    this.logger.log('Delete expired audit logs chron job running');
+    this.logger.log('Delete expired audit logs cron job running');
     const twentyEightDays: Date = DateUtil.removeDays(new Date(), 28);
     const { deletedCount } = await this.auditLogModel
       .deleteMany()
@@ -97,7 +97,7 @@ export class AuditingService {
       .lte(twentyEightDays.getTime())
       .exec();
     this.logger.log(
-      `Delete expired audit logs chron job finished - ${deletedCount} audit logs deleted`,
+      `Delete expired audit logs cron job finished - ${deletedCount} audit logs deleted`,
     );
   }
 }

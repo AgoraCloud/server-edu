@@ -22,4 +22,16 @@ export class DateUtil {
     newDate.setDate(currentDate.getDate() - days);
     return newDate;
   }
+
+  /**
+   * Removes minutes from the given date
+   * @param currentDate the current date
+   * @param minutes the number of minutes to remove
+   * @returns the new date
+   */
+  static removeMinutes(currentDate: Date, minutes: number): Date {
+    const newDate: Date = new Date(currentDate);
+    newDate.setMinutes(currentDate.getMinutes() - minutes);
+    return newDate;
+  }
 }
