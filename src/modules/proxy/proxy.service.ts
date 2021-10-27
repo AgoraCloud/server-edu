@@ -1,3 +1,4 @@
+import { DeploymentConnectionEvent } from './../../events/deployment-connection.event';
 import { PROXY_ACTIONS_DTO } from './../authorization/schemas/permission.schema';
 import { AuthorizationService } from './../authorization/authorization.service';
 import { DeploymentNotRunningException } from './../../exceptions/deployment-not-running.exception';
@@ -22,7 +23,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import * as HttpProxy from 'http-proxy';
-import { Server } from 'http';
+import { IncomingMessage, Server } from 'http';
 import { Socket } from 'net';
 import * as Cookie from 'cookie';
 import {
@@ -31,6 +32,8 @@ import {
 } from '../../utils/requests.interface';
 import { ConfigService } from '@nestjs/config';
 import { Config } from '../../config/configuration.interface';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Event } from '../../events/events.enum';
 
 @Injectable()
 export class ProxyService implements OnModuleInit {
@@ -44,6 +47,7 @@ export class ProxyService implements OnModuleInit {
     private readonly authenticationService: AuthenticationService,
     private readonly authorizationService: AuthorizationService,
     private readonly configService: ConfigService<Config>,
+    private readonly eventEmitter: EventEmitter2,
   ) {
     this.domain = this.configService.get<string>('domain');
   }
@@ -51,10 +55,12 @@ export class ProxyService implements OnModuleInit {
   onModuleInit(): void {
     this.onProxyError();
     this.proxyWebsockets();
+    this.onProxyWebsocketOpen();
+    this.onProxyWebsocketClose();
   }
 
   /**
-   * Handle proxy errors
+   * Handles proxy errors
    */
   private onProxyError(): void {
     this.httpProxy.on('error', (err: Error) => {
@@ -63,6 +69,39 @@ export class ProxyService implements OnModuleInit {
         error: err,
       });
     });
+  }
+
+  /**
+   * Handles proxy websocket open events
+   */
+  private onProxyWebsocketOpen(): void {
+    this.httpProxy.on('open', (socket: Socket) =>
+      this.processProxyWebsocketEvent(Event.DeploymentConnectionOpened, socket),
+    );
+  }
+
+  /**
+   * Handles proxy websocket close events
+   */
+  private onProxyWebsocketClose(): void {
+    this.httpProxy.on('close', (res: IncomingMessage, socket: Socket) =>
+      this.processProxyWebsocketEvent(Event.DeploymentConnectionClosed, socket),
+    );
+  }
+
+  /**
+   * Processes the proxy websocket open or close events
+   * @param event the deployment connection opened or closed event
+   * @param socket the websocket that is being proxied
+   */
+  private processProxyWebsocketEvent(
+    event: Event.DeploymentConnectionOpened | Event.DeploymentConnectionClosed,
+    socket: Socket,
+  ): void {
+    // The socket remote address is a deployments Kubernetes Service IP
+    const remoteAddress: string = socket.remoteAddress;
+    if (!remoteAddress) return;
+    this.eventEmitter.emit(event, new DeploymentConnectionEvent(remoteAddress));
   }
 
   /**

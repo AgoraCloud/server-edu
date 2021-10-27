@@ -44,7 +44,15 @@ export class DeploymentInterceptor implements NestInterceptor {
         isAdmin ? undefined : user._id,
         workspace._id,
       );
-    if (deployment.status !== DeploymentStatusDto.Running) {
+
+    // Don't throw an exception if the deployment is not running when the user
+    // is invoking the turn deployment on or off routes
+    const isDeploymentTurnOnOrOffRoute: boolean =
+      request.path.includes('/on') || request.path.includes('/off');
+    if (
+      !isDeploymentTurnOnOrOffRoute &&
+      deployment.status !== DeploymentStatusDto.Running
+    ) {
       throw new DeploymentNotRunningException(deploymentId);
     }
     request.deployment = deployment;

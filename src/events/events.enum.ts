@@ -18,6 +18,8 @@ export enum Event {
   DeploymentCreated = 'deployment.created',
   DeploymentUpdated = 'deployment.updated',
   DeploymentDeleted = 'deployment.deleted',
+  DeploymentConnectionOpened = 'deployment.connection.opened',
+  DeploymentConnectionClosed = 'deployment.connection.closed',
   // Wiki Section Events
   WikiSectionDeleted = 'wiki.section.deleted',
   // Project Events

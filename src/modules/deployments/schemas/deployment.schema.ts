@@ -1,4 +1,5 @@
 import {
+  DeploymentScalingMethodDto,
   DeploymentStatusDto,
   DeploymentTypeDto,
   DeploymentVersionDto,
@@ -62,6 +63,15 @@ export class DeploymentProperties {
   @Prop()
   proxyUrl?: string;
 
+  @Prop({
+    required: true,
+    enum: [
+      DeploymentScalingMethodDto.AlwaysOn,
+      DeploymentScalingMethodDto.OnDemand,
+    ],
+  })
+  scalingMethod: DeploymentScalingMethodDto;
+
   @Prop({ required: true, type: DeploymentImage })
   image: DeploymentImage;
 
@@ -71,6 +81,14 @@ export class DeploymentProperties {
   constructor(partial: Partial<DeploymentProperties>) {
     Object.assign(this, partial);
   }
+}
+
+export class InternalDeploymentProperties {
+  @Prop({ required: true, default: false })
+  isCurrentlyInUse: boolean;
+
+  @Prop({ required: true, default: new Date() })
+  lastActiveAt: Date;
 }
 
 export type DeploymentDocument = Deployment & Document;
@@ -88,6 +106,7 @@ export class Deployment {
       DeploymentStatusDto.Running,
       DeploymentStatusDto.Updating,
       DeploymentStatusDto.Failed,
+      DeploymentStatusDto.Stopped,
       DeploymentStatusDto.Unknown,
     ],
     default: DeploymentStatusDto.Pending,
@@ -99,6 +118,9 @@ export class Deployment {
 
   @Prop({ required: true, type: DeploymentProperties })
   properties: DeploymentProperties;
+
+  @Prop({ required: true, type: InternalDeploymentProperties })
+  internalProperties: InternalDeploymentProperties;
 
   @Prop({
     required: true,

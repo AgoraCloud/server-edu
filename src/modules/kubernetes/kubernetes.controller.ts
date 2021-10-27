@@ -24,7 +24,7 @@ import {
 import { DeploymentInterceptor } from '../../interceptors/deployment.interceptor';
 import { KubernetesService } from './kubernetes.service';
 import { WorkspaceInterceptor } from '../../interceptors/workspace.interceptor';
-import { Controller, UseInterceptors, Get, Param } from '@nestjs/common';
+import { Controller, UseInterceptors, Get, Param, Put } from '@nestjs/common';
 import { Workspace } from '../../decorators/workspace.decorator';
 import { Permissions } from '../../decorators/permissions.decorator';
 import { Deployment } from '../../decorators/deployment.decorator';
@@ -115,6 +115,72 @@ export class KubernetesController {
     @Deployment() deployment: DeploymentDocument,
   ): Promise<MetricsDto> {
     return this.kubernetesPodsService.getPodMetrics(workspaceId, deployment);
+  }
+
+  @Put('deployments/:deploymentId/on')
+  @Permissions(ActionDto.UpdateDeployment)
+  @UseInterceptors(DeploymentInterceptor)
+  @Audit(AuditActionDto.TurnOn, AuditResourceDto.Deployment)
+  @ApiTags('Deployments')
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
+  @ApiParam({ name: 'deploymentId', description: 'The deployment id' })
+  @ApiOperation({ summary: 'Turn on a deployment' })
+  @ApiOkResponse({
+    description: 'The deployment has been successfully turned on',
+  })
+  @ApiBadRequestResponse({
+    description:
+      'The deployment did not have an ON_DEMAND scaling method or the deployment is already on',
+    type: ExceptionDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
+  @ApiNotFoundResponse({
+    description: 'The workspace or deployment with the given id was not found',
+    type: ExceptionDto,
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Kubernetes service for the given deployment did not exist',
+    type: ExceptionDto,
+  })
+  turnOnDeployment(
+    @Param('workspaceId') workspaceId: string,
+    @Deployment() deployment: DeploymentDocument,
+  ): Promise<void> {
+    return this.kubernetesService.turnOnDeployment(workspaceId, deployment);
+  }
+
+  @Put('deployments/:deploymentId/off')
+  @Permissions(ActionDto.UpdateDeployment)
+  @UseInterceptors(DeploymentInterceptor)
+  @Audit(AuditActionDto.TurnOff, AuditResourceDto.Deployment)
+  @ApiTags('Deployments')
+  @ApiParam({ name: 'workspaceId', description: 'The workspace id' })
+  @ApiParam({ name: 'deploymentId', description: 'The deployment id' })
+  @ApiOperation({ summary: 'Turn off a deployment' })
+  @ApiOkResponse({
+    description: 'The deployment has been successfully turned off',
+  })
+  @ApiBadRequestResponse({
+    description:
+      'The deployment did not have an ON_DEMAND scaling method or the deployment is already off',
+    type: ExceptionDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
+  @ApiNotFoundResponse({
+    description: 'The workspace or deployment with the given id was not found',
+    type: ExceptionDto,
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Kubernetes service for the given deployment did not exist',
+    type: ExceptionDto,
+  })
+  turnOffDeployment(
+    @Param('workspaceId') workspaceId: string,
+    @Deployment() deployment: DeploymentDocument,
+  ): Promise<void> {
+    return this.kubernetesService.turnOffDeployment(workspaceId, deployment);
   }
 
   /**

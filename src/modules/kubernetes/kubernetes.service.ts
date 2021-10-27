@@ -1,3 +1,7 @@
+import { DeploymentIsAlreadyOffException } from '../../exceptions/deployment-is-already-off.exception';
+import { DeploymentIsAlreadyOnException } from '../../exceptions/deployment-is-already-on.exception';
+import { DeploymentCanNotBeTurnedOnOrOffException } from './../../exceptions/deployment-can-not-be-turned-on-or-off.exception';
+import { DeploymentConnectionEvent } from './../../events/deployment-connection.event';
 import { KubeUtil } from './utils/kube.util';
 import { KubernetesPodsService } from './kubernetes-pods.service';
 import { KubernetesDeploymentsService } from './kubernetes-deployments.service';
@@ -26,7 +30,11 @@ import {
 } from './schemas/pod-condition.schema';
 import { PodPhase } from './schemas/pod-phase.schema';
 import { DeploymentsService } from '../deployments/deployments.service';
-import { DeploymentStatusDto, MetricsDto } from '@agoracloud/common';
+import {
+  DeploymentScalingMethodDto,
+  DeploymentStatusDto,
+  MetricsDto,
+} from '@agoracloud/common';
 import { DeploymentDeletedEvent } from '../../events/deployment-deleted.event';
 import { DeploymentUpdatedEvent } from '../../events/deployment-updated.event';
 import { DeploymentCreatedEvent } from '../../events/deployment-created.event';
@@ -126,9 +134,73 @@ export class KubernetesService implements OnModuleInit {
         ),
       });
       return workspaceMetrics;
-    } catch (err) {
+    } catch (error) {
       throw new WorkspaceMetricsNotAvailableException(workspaceId);
     }
+  }
+
+  /**
+   * Turn on a deployment (scale up the deployments Kubernetes deployment
+   * replica count to 1)
+   * @param workspaceId the workspace id
+   * @param deployment the deployment
+   * @throws DeploymentCanNotBeTurnedOnOrOffException
+   * @throws DeploymentIsAlreadyOnException
+   */
+  async turnOnDeployment(
+    workspaceId: string,
+    deployment: DeploymentDocument,
+  ): Promise<void> {
+    if (
+      deployment.properties.scalingMethod ===
+      DeploymentScalingMethodDto.AlwaysOn
+    ) {
+      throw new DeploymentCanNotBeTurnedOnOrOffException(deployment._id);
+    }
+    if (deployment.status === DeploymentStatusDto.Running) {
+      throw new DeploymentIsAlreadyOnException(deployment._id);
+    }
+    await this.deploymentsService.updateStatus(
+      deployment._id,
+      DeploymentStatusDto.Pending,
+    );
+    await this.deploymentsService.updateUsageStatus(deployment._id, false);
+    await this.kubeDeploymentsService.updateDeploymentReplicaCount(
+      KubeUtil.generateResourceName(workspaceId),
+      deployment._id,
+      1,
+    );
+  }
+
+  /**
+   * Turn off a deployment (scale down the deployments Kubernetes
+   * deployment replica count to 0)
+   * @param workspaceId
+   * @param deployment
+   */
+  async turnOffDeployment(
+    workspaceId: string,
+    deployment: DeploymentDocument,
+  ): Promise<void> {
+    if (
+      deployment.properties.scalingMethod ===
+      DeploymentScalingMethodDto.AlwaysOn
+    ) {
+      throw new DeploymentCanNotBeTurnedOnOrOffException(deployment._id);
+    }
+    if (deployment.status === DeploymentStatusDto.Stopped) {
+      throw new DeploymentIsAlreadyOffException(deployment._id);
+    }
+    await this.deploymentsService.updateStatus(
+      deployment._id,
+      DeploymentStatusDto.Stopped,
+    );
+    await this.deploymentsService.updateUsageStatus(deployment._id, false);
+    await this.kubeDeploymentsService.updateDeploymentReplicaCount(
+      KubeUtil.generateResourceName(workspaceId),
+      deployment._id,
+      0,
+    );
   }
 
   /**
@@ -189,7 +261,7 @@ export class KubernetesService implements OnModuleInit {
     let resourceQuotaExists = true;
     try {
       await this.resourceQuotasService.getResourceQuota(namespace, workspaceId);
-    } catch (err) {
+    } catch (error) {
       // The resource quota does not exist, set the flag
       resourceQuotaExists = false;
     }
@@ -239,7 +311,7 @@ export class KubernetesService implements OnModuleInit {
     try {
       const namespace: string = KubeUtil.generateResourceName(payload.id);
       await this.namespacesService.deleteNamespace(namespace);
-    } catch (err) {
+    } catch (error) {
       // Do nothing, this will get picked up by the
       // deleteRemainingKubernetesNamespacesJob scheduler
     }
@@ -372,12 +444,56 @@ export class KubernetesService implements OnModuleInit {
   }
 
   /**
+   * Handles the deployment.connection.opened event
+   * @param payload the deployment.connection.opened event payload
+   */
+  @OnEvent(Event.DeploymentConnectionOpened)
+  private async handleDeploymentConnectionOpenedEvent(
+    payload: DeploymentConnectionEvent,
+  ): Promise<void> {
+    try {
+      const deploymentId: string =
+        await this.servicesService.getDeploymentIdFromServiceClusterIp(
+          payload.kubernetesServiceIp,
+        );
+      await this.deploymentsService.updateUsageStatus(deploymentId, true);
+    } catch (error) {
+      this.logger.error({
+        message: 'Error handling deployment connection opened event',
+        error,
+      });
+    }
+  }
+
+  /**
+   * Handles the deployment.connection.closed event
+   * @param payload the deployment.connection.closed event payload
+   */
+  @OnEvent(Event.DeploymentConnectionClosed)
+  private async handleDeploymentConnectionClosedEvent(
+    payload: DeploymentConnectionEvent,
+  ): Promise<void> {
+    try {
+      const deploymentId: string =
+        await this.servicesService.getDeploymentIdFromServiceClusterIp(
+          payload.kubernetesServiceIp,
+        );
+      await this.deploymentsService.updateUsageStatus(deploymentId, false);
+    } catch (error) {
+      this.logger.error({
+        message: 'Error handling deployment connection closed event',
+        error,
+      });
+    }
+  }
+
+  /**
    * Cron job that runs every hour and deletes any Kubernetes
    * namespace that was not deleted when a workspace was deleted
    */
   @Cron(CronExpression.EVERY_HOUR)
   private async deleteRemainingKubernetesNamespacesJob(): Promise<void> {
-    this.logger.log('Delete remaining Kubernetes namespaces chron job running');
+    this.logger.log('Delete remaining Kubernetes namespaces cron job running');
     let deletedCount = 0;
     const {
       body: { items: namespaces },
@@ -395,7 +511,7 @@ export class KubernetesService implements OnModuleInit {
       }
     }
     this.logger.log(
-      `Delete remaining kubernetes namespaces chron job finished - ${deletedCount} namespaces deleted`,
+      `Delete remaining kubernetes namespaces cron job finished - ${deletedCount} namespaces deleted`,
     );
   }
 
@@ -406,7 +522,7 @@ export class KubernetesService implements OnModuleInit {
    */
   @Cron(CronExpression.EVERY_HOUR)
   private async deleteRemainingKubernetesResourcesJob(): Promise<void> {
-    this.logger.log('Delete remaining Kubernetes resources chron job running');
+    this.logger.log('Delete remaining Kubernetes resources cron job running');
     const deletedCount: DeletedKubernetesResourcesCount = {
       services: 0,
       deployments: 0,
@@ -473,7 +589,7 @@ export class KubernetesService implements OnModuleInit {
       }
     }
     this.logger.log(
-      `Delete remaining Kubernetes resources chron job finished - ${deletedCount.services} services, ${deletedCount.deployments} deployments, ${deletedCount.persistentVolumeClaims} persistent volume claims and ${deletedCount.secrets} secrets deleted`,
+      `Delete remaining Kubernetes resources cron job finished - ${deletedCount.services} services, ${deletedCount.deployments} deployments, ${deletedCount.persistentVolumeClaims} persistent volume claims and ${deletedCount.secrets} secrets deleted`,
     );
   }
 
@@ -483,7 +599,7 @@ export class KubernetesService implements OnModuleInit {
    */
   @Cron(CronExpression.EVERY_MINUTE)
   private async updateDeploymentStatusesJob(): Promise<void> {
-    this.logger.log('Update deployment statuses chron job running');
+    this.logger.log('Update deployment statuses cron job running');
     let updatedStatusCount = 0;
     const workspaceNamespaces: WorkspaceNamespace[] =
       await this.getAllWorkspaceNamespaces();
@@ -497,7 +613,37 @@ export class KubernetesService implements OnModuleInit {
       }
     }
     this.logger.log(
-      `Update deployment statuses chron job finished - ${updatedStatusCount} deployment statuses updated`,
+      `Update deployment statuses cron job finished - ${updatedStatusCount} deployment statuses updated`,
+    );
+  }
+
+  /**
+   * Cron job that runs every 30 seconds and updates the replica count of
+   * inactive deployments to zero (turns off down deployments)
+   */
+  @Cron(CronExpression.EVERY_30_SECONDS)
+  private async turnOffInactiveDeploymentsJob(): Promise<void> {
+    this.logger.log('Turn off inactive deployments cron job running');
+    let turnedOffDeploymentCount = 0;
+    const inactiveDeployments: DeploymentDocument[] =
+      await this.deploymentsService.findAllInactive();
+    for (const inactiveDeployment of inactiveDeployments) {
+      try {
+        await this.turnOffDeployment(
+          inactiveDeployment.workspace._id,
+          inactiveDeployment,
+        );
+        turnedOffDeploymentCount++;
+      } catch (error) {
+        this.logger.error({
+          message: 'Error turning off inactive deployment (cron job)',
+          deploymentId: inactiveDeployment._id,
+          error,
+        });
+      }
+    }
+    this.logger.log(
+      `Turn off inactive deployments cron job finished - ${turnedOffDeploymentCount} inactive deployments turned off`,
     );
   }
 
@@ -509,8 +655,15 @@ export class KubernetesService implements OnModuleInit {
   private async updateDeploymentStatus(pod: k8s.V1Pod): Promise<void> {
     const deploymentId: string = pod.metadata?.labels?.deployment;
     if (!deploymentId) return;
-    const podPhase: string = pod.status?.phase;
 
+    // Do not update the status of a deployment if the deployment status is STOPPED
+    const deploymentStatus: DeploymentStatusDto =
+      await this.deploymentsService.getStatus(deploymentId);
+    if (deploymentStatus === DeploymentStatusDto.Stopped) {
+      return;
+    }
+
+    const podPhase: string = pod.status?.phase;
     if (!podPhase || podPhase === PodPhase.Unknown) {
       await this.deploymentsService.updateStatus(
         deploymentId,
@@ -527,19 +680,19 @@ export class KubernetesService implements OnModuleInit {
        * to insufficient cluster resources
        */
       const conditions: k8s.V1PodCondition[] = pod.status?.conditions;
-      const podScheduledConditionIndex: number = conditions?.findIndex(
+      if (!conditions || !conditions.length) return;
+      const podScheduledConditionIndex: number = conditions.findIndex(
         (c) =>
           c.type === PodConditionType.PodScheduled &&
           c.status === PodConditionStatus.False &&
           c.reason === PodConditionReason.Unschedulable,
       );
-      if (podScheduledConditionIndex !== -1) {
-        await this.deploymentsService.updateStatus(
-          deploymentId,
-          DeploymentStatusDto.Failed,
-          conditions[podScheduledConditionIndex].message,
-        );
-      }
+      if (podScheduledConditionIndex === -1) return;
+      await this.deploymentsService.updateStatus(
+        deploymentId,
+        DeploymentStatusDto.Failed,
+        conditions[podScheduledConditionIndex].message,
+      );
     } else if (podPhase === PodPhase.Failed) {
       await this.deploymentsService.updateStatus(
         deploymentId,

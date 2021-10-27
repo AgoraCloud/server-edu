@@ -1,3 +1,4 @@
+import { KubernetesServiceNotFoundException } from './../../exceptions/kubernetes-service-not-found.exception';
 import { KubeUtil } from './utils/kube.util';
 import { Inject, Injectable } from '@nestjs/common';
 import * as k8s from '@kubernetes/client-node';
@@ -28,6 +29,37 @@ export class KubernetesServicesService {
       undefined,
       KubeUtil.resourcePrefixLabelSelector,
     );
+  }
+
+  /**
+   * Get a deployment id from a Kubernetes service cluster IP
+   * @param clusterIP the Kubernetes service cluster IP
+   * @throws KubernetesServiceNotFoundException
+   * @returns the deployment id associated with the service with the given cluster IP
+   */
+  async getDeploymentIdFromServiceClusterIp(
+    clusterIP: string,
+  ): Promise<string> {
+    const { body: services } =
+      await this.k8sCoreV1Api.listServiceForAllNamespaces(
+        undefined,
+        undefined,
+        undefined,
+        KubeUtil.resourcePrefixLabelSelector,
+      );
+    // Filter the retrieved services by clusterIP
+    const filteredServices: k8s.V1Service[] = services.items.filter(
+      (s: k8s.V1Service) => s.spec?.clusterIP === clusterIP,
+    );
+    if (!filteredServices.length) {
+      throw new KubernetesServiceNotFoundException(clusterIP);
+    }
+    const deploymentId: string =
+      filteredServices[0].metadata?.labels?.deployment;
+    if (!deploymentId) {
+      throw new KubernetesServiceNotFoundException(clusterIP);
+    }
+    return deploymentId;
   }
 
   /**
