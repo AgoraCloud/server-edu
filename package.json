@@ -1,7 +1,7 @@
 {
-  "name": "agoracloud_server",
-  "version": "1.6.0",
-  "description": "AgoraClouds Server",
+  "name": "agoracloud_server_edu",
+  "version": "1.0.0",
+  "description": "AgoraClouds Server Education",
   "author": "AgoraCloud",
   "private": true,
   "license": "MIT",

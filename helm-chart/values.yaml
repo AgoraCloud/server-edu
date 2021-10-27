@@ -1,11 +1,11 @@
 image:
   agoracloud:
     server:
-      repository: agoracloud/server
+      repository: agoracloud/server-edu
       pullPolicy: Always
       tag: latest
     ui:
-      repository: agoracloud/ui
+      repository: agoracloud/ui-edu
       pullPolicy: Always
       tag: latest
 

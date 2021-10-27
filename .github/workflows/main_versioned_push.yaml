@@ -32,5 +32,5 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: agoracloud/server:latest,agoracloud/server:${{ steps.extract_branch_tag.outputs.branch_tag }}
+          tags: agoracloud/server-edu:latest,agoracloud/server-edu:${{ steps.extract_branch_tag.outputs.branch_tag }}
           platforms: linux/amd64,linux/arm64,linux/arm/v7
