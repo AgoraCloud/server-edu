@@ -1,3 +1,4 @@
+import { AuditResource } from './../modules/auditing/dto/custom-audit-resource.dto';
 import {
   AUDIT_ACTION_KEY,
   AUDIT_RESOURCE_KEY,
@@ -15,7 +16,7 @@ import { Response } from 'express';
 import { Observable, throwError } from 'rxjs';
 import { RequestWithWorkspaceUserAndIsAdmin } from '../utils/requests.interface';
 import { catchError, tap } from 'rxjs/operators';
-import { AuditActionDto, AuditResourceDto } from '@agoracloud/common';
+import { AuditActionDto } from '@agoracloud/common';
 
 /**
  * An interceptor that records every action performed by every user
@@ -32,11 +33,10 @@ export class AuditingInterceptor implements NestInterceptor {
       AUDIT_ACTION_KEY,
       context.getHandler(),
     );
-    const auditResource: AuditResourceDto =
-      this.reflector.get<AuditResourceDto>(
-        AUDIT_RESOURCE_KEY,
-        context.getHandler(),
-      );
+    const auditResource: AuditResource = this.reflector.get<AuditResource>(
+      AUDIT_RESOURCE_KEY,
+      context.getHandler(),
+    );
     const request: RequestWithWorkspaceUserAndIsAdmin = context
       .switchToHttp()
       .getRequest();

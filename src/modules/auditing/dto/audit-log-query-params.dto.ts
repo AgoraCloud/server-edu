@@ -1,3 +1,7 @@
+import {
+  AuditResource,
+  CustomAuditResourceDto,
+} from './custom-audit-resource.dto';
 import { PaginationQueryParamsDto } from './../../../utils/pagination-query-params.dto';
 import {
   IsIn,
@@ -49,8 +53,9 @@ export class AuditLogQueryParamsDto extends PaginationQueryParamsDto {
     AuditResourceDto.WikiSection,
     AuditResourceDto.WikiPage,
     AuditResourceDto.Shortcut,
+    CustomAuditResourceDto.Workstation,
   ])
-  readonly resource?: AuditResourceDto;
+  readonly resource?: AuditResource;
 
   @IsString()
   @IsOptional()

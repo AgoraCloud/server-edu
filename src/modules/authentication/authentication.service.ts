@@ -114,8 +114,16 @@ export class AuthenticationService {
     if (user) {
       await this.clearRefreshToken(user.email);
     }
-    response.clearCookie(this.accessCookieConfig.name);
-    response.clearCookie(this.refreshCookieConfig.name);
+    response.clearCookie(this.accessCookieConfig.name, {
+      ...this.accessCookieConfig.cookieOptions,
+      maxAge: this.accessCookieConfig.expirationTime * 1000,
+      domain: this.domain,
+    });
+    response.clearCookie(this.refreshCookieConfig.name, {
+      ...this.refreshCookieConfig.cookieOptions,
+      maxAge: this.refreshCookieConfig.expirationTime * 1000,
+      domain: this.domain,
+    });
   }
 
   /**

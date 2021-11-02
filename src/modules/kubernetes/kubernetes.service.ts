@@ -44,6 +44,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { Event } from '../../events/events.enum';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { DeletedKubernetesResourcesCount } from './schemas/delete-kubernetes-resources-count.type';
+import { sleep } from '../../utils/sleep.util';
 
 @Injectable()
 export class KubernetesService implements OnModuleInit {
@@ -325,6 +326,11 @@ export class KubernetesService implements OnModuleInit {
   private async handleDeploymentCreatedEvent(
     payload: DeploymentCreatedEvent,
   ): Promise<void> {
+    /**
+     * Sleep for 2 seconds to make sure that all the Kubernetes resources needed for
+     * the deployments workspace have been created when a workstation is created
+     */
+    await sleep(2000);
     const namespace: string = KubeUtil.generateResourceName(
       payload.deployment.workspace._id,
     );

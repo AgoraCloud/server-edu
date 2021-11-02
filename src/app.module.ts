@@ -34,6 +34,7 @@ import { AuthorizationModule } from './modules/authorization/authorization.modul
 import { AuditingModule } from './modules/auditing/auditing.module';
 import { ShortcutsModule } from './modules/shortcuts/shortcuts.module';
 import { InDatabaseConfigModule } from './modules/in-database-config/in-database-config.module';
+import { WorkstationsModule } from './modules/workstations/workstations.module';
 
 @Module({
   imports: [
@@ -127,6 +128,7 @@ import { InDatabaseConfigModule } from './modules/in-database-config/in-database
     AuditingModule,
     ShortcutsModule,
     InDatabaseConfigModule,
+    WorkstationsModule,
   ],
 })
 export class AppModule implements NestModule {

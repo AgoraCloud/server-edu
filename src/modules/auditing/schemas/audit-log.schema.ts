@@ -1,3 +1,7 @@
+import {
+  AuditResource,
+  CustomAuditResourceDto,
+} from './../dto/custom-audit-resource.dto';
 import { User, UserDocument } from '../../users/schemas/user.schema';
 import {
   Workspace,
@@ -53,9 +57,10 @@ export class AuditLog {
       AuditResourceDto.WikiSection,
       AuditResourceDto.WikiPage,
       AuditResourceDto.Shortcut,
+      CustomAuditResourceDto.Workstation,
     ],
   })
-  resource: AuditResourceDto;
+  resource: AuditResource;
 
   @Prop({ required: true })
   userAgent: string;

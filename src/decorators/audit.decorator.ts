@@ -1,6 +1,7 @@
+import { AuditResource } from './../modules/auditing/dto/custom-audit-resource.dto';
 import { AuditingInterceptor } from './../interceptors/auditing.interceptor';
 import { applyDecorators, UseInterceptors, SetMetadata } from '@nestjs/common';
-import { AuditActionDto, AuditResourceDto } from '@agoracloud/common';
+import { AuditActionDto } from '@agoracloud/common';
 
 /**
  * The audit action metadata key, used to extract the audit action from a method
@@ -20,7 +21,7 @@ export const AUDIT_RESOURCE_KEY = 'audit_resource';
  */
 export function Audit(
   auditAction: AuditActionDto,
-  auditResource: AuditResourceDto,
+  auditResource: AuditResource,
 ) {
   return applyDecorators(
     SetMetadata(AUDIT_ACTION_KEY, auditAction),

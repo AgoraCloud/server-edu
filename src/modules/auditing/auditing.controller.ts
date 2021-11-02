@@ -1,3 +1,4 @@
+import { CustomAuditResourceDto } from './dto/custom-audit-resource.dto';
 import {
   ExceptionDto,
   AuditLogDto,
@@ -58,7 +59,7 @@ export class AuditingController {
     name: 'resource',
     description: 'The resource in the audit log',
     required: false,
-    enum: AuditResourceDto,
+    enum: AuditResourceDto && CustomAuditResourceDto,
   })
   @ApiQuery({
     name: 'userAgent',
@@ -137,7 +138,7 @@ export class AuditingController {
     name: 'resource',
     description: 'The resource in the audit log',
     required: false,
-    enum: AuditResourceDto,
+    enum: AuditResourceDto && CustomAuditResourceDto,
   })
   @ApiQuery({
     name: 'userAgent',
