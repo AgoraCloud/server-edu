@@ -8,6 +8,8 @@ import {
 import { WorkspacesService } from './../workspaces/workspaces.service';
 import { WorkspaceDocument } from './../workspaces/schemas/workspace.schema';
 import { UserDocument } from './../users/schemas/user.schema';
+import { NoProvisionedWorkstationException } from '../../exceptions/no-provisioned-workstation.exception';
+import { WorkstationNotFoundException } from './../../exceptions/workstation-not-found.exception';
 import { UsersService } from './../users/users.service';
 import { DeploymentsService } from './../deployments/deployments.service';
 import { InjectModel } from '@nestjs/mongoose';
@@ -90,6 +92,44 @@ export class WorkstationsService {
       .populate('workspace')
       .populate('deployment')
       .exec();
+  }
+
+  /**
+   * Find a workstation
+   * @param workstationId the workstation id
+   * @throws WorkstationNotFoundException
+   * @returns the workstation document
+   */
+  async findOne(workstationId: string): Promise<WorkstationDocument> {
+    const workstation: WorkstationDocument = await this.workstationModel
+      .findOne()
+      .where('_id')
+      .equals(workstationId)
+      .populate('user')
+      .populate('workspace')
+      .populate('deployment')
+      .exec();
+    if (!workstation) throw new WorkstationNotFoundException(workstationId);
+    return workstation;
+  }
+
+  /**
+   * Get a users provisioned workstation
+   * @param userId the users id
+   * @throws NoProvisionedWorkstationException
+   * @returns the users provisioned workstation
+   */
+  async findByUserId(userId: string): Promise<WorkstationDocument> {
+    const workstation: WorkstationDocument = await this.workstationModel
+      .findOne()
+      .where('user')
+      .equals(userId)
+      .populate('user')
+      .populate('workspace')
+      .populate('deployment')
+      .exec();
+    if (!workstation) throw new NoProvisionedWorkstationException(userId);
+    return workstation;
   }
 
   /**
