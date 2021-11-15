@@ -199,13 +199,22 @@ export class DeploymentsService {
       throw new DeploymentCannotBeUpdatedException(deploymentId);
     }
 
-    const updateDeploymentResourcesDto: UpdateDeploymentResourcesDto =
-      updateDeploymentDto.properties?.resources;
     // Tracks whether a deployments Kubernetes specific attributes were updated
     let isDeploymentUpdated = false;
 
     // Change the updated fields only
     deployment.name = updateDeploymentDto.name || deployment.name;
+    const updateDeploymentDtoIsFavorite: boolean =
+      updateDeploymentDto.properties?.isFavorite;
+    if (
+      isDefined(updateDeploymentDtoIsFavorite) &&
+      updateDeploymentDtoIsFavorite !== deployment.properties.isFavorite
+    ) {
+      deployment.properties.isFavorite = updateDeploymentDtoIsFavorite;
+    }
+    const updateDeploymentResourcesDto: UpdateDeploymentResourcesDto =
+      updateDeploymentDto.properties?.resources;
+    // Check if a new cpu count has been supplied
     const newCpuCount: number = updateDeploymentResourcesDto?.cpuCount;
     if (
       isDefined(newCpuCount) &&
@@ -214,6 +223,7 @@ export class DeploymentsService {
       deployment.properties.resources.cpuCount = newCpuCount;
       isDeploymentUpdated = true;
     }
+    // Check if a new memory count has been supplied
     const newMemoryCount: number = updateDeploymentResourcesDto?.memoryCount;
     if (
       isDefined(newMemoryCount) &&
