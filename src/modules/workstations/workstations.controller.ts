@@ -3,9 +3,18 @@ import { ActionDto, AuditActionDto, ExceptionDto } from '@agoracloud/common';
 import { WorkstationDto } from './dto/workstation.dto';
 import { WorkstationDocument } from './schema/workstation.schema';
 import { FindOneParams } from './../../utils/find-one-params';
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Put,
+} from '@nestjs/common';
 import { WorkstationsService } from './workstations.service';
 import { CreateWorkstationDto } from './dto/create-workstation.dto';
+import { UpdateWorkstationDto } from './dto/update-workstation.dto';
 import {
   ApiCookieAuth,
   ApiTags,
@@ -125,5 +134,63 @@ export class WorkstationsController {
   @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
   find(@User('_id') userId: string): Promise<WorkstationDocument> {
     return this.workstationsService.findByUserId(userId);
+  }
+
+  /**
+   * Update a workstation, accessible by super admins only
+   * @param workstationId the workstation id
+   * @param updateWorkstationDto the updated workstation
+   * @returns the updated workstation document
+   */
+  @ApiParam({ name: 'id', description: 'The workstation id' })
+  @ApiOperation({ summary: 'Update a workstation' })
+  @ApiOkResponse({
+    description: 'The workstation has been successfully updated',
+    type: WorkstationDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'The provided workstation or workstation id was not valid',
+    type: ExceptionDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
+  @ApiNotFoundResponse({
+    description: 'The workstation with the given id was not found',
+    type: ExceptionDto,
+  })
+  @Put('workstations/:id')
+  @Permissions(ActionDto.ManageUser)
+  @Audit(AuditActionDto.Update, CustomAuditResourceDto.Workstation)
+  update(
+    @Param() { id: workstationId }: FindOneParams,
+    @Body() updateWorkstationDto: UpdateWorkstationDto,
+  ): Promise<WorkstationDocument> {
+    return this.workstationsService.update(workstationId, updateWorkstationDto);
+  }
+
+  /**
+   * Delete a workstation, accessible by super admins only
+   * @param workstationId the workstation id
+   */
+  @ApiParam({ name: 'id', description: 'The workstation id' })
+  @ApiOperation({ summary: 'Delete a workstation' })
+  @ApiOkResponse({
+    description: 'The workstation has been successfully deleted',
+  })
+  @ApiBadRequestResponse({
+    description: 'The provided workstation id was not valid',
+    type: ExceptionDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ExceptionDto })
+  @ApiForbiddenResponse({ description: 'Forbidden', type: ExceptionDto })
+  @ApiNotFoundResponse({
+    description: 'The workstation with the given id was not found',
+    type: ExceptionDto,
+  })
+  @Delete('workstations/:id')
+  @Permissions(ActionDto.ManageUser)
+  @Audit(AuditActionDto.Delete, CustomAuditResourceDto.Workstation)
+  remove(@Param() { id: workstationId }: FindOneParams): Promise<void> {
+    return this.workstationsService.remove(workstationId);
   }
 }

@@ -15,6 +15,11 @@ import { DeploymentsService } from './../deployments/deployments.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
 import { CreateWorkstationDto } from './dto/create-workstation.dto';
+import {
+  UpdateWorkstationDto,
+  UpdateWorkstationUserDto,
+  UpdateWorkstationPropertiesDto,
+} from './dto/update-workstation.dto';
 import { Workstation, WorkstationDocument } from './schema/workstation.schema';
 import { Model } from 'mongoose';
 import { Event } from '../../events/events.enum';
@@ -130,6 +135,72 @@ export class WorkstationsService {
       .exec();
     if (!workstation) throw new NoProvisionedWorkstationException(userId);
     return workstation;
+  }
+
+  /**
+   * Update a workstation
+   * @param workstationId the workstation id
+   * @param updateWorkstationDto the updated workstation
+   * @returns the updated workstation
+   */
+  async update(
+    workstationId: string,
+    updateWorkstationDto: UpdateWorkstationDto,
+  ): Promise<WorkstationDocument> {
+    const workstation: WorkstationDocument = await this.findOne(workstationId);
+
+    // Change the updated fields only
+    workstation.name = updateWorkstationDto.name || workstation.name;
+    const updateWorkstationUserDto: UpdateWorkstationUserDto =
+      updateWorkstationDto.user;
+    if (updateWorkstationUserDto) {
+      workstation.user = await this.usersService.adminUpdate(
+        workstation.user._id,
+        updateWorkstationUserDto,
+      );
+    }
+    const updateWorkstationPropertiesDto: UpdateWorkstationPropertiesDto =
+      updateWorkstationDto.properties;
+    if (updateWorkstationPropertiesDto) {
+      workstation.deployment = await this.deploymentsService.update(
+        workstation.workspace._id,
+        workstation.deployment._id,
+        {
+          properties: {
+            resources: {
+              cpuCount: updateWorkstationPropertiesDto.cpuCount,
+              memoryCount: updateWorkstationPropertiesDto.memoryCount,
+            },
+          },
+        },
+      );
+    }
+
+    await this.workstationModel
+      .updateOne(null, workstation)
+      .where('_id')
+      .equals(workstationId)
+      .exec();
+    return workstation;
+  }
+
+  /**
+   * Delete a workstation
+   * @param workstationId the workstation id
+   * @throws WorkstationNotFoundException
+   */
+  async remove(workstationId: string): Promise<void> {
+    const workstation: WorkstationDocument = await this.workstationModel
+      .findOneAndDelete()
+      .where('_id')
+      .equals(workstationId)
+      .exec();
+    if (!workstation) throw new WorkstationNotFoundException(workstationId);
+    /**
+     * When a workstation is deleted, delete the user attached to the workstation. This will lead to a
+     * cascading effect where the users workspace and deployment are also deleted.
+     */
+    await this.usersService.remove(workstation.user._id);
   }
 
   /**
