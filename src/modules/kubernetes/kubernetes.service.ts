@@ -676,10 +676,21 @@ export class KubernetesService implements OnModuleInit {
         DeploymentStatusDto.Unknown,
       );
     } else if (podPhase === PodPhase.Running) {
-      await this.deploymentsService.updateStatus(
-        deploymentId,
-        DeploymentStatusDto.Running,
-      );
+      /**
+       * Since we are listening to pod status updates, a pod might be running and is able to accept connections
+       * before Kubernetes updates the status of the Kubernetes Deployment to running. This might cause issues
+       * where an AgoraCloud deployment status is set to running but Kubernetes will not allow any connections
+       * to the Kubernetes Deployment, as the status of the Kubernetes Deployment has not been updated yet,
+       * leading to errors in the UI. Therefore, out of an abundance of caution, a 5 second delay is added to
+       * ensure that Kubernetes is ready to allow connections to AgoraCloud deployments before the status of
+       * the deployment is set to running.
+       */
+      setTimeout(async () => {
+        await this.deploymentsService.updateStatus(
+          deploymentId,
+          DeploymentStatusDto.Running,
+        );
+      }, 5000);
     } else if (podPhase === PodPhase.Pending) {
       /**
        * Check if the pod can not be scheduled by Kubernetes due
